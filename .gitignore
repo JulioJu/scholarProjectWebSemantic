@@ -1,0 +1,7 @@
+!/teacherExample/run/configuration/sempic.ttl
+!/teacherExample/target/generated-sources/java/fr/uga/miashs/sempic/model/rdf
+/teacherExample/run/*
+/teacherExample/target/*
+/teacherExample/.classpath
+/teacherExample/.project
+/teacherExample/.settings/

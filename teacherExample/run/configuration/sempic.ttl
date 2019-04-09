@@ -1,0 +1,69 @@
+@prefix :      <#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix ja:    <http://jena.hpl.hp.com/2005/11/Assembler#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix fuseki: <http://jena.apache.org/fuseki#> .
+@prefix tdb2:    <http://jena.apache.org/2016/tdb#>.
+
+:service_sempic_all  a                   fuseki:Service ;
+        rdfs:label                    "Sempic data + ontology with reasoner" ;
+        fuseki:dataset                :infdataset ;
+        fuseki:name                   "sempic" ;
+        fuseki:serviceQuery           "query" , "sparql" ;
+        fuseki:serviceReadGraphStore  "get" ;
+        fuseki:serviceReadWriteGraphStore
+                "data" ;
+        fuseki:serviceUpdate          "update" ;
+        fuseki:serviceUpload          "upload" .
+
+
+:service_sempic_onto  a                   fuseki:Service ;
+        rdfs:label                    "Sempic ontology (only asserted data)" ;
+        fuseki:dataset                :ontodataset ;
+        fuseki:name                   "sempic-onto" ;
+        fuseki:serviceQuery           "query" , "sparql" ;
+        fuseki:serviceReadGraphStore  "get" ;
+        fuseki:serviceReadWriteGraphStore
+                "data" ;
+        fuseki:serviceUpdate          "update" ;
+        fuseki:serviceUpload          "upload" .
+
+:service_sempic_data  a                   fuseki:Service ;
+        rdfs:label                    "Sempic data (only asserted data)" ;
+        fuseki:dataset                :datadataset;
+        fuseki:name                   "sempic-data" ;
+        fuseki:serviceQuery           "query" , "sparql" ;
+        fuseki:serviceReadGraphStore  "get" ;
+        fuseki:serviceReadWriteGraphStore
+                "data" ;
+        fuseki:serviceUpdate          "update" ;
+        fuseki:serviceUpload          "upload" .
+
+:infdataset a			ja:RDFDataset;
+	ja:defaultGraph		:infmodel.
+
+:ontodataset a			ja:RDFDataset;
+	ja:defaultGraph		:sempiconto.
+
+:datadataset a			ja:RDFDataset;
+	ja:defaultGraph		:sempicdata.
+
+
+:infmodel a 			ja:InfModel;
+	ja:baseModel		:unionmodel;
+        ja:reasoner  		[ ja:reasonerURL <http://jena.hpl.hp.com/2003/OWLFBRuleReasoner>].
+
+:unionmodel
+	a		ja:UnionModel;
+	ja:rootModel	:sempicdata;
+	ja:subModel	:sempiconto .
+
+
+:sempicdata a tdb2:GraphTDB2 ;
+	tdb2:location "./run/databases/sempic-data" .
+
+:sempiconto
+	a ja:MemoryModel ;
+ja:content [
+		ja:externalContent "./src/main/resources/sempiconto.owl"
+	].
