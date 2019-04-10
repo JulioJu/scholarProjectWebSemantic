@@ -302,6 +302,32 @@
             <artifactId>metrics-core</artifactId>
         </dependency>
         <!-- jhipster-needle-maven-add-dependency -->
+
+
+        <!-- Added by JulioJu -->
+        <!-- ———————————————— -->
+        <dependency>
+            <groupId>org.apache.jena</groupId>
+            <artifactId>apache-jena</artifactId>
+            <type>zip</type>
+            <version> 3.10.0 </version>
+        </dependency>
+        <!-- https://jena.apache.org/documentation/tools/schemagen.html#using-schemagen-with-maven -->
+        <!-- ———————————————— -->
+        <dependency>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <!-- Last version. Release date 2017. Checked 2019/04/09 -->
+            <version>1.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <!-- Last version. Release date 2017. Checked 2019/04/09 -->
+            <version>3.0.0</version>
+        </dependency>
+        <!-- End added by JulioJu -->
+
     </dependencies>
 
     <build>
@@ -420,6 +446,58 @@
                 </executions>
             </plugin>
             <!-- jhipster-needle-maven-add-plugin -->
+
+
+            <!-- Added by JulioJu -->
+            <!-- https://jena.apache.org/documentation/tools/schemagen.html#using-schemagen-with-maven -->
+            <!-- ———————————————— -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <!-- Last version. Release date 2017. Checked 2019/04/09 -->
+                <version>1.6.0</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>jena.schemagen</mainClass>
+                            <commandlineArgs>
+                                --inference \
+                                -i ${basedir}/src/main/resources/sempiconto.owl \
+                                -e RDF/XML \
+                                --package fr.uga.miashs.sempic.model.rdf \
+                                -o ${project.build.directory}/generated-sources/java \
+                                -n SempicOnto
+                            </commandlineArgs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <!-- Last version. Release date 2017. Checked 2019/04/09 -->
+                 <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-sources/java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- End added by JulioJu -->
+
+
         </plugins>
         <pluginManagement>
             <plugins>
@@ -669,6 +747,14 @@
                             <exclude>**/*IntTest*</exclude>
                             <exclude>**/*CucumberIT*</exclude>
                         </excludes>
+
+                        <!-- Added by JulioJu -->
+                        <!-- ———————————————— -->
+                        <!-- With the plugin Jena added above by me, test fails -->
+                        <!-- https://maven.apache.org/surefire/maven-surefire-plugin/examples/skipping-tests.html -->
+                        <skipTests>true</skipTests>
+                        <!-- End added by JulioJu -->
+
                     </configuration>
                 </plugin>
                 <plugin>

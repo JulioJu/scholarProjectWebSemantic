@@ -1,9 +1,14 @@
 !/teacherExample/run/configuration/sempic.ttl
-!/teacherExample/target/generated-sources/java/fr/uga/miashs/sempic/model/rdf
+!/teacherExample/target/generated-sources/java/fr/uga/miashs/sempic/model/rdf/*
 /teacherExample/run/*
 /teacherExample/target/*
 /teacherExample/.classpath
 /teacherExample/.project
 /teacherExample/.settings/
 
+!/scholarProjectWebSemantic/target/generated-sources/java/fr/uga/miashs/sempic/model/rdf/*
+/scholarProjectWebSemantic/target/*
 /scholarProjectWebSemantic/yarn.lock
+
+!/scholarProjectWebSemanticFusekiDatabase/run/configuration/sempic.ttl
+/scholarProjectWebSemanticFusekiDatabase/run/*
