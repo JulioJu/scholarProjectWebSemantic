@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.uga.miashs.sempic.rdf;
 
 import fr.uga.miashs.sempic.model.rdf.SempicOnto;
@@ -9,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.ejb.Stateless;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.ReadWrite;
@@ -29,7 +24,6 @@ import org.apache.jena.vocabulary.RDFS;
  *
  * @author jerome.david@univ-grenoble-alpes.fr
  */
-@Stateless
 public class RDFStore {
 
     public final static String ENDPOINT_QUERY = "http://localhost:3030/sempic/sparql"; // SPARQL endpoint
@@ -128,12 +122,12 @@ public class RDFStore {
         return m.listSubjects().toList();
     }
 
-    
+
     /**
      * Create a list of anonymous instances for each of the classes
      * given as parameter. The created instances have a label "a "+ label of the class.
      * @param classes
-     * @return 
+     * @return
      */
     public List<Resource> createAnonInstances(List<Resource> classes) {
         Model m = ModelFactory.createDefaultModel();
@@ -146,19 +140,22 @@ public class RDFStore {
         return res;
     }
 
-    
+
     public Resource createPhoto(long photoId, long albumId, long ownerId) {
         // create an empty RDF graph
         Model m = ModelFactory.createDefaultModel();
         // create an instance of Photo in Model m
-        Resource pRes = m.createResource(Namespaces.getPhotoUri(photoId), SempicOnto.Photo);
+        Resource photoResource = m.createResource(
+                Namespaces.getPhotoUri(photoId),
+                SempicOnto.Photo
+                );
 
-        pRes.addLiteral(SempicOnto.albumId, albumId);
-        pRes.addLiteral(SempicOnto.ownerId, ownerId);
+        photoResource.addLiteral(SempicOnto.albumId, albumId);
+        photoResource.addLiteral(SempicOnto.ownerId, ownerId);
 
         saveModel(m);
 
-        return pRes;
+        return photoResource;
     }
 
     /**
@@ -189,5 +186,5 @@ public class RDFStore {
         return m.getResource(pUri);
     }
 
-    
+
 }

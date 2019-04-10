@@ -5,7 +5,7 @@
     <groupId>fr.uga.miashs.sempic</groupId>
     <artifactId>SempicRDF</artifactId>
     <version>1.1-SNAPSHOT</version>
-    <packaging>ejb</packaging>
+    <packaging>jar</packaging>
 
     <name>SempicRDF</name>
 
@@ -38,7 +38,7 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
-    
+
     <build>
         <plugins>
             <plugin>
@@ -47,6 +47,7 @@
                 <version>1.6.0</version>
                 <executions>
                     <execution>
+                        <id>generation</id>
                         <phase>generate-sources</phase>
                         <goals>
                             <goal>java</goal>
@@ -63,7 +64,28 @@
                             </commandlineArgs>
                         </configuration>
                     </execution>
+
+                    <!-- Run with `exec:java` 1 -->
+                    <!-- https://stackoverflow.com/questions/9846046/run-main-class-of-maven-project -->
+                    <execution>
+                        <id>start</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                    </execution>
+
                 </executions>
+
+                <!-- Run with `exec:java` 2 -->
+                <!-- https://stackoverflow.com/questions/9846046/run-main-class-of-maven-project -->
+                <configuration>
+                    <mainClass>fr.uga.miashs.sempic.rdf.ExampleRDFStore</mainClass>
+                    <!-- <arguments> -->
+                    <!--     <argument>foo</argument> -->
+                    <!--     <argument>bar</argument> -->
+                    <!-- </arguments> -->
+                </configuration>
+
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -96,39 +118,7 @@
                     </compilerArguments>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-ejb-plugin</artifactId>
-                <version>2.3</version>
-                <configuration>
-                    <ejbVersion>3.1</ejbVersion>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.6</version>
-                <executions>
-                    <execution>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${endorsed.dir}</outputDirectory>
-                            <silent>true</silent>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>javax</groupId>
-                                    <artifactId>javaee-endorsed-api</artifactId>
-                                    <version>7.0</version>
-                                    <type>jar</type>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+
         </plugins>
     </build>
 

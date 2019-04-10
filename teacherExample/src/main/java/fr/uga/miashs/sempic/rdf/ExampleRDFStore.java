@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.uga.miashs.sempic.rdf;
 
 import fr.uga.miashs.sempic.model.rdf.SempicOnto;
@@ -18,31 +13,51 @@ import org.apache.jena.vocabulary.RDFS;
  */
 public class ExampleRDFStore {
     public static void main(String[] args) {
-        RDFStore s = new RDFStore();
 
-        Resource pRes = s.createPhoto(1, 1, 1);
+        System.out.println("Start of app");
 
-        Model m = ModelFactory.createDefaultModel();
-        Resource newAnimal = m.createResource(SempicOnto.Animal);
-        newAnimal.addLiteral(RDFS.label, "Medor");
-        m.add(pRes, SempicOnto.depicts, newAnimal);
-        m.write(System.out, "turtle");
+        RDFStore rdfStore = new RDFStore();
 
-        s.saveModel(m);
-        
-        //s.deleteModel(m);
-        //s.cnx.load(m);
-        List<Resource> classes = s.listSubClassesOf(SempicOnto.Depiction);
+        // ————————————————————————————
+        System.out.println("Coucou 0");
+
+        Resource photoResource = rdfStore.createPhoto(1, 1, 1);
+        Model model = ModelFactory.createDefaultModel();
+
+        // animalResource
+        Resource animalResource = model.createResource(SempicOnto.Animal);
+        animalResource.addLiteral(RDFS.label, "Médor");
+        model.add(photoResource, SempicOnto.depicts, animalResource);
+
+        // Print
+        model.write(System.out, "turtle");
+        System.out.println("Coucou 1");
+
+        // personResource
+        Resource personResource = model.createResource(SempicOnto.Person);
+        personResource.addLiteral(RDFS.label, "Charlemagne");
+        model.add(photoResource, SempicOnto.depicts, personResource);
+
+        // Print
+        model.write(System.out, "turtle");
+        System.out.println("Coucou 2");
+        // ————————————————————————————
+
+        rdfStore.saveModel(model);
+
+        //rdfStore.deleteModel(model);
+        //rdfStore.cnx.load(model);
+        List<Resource> classes = rdfStore.listSubClassesOf(SempicOnto.Depiction);
         classes.forEach(c -> {System.out.println(c);});
 
-        List<Resource> instances = s.createAnonInstances(classes);
+        List<Resource> instances = rdfStore.createAnonInstances(classes);
         instances.forEach(i -> {
             System.out.println(i.getProperty(RDFS.label));
         });
 
-        //s.deleteModel(m);
-        //s.readPhoto(1).getModel().write(System.out,"turtle");
+        //rdfStore.deleteModel(model);
+        //rdfStore.readPhoto(1).getModel().write(System.out,"turtle");
         // print the graph on the standard output
-        //pRes.getModel().write(System.out);
+        //photoResource.getModel().write(System.out);
     }
 }
