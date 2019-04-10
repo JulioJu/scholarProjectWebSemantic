@@ -1,0 +1,41 @@
+{
+    "name": "Photo",
+    "fields": [
+        {
+            "fieldName": "name",
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "finThumbnail",
+            "javadoc": "jpeg thumbnail",
+            "fieldType": "byte[]",
+            "fieldTypeBlobContent": "image",
+            "fieldValidateRules": [
+                "required"
+            ]
+        }
+    ],
+    "relationships": [
+        {
+            "relationshipType": "many-to-one",
+            "otherEntityName": "album",
+            "otherEntityRelationshipName": "photo",
+            "relationshipValidateRules": "required",
+            "relationshipName": "album",
+            "otherEntityField": "id"
+        }
+    ],
+    "changelogDate": "20190413102459",
+    "entityTableName": "photo",
+    "dto": "no",
+    "pagination": "infinite-scroll",
+    "service": "serviceClass",
+    "jpaMetamodelFiltering": false,
+    "fluentMethods": true,
+    "clientRootFolder": "",
+    "applications": "*",
+    "angularJSSuffix": "sempic"
+}

@@ -1,0 +1,42 @@
+<div class="row justify-content-center">
+    <div class="col-8">
+        <div *ngIf="photo">
+            <h2><span>Photo</span> {{photo.id}}</h2>
+            <hr>
+            <jhi-alert-error></jhi-alert-error>
+            <dl class="row-md jh-entity-details">
+                <dt><span>Name</span></dt>
+                <dd>
+                    <span>{{photo.name}}</span>
+                </dd>
+                <dt><span ngbTooltip="jpeg thumbnail">Fin Thumbnail</span></dt>
+                <dd>
+                    <div *ngIf="photo.finThumbnail">
+                        <a (click)="openFile(photo.finThumbnailContentType, photo.finThumbnail)">
+                            <img [src]="'data:' + photo.finThumbnailContentType + ';base64,' + photo.finThumbnail" style="max-width: 100%;" alt="photo image"/>
+                        </a>
+                        {{photo.finThumbnailContentType}}, {{byteSize(photo.finThumbnail)}}
+                    </div>
+                </dd>
+                <dt><span>Album</span></dt>
+                <dd>
+                    <div *ngIf="photo.album">
+                        <a [routerLink]="['/album-sempic', photo.album?.id, 'view']">{{photo.album?.id}}</a>
+                    </div>
+                </dd>
+            </dl>
+
+            <button type="submit"
+                    (click)="previousState()"
+                    class="btn btn-info">
+                <fa-icon [icon]="'arrow-left'"></fa-icon>&nbsp;<span> Back</span>
+            </button>
+
+            <button type="button"
+                    [routerLink]="['/photo-sempic', photo.id, 'edit']"
+                    class="btn btn-primary">
+                <fa-icon [icon]="'pencil-alt'"></fa-icon>&nbsp;<span> Edit</span>
+            </button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,124 @@
+// Documentation:
+// ———————————————————
+// See documentation at https://www.jhipster.tech/jdl/
+// See https://www.jhipster.tech/creating-an-entity/
+// Following documentation copied from https://github.com/JulioJu/docxapp/blob/master/doc/generator_of_entities.jh
+
+// UML representation:
+// ———————————————————
+// See UML representation with http://jhipster.github.io/jdl-studio
+// Jdl-studio can be use offline with docker (see documentation) or
+// with http://github.com/jhipster/jdl-studio:
+// `git clone http://github.com/jhipster/jdl-studio' and launch index.html
+// Entities are ordored for a good representation in http://jhipster.github.io/jdl-studio
+
+// Strategy for Fetching data
+// ——————————————————————————
+// IMPORTANT TO LEARN !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// VERY IMPORTANT !!!!!!!!!!!!!
+// Note about lazy loading or lazy strategy for fetching data from the database
+// used by JHipster
+// See https://docs.oracle.com/javaee/7/api/javax/persistence/FetchType.html
+// ManyToMany and OneToMany and ManyToOne have lazy loading. Therefore set<> is
+    // null.
+// USE "EntityGraph" for retrieve HashSet<>.
+// Explanations and Examples in this project:
+// ———
+// * See Explanations in src/main/java/fr/alteca/docxapp/rest/userResource.java.
+// See this example also at:
+// https://github.com/jhipster/jhipster-sample-app/blob/master/src/main/java/io/github/jhipster/sample/web/rest/UserResource.java
+// * See the example corresponding at:
+// src/main/java/fr/alteca/docxapp/repository/UserRepository.java (see also this
+// class at
+// https://github.com/jhipster/jhipster-sample-app/blob/master/src/main/java/io/github/jhipster/sample/repository/UserRepository.java).
+// * See also other examples in
+// src/main/java/fr/alteca/docxapp//UserResource.java this project under
+// src/main/java/fr/alteca/docxapp/repository.
+
+
+// Note about JDL language
+// ———————————————————————
+
+// WARNING if you use an URL in enum, in « http:// » or « https:// »,
+// « // » are interpreted as the start of a JDL comment
+
+// name_name => namename in the Database (jdl behaviour can be reconfigured in
+// Java class)
+// nameName => name_name in the Database (jdl behaviour, can be reconfigured in Java class)
+// relationship OneToMany {
+//     Album to Photo {photoAlbum required} => bug with jdl. And it's normal !
+// }
+
+
+// Bidirectional OneToMany between Album and Photo and Album and Finaldoc
+// ——————————————————————————————————————————————————
+
+// Could not choose column name in database.
+// It's a OneToMany Bidirectional. Both tables know otherone.
+
+// No Join table created
+
+// No difference between
+// Album{photo} to Photo
+// and
+// Album{photo} to Photo{model}
+// and
+// Album to Photo{model}
+
+// Following syntax doesn't work
+// Album to Photo
+
+// Album to Photo{model} =>
+// in Photo.java:
+// @ManyToOne
+// In Album.java:
+// OneToMany(mappedBy="model")
+
+// Album to Photo{model required} ==> in Photo.java :
+// @ManyToOne(optional = false)
+// @NotNull
+
+entity Album {
+    name String required
+}
+
+entity Photo {
+    name String required,
+    /** jpeg thumbnail */
+    finThumbnail ImageBlob required
+}
+
+
+// Bidirectional OneToMany
+relationship OneToMany {
+    /**
+     * photo attribute should not be required because otherwise it's a vicious
+     * circle
+     */
+    Album{photo}
+        to Photo{album required}
+}
+
+/* https://github.com/jhipster/jhipster-core/issues/52 */
+/* Error: Relationships from the User entity is not supported in the declaration between 'User' and 'Album'. */
+/* ERROR! Error while parsing applications and entities from the JDL Error: Relationships from the User entity is not supported in the declaration between 'User' and 'Album'. */
+/* relationship OneToMany { */
+/*     User{album} */
+/*         to Album{user required} */
+/* } */
+relationship ManyToOne {
+    Album{user}
+        to User
+}
+
+// JHipster implementatin
+// ————————————————
+
+/**
+* Services for crud operations in filesystem and maybe other operations
+*/
+service Photo with serviceClass
+
+paginate * with infinite-scroll
+
+angularSuffix * with sempic
