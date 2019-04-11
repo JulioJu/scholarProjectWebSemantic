@@ -7,6 +7,7 @@
 * [Teacher's instructions](#teachers-instructions)
 * [scholarProjectWebSemantic details](#scholarprojectwebsemantic-details)
     * [Jena](#jena)
+    * [Test API without front (resolve authentification problem)](#test-api-without-front-resolve-authentification-problem)
 * [Credits](#credits)
 
 <!-- vim-markdown-toc -->
@@ -64,6 +65,8 @@ See ./TeachersInstruction2.pdf
 # scholarProjectWebSemantic details
 This application was generated using JHipster 6.0.0-beta.0, you can find documentation and help at https://www.jhipster.tech/documentation-archive/v6.0.0-beta.0 .
 
+See also ./scholarProjectWebSemantic/README.md
+
 Entities generated thanks
 
 ```sh
@@ -73,7 +76,6 @@ jhipster import-jdl ../generator_of_entities.jh --force
 
 (see ./generator_of_entities.jh for further details)
 
-
 ## Jena
 
 To install Jena maven plugin, see pom.xml. Code relative to Jena
@@ -82,6 +84,17 @@ has added between comment “`Added by JulioJu`”
 Do not forget to run `mvn install`.
 
 See also ./teacherExample/HowToConfigureJenaByJeromeDavid.pdf
+
+## Test API without front (resolve authentification problem)
+
+Very useful to test an API. Learnt in a [TupperVim](https://tuppervim.org).
+
+See https://github.com/sharat87/roast.vim
+
+Thanks ./rest_request_with_vim.roast we could test API without front, in Vim.
+It manages authentifications tokens automatically.
+
+See also my issue at https://github.com/sharat87/roast.vim/issues/4
 
 # Credits
 
