@@ -12,3 +12,5 @@
 
 !/scholarProjectWebSemanticFusekiDatabase/run/configuration/sempic.ttl
 /scholarProjectWebSemanticFusekiDatabase/run/*
+
+/scholarProjectWebSemantic/yarn.lock

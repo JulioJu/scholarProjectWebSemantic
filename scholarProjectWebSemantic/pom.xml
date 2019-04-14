@@ -306,6 +306,8 @@
 
         <!-- Added by JulioJu -->
         <!-- ———————————————— -->
+
+        <!-- Jena  -->
         <dependency>
             <groupId>org.apache.jena</groupId>
             <artifactId>apache-jena</artifactId>
@@ -326,6 +328,26 @@
             <!-- Last version. Release date 2017. Checked 2019/04/09 -->
             <version>3.0.0</version>
         </dependency>
+
+        <!-- json-b -->
+        <dependency>
+            <groupId>javax.json.bind</groupId>
+            <artifactId>javax.json.bind-api</artifactId>
+            <version>1.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse</groupId>
+            <artifactId>yasson</artifactId>
+            <version>1.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.json</artifactId>
+            <version>1.1</version>
+        </dependency>
+
         <!-- End added by JulioJu -->
 
     </dependencies>
@@ -911,6 +933,30 @@
                 <!-- default Spring profiles -->
                 <spring.profiles.active>dev${profile.tls}${profile.no-liquibase}</spring.profiles.active>
             </properties>
+
+            <!-- Added by JulioJu -->
+            <!-- ———————————————— -->
+            <!--
+            To trigger hot swapping when it's `mvn` is triggered outside an IDE
+            (see also README.md)
+            -->
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <configuration>
+                            <mainClass>${start-class}</mainClass>
+                            <executable>true</executable>
+                            <configuration>
+                                <excludeDevtools>false</excludeDevtools>
+                            </configuration>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+            <!-- End added by JulioJu -->
+
         </profile>
         <profile>
             <id>prod</id>

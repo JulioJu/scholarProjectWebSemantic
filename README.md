@@ -7,6 +7,8 @@
 * [Teacher's instructions](#teachers-instructions)
 * [scholarProjectWebSemantic details](#scholarprojectwebsemantic-details)
     * [Jena](#jena)
+    * [Hot swapping (watch mode)](#hot-swapping-watch-mode)
+    * [LoggingConfiguration file](#loggingconfiguration-file)
     * [Test API without front (resolve authentification problem)](#test-api-without-front-resolve-authentification-problem)
 * [Credits](#credits)
 
@@ -84,6 +86,29 @@ has added between comment “`Added by JulioJu`”
 Do not forget to run `mvn install`.
 
 See also ./teacherExample/HowToConfigureJenaByJeromeDavid.pdf
+
+## Hot swapping (watch mode)
+* Trigger recompilation on change
+
+* Useful to develop with Vim, without any IDE.
+
+* Do not run simply `mvn` because it automatically trigger `npm install`
+    Run instead: `mvn -P\!webpack`
+
+* To trigger hot swapping, `pom.xml` was changed as explained at:
+    https://blog.docker.com/2017/05/spring-boot-development-docker/
+    * See also https://docs.spring.io/spring-boot/docs/current/reference/html/using-boot-running-your-application.html
+    * TODO create a Pull Request on JHipster
+
+## LoggingConfiguration file
+
+In this file the line 63 is changed because otherwise we have the following
+but when hot swapping is triggered :
+```
+    org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'loggingConfiguration' defined in file [/home/julioprayer/DCISS/webSemantique/coursJDavid/SempicRDF/scholarProjectWebSemantic/target/classes/fr/uga/juli
+    oju/jhipster/config/LoggingConfiguration.class]: Unexpected exception during bean creation; nested exception is java.lang.IllegalArgumentException: Could not resolve placeholder 'spring.application.name' in value "${spring.application.name
+    }"
+```
 
 ## Test API without front (resolve authentification problem)
 

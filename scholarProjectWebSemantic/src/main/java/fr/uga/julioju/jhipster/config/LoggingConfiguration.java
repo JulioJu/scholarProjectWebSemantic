@@ -56,7 +56,11 @@ public class LoggingConfiguration {
 
     private final JHipsterProperties jHipsterProperties;
 
-    public LoggingConfiguration(@Value("${spring.application.name}") String appName, @Value("${server.port}") String serverPort,
+    // @Value is changed because on hot swapping, there is a the following bug:
+    // org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'loggingConfiguration' defined in file [/home/julioprayer/DCISS/webSemantique/coursJDavid/SempicRDF/scholarProjectWebSemantic/target/classes/fr/uga/juli
+    // oju/jhipster/config/LoggingConfiguration.class]: Unexpected exception during bean creation; nested exception is java.lang.IllegalArgumentException: Could not resolve placeholder 'spring.application.name' in value "${spring.application.name
+    // }"
+    public LoggingConfiguration(@Value("scholarprojectwebsemantic") String appName, @Value("${server.port}") String serverPort,
          JHipsterProperties jHipsterProperties) {
         this.appName = appName;
         this.serverPort = serverPort;
