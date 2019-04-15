@@ -946,8 +946,6 @@
                         <groupId>org.springframework.boot</groupId>
                         <artifactId>spring-boot-maven-plugin</artifactId>
                         <configuration>
-                            <mainClass>${start-class}</mainClass>
-                            <executable>true</executable>
                             <configuration>
                                 <excludeDevtools>false</excludeDevtools>
                             </configuration>
