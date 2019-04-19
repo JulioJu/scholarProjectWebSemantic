@@ -5,8 +5,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.validation.Valid;
+
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
@@ -56,6 +61,79 @@ public class SempicRest {
     }
 
     /**
+     * {@code PUT  /photo} : Creates or Updates a photoRDF
+     *
+     * @param photoRDF the photoRDF to update.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated photoRDF,
+     * or with status {@code 400 (Bad Request)} if the photoRDF is not valid,
+     * or with status {@code 500 (Internal Server Error)} if the photoRDF couldn't be updated.
+     * @throws UnsupportedEncodingException
+     * @throws URISyntaxException if the Location URI syntax is incorrect.
+     */
+    @PutMapping("/photo")
+    public ResponseEntity<PhotoRDF> updatePhotoRDF(
+            @Valid @RequestBody PhotoRDF photoRDF)
+            throws UnsupportedEncodingException {
+        log.debug("REST request to update PhotoRDF : {}", photoRDF);
+
+        // TODO delete photo before update, otherwise it appends
+        // TODO Resources like `SempicOnto.Person` or
+        // `SempicOnto.Animal` are changed to anonymous Resources
+
+        RDFStore rdfStore = new RDFStore();
+
+        Resource photoResource = rdfStore.createPhoto(photoRDF.getPhotoId(),
+                photoRDF.getAlbumId(), photoRDF.getOwnerId());
+
+        Model model = photoResource.getModel();
+
+
+        // Maybe do not add several, because otherwise we should use a Bag
+        for (int depictionIndex = 0 ;
+                depictionIndex < photoRDF.getDepiction().length ;
+                depictionIndex++) {
+            String depictionURI = SempicOnto.NS
+                + photoRDF.getDepiction()[depictionIndex].getDepiction();
+            Resource sempicOntoResource = model.createResource(depictionURI);
+            rdfStore.testIfUriIsClass(sempicOntoResource.getURI());
+
+            Resource descriptionResource =
+                model.createResource(sempicOntoResource);
+
+            for (int literalsIndex = 0 ;
+                    literalsIndex <
+                        photoRDF.getDepiction()[depictionIndex]
+                            .getLiterals().length ;
+                    literalsIndex++
+            ) {
+                descriptionResource.addLiteral(RDFS.label,
+                        photoRDF.getDepiction()[depictionIndex]
+                        .getLiterals()[literalsIndex]);
+            }
+            model.add(photoResource, SempicOnto.depicts, descriptionResource);
+        }
+
+        System.out.println("Below: model before it saved");
+        model.write(System.out, "turtle");
+
+        // print the graph on the standard output
+        System.out.println("Below: print resource");
+        photoResource.getModel().write(System.out, "turtle");
+
+        rdfStore.saveModel(model);
+        System.out.println("Below: model saved: TODO, WHY IT'S NOT THE SAME AS ABOVE");
+        rdfStore.readPhoto(photoRDF.getPhotoId())
+            .getModel().write(System.out, "n-triple");
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        rdfStore.readPhoto(photoRDF.getPhotoId())
+            .getModel().write(baos, "turtle");
+        photoRDF.setTurtleRepresString(baos.toString("utf8"));
+
+        return ResponseEntity.ok().body(photoRDF);
+    }
+
+    /**
      * GET  /rdfStores : get a rdfStores.
      *
      * @return the response with status 200 (OK) and the list of rdfStores in body
@@ -72,7 +150,7 @@ public class SempicRest {
         // ————————————————————————————
         System.out.println("\n\nStart of create triples\n————————————");
 
-        Resource photoResource = rdfStore.createPhoto(1, 1, 1);
+        Resource photoResource = rdfStore.createPhoto(12, 1, 1);
         Model model = ModelFactory.createDefaultModel();
 
         // animalResource

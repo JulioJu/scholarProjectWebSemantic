@@ -1,7 +1,7 @@
 package fr.uga.julioju.sempic;
 
-import fr.uga.julioju.sempic.Exceptions.FusikiDownException;
-import fr.uga.julioju.sempic.Exceptions.FusikiJenaQueryException;
+import fr.uga.julioju.sempic.Exceptions.FusekiDownException;
+import fr.uga.julioju.sempic.Exceptions.FusekiJenaQueryException;
 import fr.uga.miashs.sempic.model.rdf.SempicOnto;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,7 +46,7 @@ public class RDFStore {
         try {
             cnx.commit();
         } catch (HttpException e) {
-            throw new FusikiDownException();
+            throw new FusekiDownException();
         }
     }
 
@@ -54,7 +54,7 @@ public class RDFStore {
         try {
             cnx.update(u);
         } catch (HttpException e) {
-            throw new FusikiDownException();
+            throw new FusekiDownException();
         }
     }
 
@@ -62,7 +62,7 @@ public class RDFStore {
         try {
             cnx.update(u);
         } catch (HttpException e) {
-            throw new FusikiDownException();
+            throw new FusekiDownException();
         }
     }
 
@@ -70,9 +70,9 @@ public class RDFStore {
         try {
             return cnx.queryConstruct(s);
         } catch (QueryExceptionHTTP e) {
-            throw new FusikiDownException();
+            throw new FusekiDownException();
         } catch (QueryException e) {
-            throw new FusikiJenaQueryException(e.toString());
+            throw new FusekiJenaQueryException(e.toString());
         }
     }
 
@@ -80,9 +80,9 @@ public class RDFStore {
         try {
             return cnx.queryAsk(s);
         } catch (QueryExceptionHTTP e) {
-            throw new FusikiDownException();
+            throw new FusekiDownException();
         } catch (QueryException e) {
-            throw new FusikiJenaQueryException(e.toString());
+            throw new FusekiJenaQueryException(e.toString());
         }
     }
 
@@ -95,7 +95,7 @@ public class RDFStore {
         try {
             cnx.load(m);
         } catch (HttpException e) {
-            throw new FusikiDownException();
+            throw new FusekiDownException();
         }
         this.cnxCommit();
     }
@@ -160,13 +160,16 @@ public class RDFStore {
     }
 
     // Reference https://users.jena.apache.narkive.com/dMOMKIO8/sparql-to-check-if-a-specific-uri-exists
-    private boolean isUriExists(String uri) {
+    public void testIfUriIsClass(String uri) {
         String s = "ASK WHERE {"
             + "{ <" + uri + "> ?p ?o . }"
             + " UNION "
             + "{?s ?p <" + uri + "> . }"
             + "}";
-        return this.cnxQueryAsk(s);
+        if (!this.cnxQueryAsk(s)) {
+            throw new FusekiJenaQueryException(
+                    "'" + uri + "' is not a RDF class");
+        }
     }
 
     // Note: we could use directly string uri, but it would become vulnerable
@@ -181,10 +184,7 @@ public class RDFStore {
     public List<Resource> listSubClassesOf(Resource c) {
         String uri = c.getURI();
 
-        if (!this.isUriExists(uri)) {
-            throw new FusikiJenaQueryException("'"
-                    + c.getURI() + "' is not a RDF class");
-        }
+        this.testIfUriIsClass(uri);
 
         String s = "CONSTRUCT { "
             + "?s <" + RDFS.label + "> ?o "
@@ -225,8 +225,6 @@ public class RDFStore {
 
         photoResource.addLiteral(SempicOnto.albumId, albumId);
         photoResource.addLiteral(SempicOnto.ownerId, ownerId);
-
-        saveModel(m);
 
         return photoResource;
     }

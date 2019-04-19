@@ -33,4 +33,30 @@ GET {root}/api/rdfquery_listsubclassof/jioejiewijweiojfeji
 
 # ————————————————
 
+# Create photo
+
+# PUT {root}/api/photo << END
+# {{
+#     "photoId": 31,
+#     "albumId": 1,
+#     "ownerId": 1,
+#     "depiction": [
+#         {{"depiction": "Person", "literals": ["Theo", "Alban", "Auguste", "Xavier"]}},
+#         {{"depiction": "Animal", "literals": ["Medor"]}}
+#     ]
+#  }}
+# END
+
+# Actually, works with `curl` described above, but let's test with bwlow
+PUT {root}/api/photo << END
+{{
+    "photoId": 36,
+    "albumId": 1,
+    "ownerId": 1,
+    "depiction": [
+        {{"depiction": "Animal", "literals": ["Medor"]}}
+    ]
+}}
+END
+
 # <c-j> / <c-k> to toogle between displays.
