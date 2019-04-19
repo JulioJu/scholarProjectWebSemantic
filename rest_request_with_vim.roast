@@ -20,4 +20,17 @@ Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX
 # Press ENTER key on the following url
 GET {root}/api/rdfstore
 
+# list subclass of
+# ————————————————
+
+GET {root}/api/rdfquery_listsubclassof
+
+GET {root}/api/rdfquery_listsubclassof/Depiction
+
+GET {root}/api/rdfquery_listsubclassof/Person
+
+GET {root}/api/rdfquery_listsubclassof/jioejiewijweiojfeji
+
+# ————————————————
+
 # <c-j> / <c-k> to toogle between displays.

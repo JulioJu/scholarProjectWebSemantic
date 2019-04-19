@@ -1,7 +1,7 @@
 package fr.uga.julioju.sempic;
 
 import fr.uga.julioju.sempic.Exceptions.FusikiDownException;
-import fr.uga.julioju.sempic.Exceptions.QueryJenaException;
+import fr.uga.julioju.sempic.Exceptions.FusikiJenaQueryException;
 import fr.uga.miashs.sempic.model.rdf.SempicOnto;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -72,7 +72,17 @@ public class RDFStore {
         } catch (QueryExceptionHTTP e) {
             throw new FusikiDownException();
         } catch (QueryException e) {
-            throw new QueryJenaException();
+            throw new FusikiJenaQueryException(e.toString());
+        }
+    }
+
+    private boolean cnxQueryAsk (String s) {
+        try {
+            return cnx.queryAsk(s);
+        } catch (QueryExceptionHTTP e) {
+            throw new FusikiDownException();
+        } catch (QueryException e) {
+            throw new FusikiJenaQueryException(e.toString());
         }
     }
 
@@ -123,7 +133,7 @@ public class RDFStore {
             Var v = bnMap.get(r);
             if (v == null) {
                 bnMap.put(r, v = Var.alloc("A" + bnMap.size()));
-            }
+           }
             return v;
         }
         return r.asNode();
@@ -149,6 +159,18 @@ public class RDFStore {
         }
     }
 
+    // Reference https://users.jena.apache.narkive.com/dMOMKIO8/sparql-to-check-if-a-specific-uri-exists
+    private boolean isUriExists(String uri) {
+        String s = "ASK WHERE {"
+            + "{ <" + uri + "> ?p ?o . }"
+            + " UNION "
+            + "{?s ?p <" + uri + "> . }"
+            + "}";
+        return this.cnxQueryAsk(s);
+    }
+
+    // Note: we could use directly string uri, but it would become vulnerable
+    // to SQL injection
     /**
      * Retieves all the resources that are subclasses of resource c. To be
      * selected classes must have the property rdfs:label instanciated
@@ -157,16 +179,22 @@ public class RDFStore {
      * @return
      */
     public List<Resource> listSubClassesOf(Resource c) {
+        String uri = c.getURI();
+
+        if (!this.isUriExists(uri)) {
+            throw new FusikiJenaQueryException("'"
+                    + c.getURI() + "' is not a RDF class");
+        }
+
         String s = "CONSTRUCT { "
             + "?s <" + RDFS.label + "> ?o "
             + "} WHERE {"
-            + "?s <" + RDFS.subClassOf + "> <" + c.getURI() + "> ."
+            + "?s <" + RDFS.subClassOf + "> <" + uri + "> ."
             + "?s <" + RDFS.label + "> ?o ."
             + "}";
         Model m = this.cnxQueryConstruct(s);
         return m.listSubjects().toList();
     }
-
 
     /**
      * Create a list of anonymous instances for each of the classes

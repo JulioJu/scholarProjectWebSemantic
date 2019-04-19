@@ -1,11 +1,11 @@
 package fr.uga.julioju.jhipster.SempicRest;
-import javax.json.bind.JsonbBuilder;
-
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -14,6 +14,7 @@ import org.apache.jena.vocabulary.RDFS;
 
 import fr.uga.julioju.sempic.RDFStore;
 import fr.uga.julioju.sempic.RDFStoreModel;
+import fr.uga.julioju.sempic.ResponseQuery;
 import fr.uga.miashs.sempic.model.rdf.SempicOnto;
 
 /**
@@ -25,19 +26,33 @@ public class SempicRest {
 
     private final Logger log = LoggerFactory.getLogger(SempicRest.class);
 
-    private void queries(RDFStore rdfStore) {
+    /**
+     * GET  //rdfquery_listsubclassof/:classQuery : get subclasses of classQuery
+     *
+     * @return the response with status 200 (OK) and the result of rdfquery in body
+     *  or response with status 404 if ":classQuery" doesn't exist
+     */
+    @GetMapping("/rdfquery_listsubclassof/{classQuery}")
+    public ResponseEntity<ResponseQuery>
+    getRdfQuery(@PathVariable String classQuery) {
 
-        System.out.println("\n\nStart of queries\n————————————");
+        log.debug("REST request to get subclass of:", classQuery);
+
+        RDFStore rdfStore = new RDFStore();
+
+        ArrayList<String> results = new ArrayList<String>();
+
         List<Resource> classes =
-            rdfStore.listSubClassesOf(SempicOnto.Depiction);
-        classes.forEach(c -> {System.out.println(c);});
+            rdfStore.listSubClassesOf(
+                    // Note: we could use directly string uri, but it becomes
+                    // vulnerable to SQL injection
+                    ModelFactory.createDefaultModel().createResource(
+                        SempicOnto.NS + classQuery
+                    ));
+        classes.forEach(c -> { results.add(c.toString()); });
 
-        List<Resource> instances = rdfStore.createAnonInstances(classes);
-        instances.forEach(i -> {
-            System.out.println(i.getProperty(RDFS.label));
-        });
-        System.out.println("End of queries\n————————————");
-
+        return ResponseEntity.ok()
+            .body(new ResponseQuery(results));
     }
 
     /**
@@ -46,15 +61,13 @@ public class SempicRest {
      * @return the response with status 200 (OK) and the list of rdfStores in body
      */
     @GetMapping("/rdfstore")
-    public ResponseEntity<String> getRdfStore() {
+    public ResponseEntity<RDFStoreModel> getRdfStore() {
         log.debug("REST request to get RestStore");
 
         System.out.println("\n\n\nStart of app\n————————————\n\n");
 
 
         RDFStore rdfStore = new RDFStore();
-
-        queries(rdfStore);
 
         // ————————————————————————————
         System.out.println("\n\nStart of create triples\n————————————");
@@ -83,9 +96,9 @@ public class SempicRest {
 
         rdfStore.saveModel(model);
 
+
         //rdfStore.deleteModel(model);
         //rdfStore.cnx.load(model);
-        queries(rdfStore);
 
         //rdfStore.deleteModel(model);
         //rdfStore.readPhoto(1).getModel().write(System.out,"turtle");
@@ -95,7 +108,7 @@ public class SempicRest {
         System.out.println("\n\n\nEnd of app\n————————————\n\n");
 
         return ResponseEntity.ok()
-            .body(JsonbBuilder.create().toJson(new RDFStoreModel("bbbb")));
+            .body(new RDFStoreModel("bbbb"));
     }
 
 }
