@@ -24,6 +24,7 @@ import org.apache.jena.sparql.engine.http.QueryExceptionHTTP;
 import org.apache.jena.sparql.modify.request.QuadAcc;
 import org.apache.jena.sparql.modify.request.UpdateDeleteWhere;
 import org.apache.jena.update.Update;
+import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 
 /**
@@ -244,12 +245,14 @@ public class RDFStore {
                 + "<" + pUri + "> ?p ?o . "
                 + "<" + pUri + "> ?p1 ?o1 . "
                 + "?o1 <" + RDFS.label + "> ?o2 . "
+                + "?o1 <" + RDF.type + "> ?o4 . "
                 + "} "
                 + "WHERE { "
                 + "<" + pUri + "> ?p ?o . "
                 + "OPTIONAL {"
                 + "<" + pUri + "> ?p1 ?o1 ."
                 + "?o1 <" + RDFS.label + "> ?o2 ."
+                + "?o1 <" + RDF.type + "> ?o4 ."
                 + "FILTER (?p1 IN (<" + SempicOnto.depicts + ">,<" + SempicOnto.takenIn + ">,<" + SempicOnto.takenBy + ">)) "
                 + "}"
                 + "}";

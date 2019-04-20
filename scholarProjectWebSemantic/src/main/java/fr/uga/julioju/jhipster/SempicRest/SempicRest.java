@@ -15,6 +15,7 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 
 import fr.uga.julioju.sempic.RDFStore;
@@ -76,19 +77,19 @@ public class SempicRest {
             throws UnsupportedEncodingException {
         log.debug("REST request to update PhotoRDF : {}", photoRDF);
 
-        // TODO delete photo before update, otherwise it appends
-        // TODO Resources like `SempicOnto.Person` or
-        // `SempicOnto.Animal` are changed to anonymous Resources
 
         RDFStore rdfStore = new RDFStore();
 
         Resource photoResource = rdfStore.createPhoto(photoRDF.getPhotoId(),
                 photoRDF.getAlbumId(), photoRDF.getOwnerId());
 
+        // Delete photos before update, otherwise it appends
+        rdfStore.deleteResource(photoResource);
+
         Model model = photoResource.getModel();
 
 
-        // Maybe do not add several, because otherwise we should use a Bag
+        // TODO use bag
         for (int depictionIndex = 0 ;
                 depictionIndex < photoRDF.getDepiction().length ;
                 depictionIndex++) {
@@ -97,8 +98,7 @@ public class SempicRest {
             Resource sempicOntoResource = model.createResource(depictionURI);
             rdfStore.testIfUriIsClass(sempicOntoResource.getURI());
 
-            Resource descriptionResource =
-                model.createResource(sempicOntoResource);
+            Resource descriptionResource = model.createResource();
 
             for (int literalsIndex = 0 ;
                     literalsIndex <
@@ -106,6 +106,7 @@ public class SempicRest {
                             .getLiterals().length ;
                     literalsIndex++
             ) {
+                descriptionResource.addProperty(RDF.type, sempicOntoResource);
                 descriptionResource.addLiteral(RDFS.label,
                         photoRDF.getDepiction()[depictionIndex]
                         .getLiterals()[literalsIndex]);
@@ -123,11 +124,11 @@ public class SempicRest {
         rdfStore.saveModel(model);
         System.out.println("Below: model saved: TODO, WHY IT'S NOT THE SAME AS ABOVE");
         rdfStore.readPhoto(photoRDF.getPhotoId())
-            .getModel().write(System.out, "n-triple");
+            .getModel().write(System.out, "turtle");
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         rdfStore.readPhoto(photoRDF.getPhotoId())
-            .getModel().write(baos, "turtle");
+            .getModel().write(baos, "n-triple");
         photoRDF.setTurtleRepresString(baos.toString("utf8"));
 
         return ResponseEntity.ok().body(photoRDF);
