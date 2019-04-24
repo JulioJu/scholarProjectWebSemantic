@@ -22,25 +22,21 @@ import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpAsQuery;
 import org.apache.jena.sparql.algebra.op.OpBGP;
 import org.apache.jena.sparql.algebra.op.OpFilter;
-import org.apache.jena.sparql.algebra.op.OpProject;
+import org.apache.jena.sparql.algebra.op.OpLeftJoin;
+import org.apache.jena.sparql.algebra.op.OpUnion;
 import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.Var;
-import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.http.QueryExceptionHTTP;
 import org.apache.jena.sparql.expr.E_OneOf;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprList;
-import org.apache.jena.sparql.expr.ExprNode;
 import org.apache.jena.sparql.expr.ExprVar;
-import org.apache.jena.sparql.expr.ExprVisitor;
-import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.expr.nodevalue.NodeValueNode;
-import org.apache.jena.sparql.function.FunctionEnv;
-import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.modify.request.QuadAcc;
 import org.apache.jena.sparql.modify.request.UpdateDeleteWhere;
 import org.apache.jena.sparql.syntax.ElementFilter;
 import org.apache.jena.sparql.syntax.ElementGroup;
+import org.apache.jena.sparql.syntax.ElementOptional;
 import org.apache.jena.sparql.syntax.ElementTriplesBlock;
 import org.apache.jena.sparql.syntax.Template;
 import org.apache.jena.update.Update;
@@ -50,7 +46,8 @@ import org.apache.jena.vocabulary.RDFS;
 
 /**
  *
- * @author jerome.david@univ-grenoble-alpes.fr
+ * @author https://github.com/JulioJu
+ * TODO factorize
  */
 public class RDFStore {
 
@@ -80,16 +77,6 @@ public class RDFStore {
         }
     }
 
-    private Model cnxQueryConstruct (String s) {
-        try {
-            return cnx.queryConstruct(s);
-        } catch (QueryExceptionHTTP e) {
-            throw new FusekiDownException();
-        } catch (QueryException e) {
-            throw new FusekiJenaQueryException(e.toString());
-        }
-    }
-
     private Model cnxQueryConstruct (Query q) {
         try {
             return cnx.queryConstruct(q);
@@ -100,9 +87,9 @@ public class RDFStore {
         }
     }
 
-    private boolean cnxQueryAsk (String s) {
+    private boolean cnxQueryAsk (Query q) {
         try {
-            return cnx.queryAsk(s);
+            return cnx.queryAsk(q);
         } catch (QueryExceptionHTTP e) {
             throw new FusekiDownException();
         } catch (QueryException e) {
@@ -158,38 +145,104 @@ public class RDFStore {
 
     // Reference https://users.jena.apache.narkive.com/dMOMKIO8/sparql-to-check-if-a-specific-uri-exists
     public void testIfUriIsClass(String uri) {
-        String s = "ASK WHERE {"
-            + "{ <" + uri + "> ?p ?o . }"
-            + " UNION "
-            + "{?s ?p <" + uri + "> . }"
-            + "}";
-        if (!this.cnxQueryAsk(s)) {
+        // String s = "ASK WHERE {"
+        //     + "{ <" + uri + "> ?p ?o . }"
+        //     + " UNION "
+        //     + "{?s ?p <" + uri + "> . }"
+        //     + "}";
+
+        // Only Algebral level. Could be also done at syntax level
+        // To do at syntax level,
+        // Take model of `this.readPhoto(:id)` and use ElementUnion
+
+        Triple tripleSubject = Triple.create(
+                    NodeFactory.createURI(uri),
+                    Var.alloc("p"),
+                    Var.alloc("o"));
+        BasicPattern basicPatternSubject = new BasicPattern();
+        basicPatternSubject.add(tripleSubject);
+        Op opSubject = new OpBGP(basicPatternSubject);
+
+        Triple objectTriple = Triple.create(
+                    Var.alloc("s"),
+                    Var.alloc("p"),
+                    NodeFactory.createURI(uri)
+                    );
+        BasicPattern basicPatternObject = new BasicPattern();
+        basicPatternObject.add(objectTriple);
+        Op opObject = new OpBGP(basicPatternObject);
+
+        Op op = OpUnion.create(opSubject, opObject);
+
+        Query queryAlgebraBuild = OpAsQuery.asQuery(op);
+        queryAlgebraBuild.setQueryAskType();
+
+        System.out.println("testIfUriIsClass " + queryAlgebraBuild);
+
+        if (!this.cnxQueryAsk(queryAlgebraBuild)) {
             throw new FusekiJenaQueryException(
                     "'" + uri + "' is not a RDF class");
         }
     }
 
-    // Note: we could use directly string uri, but it would become vulnerable
-    // to SQL injection
     /**
      * Retieves all the resources that are subclasses of resource c. To be
      * selected classes must have the property rdfs:label instanciated
      *
-     * @param c A named class (the resource cannot be annonymous)
+     * @param uriClass a named class with a complet URI
+     *  (the resource cannot be annonymous)
      * @return
      */
-    public List<Resource> listSubClassesOf(Resource c) {
-        String uri = c.getURI();
+    public List<Resource> listSubClassesOf(String uriClass) {
 
-        this.testIfUriIsClass(uri);
+        this.testIfUriIsClass(uriClass);
 
-        String s = "CONSTRUCT { "
-            + "?s <" + RDFS.label + "> ?o "
-            + "} WHERE {"
-            + "?s <" + RDFS.subClassOf + "> <" + uri + "> ."
-            + "?s <" + RDFS.label + "> ?o ."
-            + "}";
-        Model m = this.cnxQueryConstruct(s);
+        // String s = "CONSTRUCT { "
+        //     + "?s <" + RDFS.label + "> ?o "
+        //     + "} WHERE {"
+        //     + "?s <" + RDFS.subClassOf + "> <" + uriClass + "> ."
+        //     + "?s <" + RDFS.label + "> ?o ."
+        //     + "}";
+
+        Triple tripleRDFSLabel = Triple.create(
+                    Var.alloc("s"),
+                    RDFS.label.asNode(),
+                    Var.alloc("o")
+                    );
+        Triple tripleSubClassOf = Triple.create(
+                    Var.alloc("s"),
+                    RDFS.subClassOf.asNode(),
+                    NodeFactory.createURI(uriClass)
+                    );
+        BasicPattern basicPattern = new BasicPattern();
+        basicPattern.add(tripleSubClassOf);
+        basicPattern.add(tripleRDFSLabel);
+        Op op = new OpBGP(basicPattern);
+
+        // Works only for SELECT clause, not CONSTRUCT clause:
+        // Syntax very fat. You could instead use:
+        // op = new OpProject(op,
+        //             Arrays.asList(
+        //                 new Var[] {
+        //                     Var.alloc("s"),
+        //                     Var.alloc(RDFS.label.asNode()),
+        //                     Var.alloc("o")
+        //                 }
+        //             )
+        //         );
+
+        Query queryAlgebraBuild = OpAsQuery.asQuery(op);
+
+        queryAlgebraBuild.setQueryConstructType();
+
+        BasicPattern basicPatternConstructClause = new BasicPattern();
+        basicPatternConstructClause.add(tripleRDFSLabel);
+        queryAlgebraBuild.setConstructTemplate(
+                new Template(basicPatternConstructClause));
+
+        System.out.println("listSubClassesOf " + queryAlgebraBuild);
+
+        Model m = this.cnxQueryConstruct(queryAlgebraBuild);
         return m.listSubjects().toList();
     }
 
@@ -227,63 +280,76 @@ public class RDFStore {
     }
 
     /**
-     * Query a Photo and retrieve all the direct properties of the photo and if
-     * the property are depic, takenIn or takenBy, it also retrieve the labels
-     * of the object of these properties
+     * Query a Photo and retrieve all the direct properties
+     * of the photo and if the property are depicts, albumId and
+     * ownerId
+     * If the object has RDFS.label and RDF.type, retrieve the triple
      *
      * @param id
      * @return
      */
     public Resource readPhoto(long id, boolean shouldPrint) {
-        String pUri = Namespaces.getPhotoUri(id);
+        String photoUri = Namespaces.getPhotoUri(id);
 
-        // SPARQL syntax
-        // —————————————
+        // // SPARQL syntax
+        // // —————————————
         // String s = "CONSTRUCT {"
-        //         + "<" + pUri + "> ?p ?o . "
+        //         + "<" + photoUri + "> ?p ?o . "
         //         + "?o <" + RDFS.label + "> ?o2 . "
         //         + "?o <" + RDF.type + "> ?o3 . "
         //         + "} "
         //         + "WHERE { "
-        //         + "<" + pUri + "> ?p ?o . "
+        //         + "<" + photoUri + "> ?p ?o . "
         //         + "OPTIONAL {"
         //         + "?o <" + RDFS.label + "> ?o2 ."
         //         + "?o <" + RDF.type + "> ?o3 ."
-        //         + "FILTER (?p IN (<" + SempicOnto.depicts + "> /*,<" + SempicOnto.takenIn + ">,<" + SempicOnto.takenBy + "> */)) "
         //         + "}"
+        //         + "FILTER (?p IN (<" + SempicOnto.depicts + "> ,<" + SempicOnto.albumId + ">,<" + SempicOnto.ownerId + "> )) "
         //         + "}";
-        // Model m = this.cnxQueryConstruct(s);
 
         // Java API
         // ———————
         // ———————
 
-        Triple uriTriple = Triple.create(
-                    NodeFactory.createURI(pUri),
+        Triple tripleUri = Triple.create(
+                    NodeFactory.createURI(photoUri),
                     Var.alloc("p"),
                     Var.alloc("o"));
 
-        Triple labelTriple = Triple.create(
+        Triple tripleLabel = Triple.create(
                     Var.alloc("o"),
                     RDFS.label.asNode(),
                     Var.alloc("o2"));
 
-        Triple rdfTriple = Triple.create(
+        Triple tripleRDFType = Triple.create(
                     Var.alloc("o"),
                     RDF.type.asNode(),
                     Var.alloc("o3"));
 
         BasicPattern basicPattern = new BasicPattern();
-        basicPattern.add(uriTriple);
-        basicPattern.add(labelTriple);
-        basicPattern.add(rdfTriple);
+        basicPattern.add(tripleUri);
+        basicPattern.add(tripleLabel);
+        basicPattern.add(tripleRDFType);
 
-        Expr expr = new E_OneOf(
+        BasicPattern basicPatternWhere = new BasicPattern();
+        basicPatternWhere.add(tripleUri);
+
+        BasicPattern basicPatterWhereOptional = new BasicPattern();
+        basicPatterWhereOptional.add(tripleLabel);
+        basicPatterWhereOptional.add(tripleRDFType);
+
+        Expr exprFilter = new E_OneOf(
                 new ExprVar("p"),
-                new ExprList(  new NodeValueNode(SempicOnto.depicts.asNode()) )
-                );
+                    new ExprList(
+                        Arrays.asList(new Expr[] {
+                            new NodeValueNode(SempicOnto.depicts.asNode()),
+                            new NodeValueNode(SempicOnto.albumId.asNode()),
+                            new NodeValueNode(SempicOnto.ownerId.asNode())
+                        })
+                    )
+            );
 
-        // Java API 1): syntax
+        // Java API 1): Syntax form of the query
         // ———————————————
         // NOT USED, JUST PRINT IN CONSOLE
         // ——————————————
@@ -296,33 +362,44 @@ public class RDFStore {
             // set CONSTRUCT clause
             querySyntaxBuild.setQueryConstructType();
             ElementTriplesBlock elementTriplesBlock = new ElementTriplesBlock();
-            elementTriplesBlock.addTriple(uriTriple);
+            elementTriplesBlock.addTriple(tripleUri);
                                                 // BasicPattern or QuadAcc
             querySyntaxBuild.setConstructTemplate(new Template(basicPattern));
 
             // set WHERE clause
-            ElementGroup queryPattern = new ElementGroup();
-            queryPattern.addTriplePattern(uriTriple);
-            queryPattern.addTriplePattern(labelTriple);
-            queryPattern.addTriplePattern(rdfTriple);
-            ElementFilter elementFilter = new ElementFilter(expr);
-            queryPattern.addElementFilter(elementFilter);
-            querySyntaxBuild.setQueryPattern(queryPattern);
+            ElementGroup elementGroup = new ElementGroup();
+            elementGroup.addTriplePattern(tripleUri);
+
+            ElementGroup elementGroupOptional = new ElementGroup();
+            elementGroupOptional.addTriplePattern(tripleLabel);
+            elementGroupOptional.addTriplePattern(tripleRDFType);
+            ElementOptional elementOptional = new ElementOptional(
+                    elementGroupOptional
+                    );
+            elementGroup.addElement(elementOptional);
+
+            ElementFilter elementFilter = new ElementFilter(exprFilter);
+            elementGroup.addElementFilter(elementFilter);
+
+            querySyntaxBuild.setQueryPattern(elementGroup);
 
             System.out.println("querySyntaxBuild " + querySyntaxBuild);
         }
 
-        // Java API 2) Algebra
+        // Java API 2) Algebra form of the query
         // —————————————————————
 
-        Op op;
         // Make a BGP (Basic Graph Pattern) from this pattern
         // see also
         // https://afia.asso.fr/wp-content/uploads/2018/01/Corby_PDIA2017_RechercheSemantique.pdf
         // to understand what is a BGP.
-        op = new OpBGP(basicPattern);
+        Op opLeft = new OpBGP(basicPatternWhere);
+        Op opRight = new OpBGP(basicPatterWhereOptional);
+
+        Op op = OpLeftJoin.createLeftJoin(opLeft, opRight, null);
+
         // Filter that pattern with our expression
-        op = OpFilter.filter(expr, op);
+        op = OpFilter.filter(exprFilter, op);
 
         // Notice that the query form (SELECT, CONSTRUCT, DESCRIBE, ASK) isn't
         // part of the algebra, and we have to set this in the query (although
@@ -330,7 +407,11 @@ public class RDFStore {
         // https://jena.apache.org/documentation/query/manipulating_sparql_using_arq.html
         Query queryAlgebraBuild = OpAsQuery.asQuery(op);
         queryAlgebraBuild.setQueryConstructType();
+
+        // We could also use `new OpProject(op, Arrays.asList(Var.alloc( ……`
+        // if we use a SELECT clause (see the README.md).
         queryAlgebraBuild.setConstructTemplate(new Template(basicPattern));
+
         if (shouldPrint) {
             System.out.println("queryAlgebraBuild " + queryAlgebraBuild);
         }
@@ -340,7 +421,7 @@ public class RDFStore {
         // Here we execute only queryAlgebraBuild and not querySyntaxBuild
 
         Model m = this.cnxQueryConstruct(queryAlgebraBuild);
-        return m.getResource(pUri);
+        return m.getResource(photoUri);
     }
 
 }

@@ -7,16 +7,18 @@
 * [Teacher's instructions](#teachers-instructions)
 * [scholarProjectWebSemantic details](#scholarprojectwebsemantic-details)
     * [Where is my code](#where-is-my-code)
+    * [Implementation notes](#implementation-notes)
+    * [Test API without front (resolve authentification problem)](#test-api-without-front-resolve-authentification-problem)
     * [Jena](#jena)
     * [Hot swapping (watch mode)](#hot-swapping-watch-mode)
-    * [Test API without front (resolve authentification problem)](#test-api-without-front-resolve-authentification-problem)
-* [Construct a Jena Query](#construct-a-jena-query)
-    * [Sparql syntax](#sparql-syntax)
-    * [Java API 1) syntax build](#java-api-1-syntax-build)
-    * [Java API 2) Algebra](#java-api-2-algebra)
-    * [Java API, Query](#java-api-query)
-    * [See also](#see-also)
-* [Jena DELETE](#jena-delete)
+    * [Construct a Jena Query](#construct-a-jena-query)
+        * [Sparql syntax](#sparql-syntax)
+        * [Java API 1) syntax form of the query](#java-api-1-syntax-form-of-the-query)
+        * [Java API 2) Algebra form of the query](#java-api-2-algebra-form-of-the-query)
+        * [Java API, Query](#java-api-query)
+        * [See also](#see-also)
+    * [Jena DELETE](#jena-delete)
+* [TODO](#todo)
 * [Credits](#credits)
 
 <!-- vim-markdown-toc -->
@@ -74,6 +76,11 @@ mvn
 yarn start
 ```
 
+To run server side in one line:
+```sh
+$ pushd ../scholarProjectWebSemanticFusekiDatabase && fuseki-server > /dev/null 2> /dev/null & ; popd &&  rm -Rf target && mvn -P \!webpack
+```
+
 # Teacher's instructions
 
 See ./TeachersInstruction1.pdf
@@ -105,6 +112,23 @@ All my code is under
     . With the current config, Spring could only automatically load REST routes
     defined under its root folder.
 
+## Implementation notes
+
+Server API are tested thanks ./rest_request_with_vim.roast (see below).
+
+***All API are protected against SQL injection.***
+
+## Test API without front (resolve authentification problem)
+
+Very useful to test an API. Learnt in a [TupperVim](https://tuppervim.org).
+
+See https://github.com/sharat87/roast.vim
+
+Thanks ./rest_request_with_vim.roast we could test API without front, in Vim.
+It manages authentifications tokens automatically.
+
+See also my issue at https://github.com/sharat87/roast.vim/issues/4
+
 ## Jena
 
 To install Jena maven plugin, see pom.xml. Code relative to Jena
@@ -127,40 +151,33 @@ See also ./teacherExample/HowToConfigureJenaByJeromeDavid.pdf
     * See also https://docs.spring.io/spring-boot/docs/current/reference/html/using-boot-running-your-application.html
     * TODO create a Pull Request on JHipster
 
-## Test API without front (resolve authentification problem)
 
-Very useful to test an API. Learnt in a [TupperVim](https://tuppervim.org).
-
-See https://github.com/sharat87/roast.vim
-
-Thanks ./rest_request_with_vim.roast we could test API without front, in Vim.
-It manages authentifications tokens automatically.
-
-See also my issue at https://github.com/sharat87/roast.vim/issues/4
-
-# Construct a Jena Query
+## Construct a Jena Query
 
 I've shown three ways to construct a Query in
 ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/sempic/RDFStore.java ,
 under function `readPhoto(long id)`. It exists more solutions.
+See also `subClassOf(String classUri)`, more simple example. See also all this
+file. This file is not factorize, my goal is keep as an example.
 
 The most important doc is the ***official doc***
     https://jena.apache.org/documentation/query/manipulating_sparql_using_arq.html
 
-## Sparql syntax
+### Sparql syntax
 
 The Sparql syntax is very known and very documented. But it should not be
-used in a Java Program as the say at
-https://jena.apache.org/documentation/query/manipulating_sparql_using_arq.html
+used in a Java Program
 
 > “But what about [little Bobby Tables](https://xkcd.com/327/)? And, even if you
 > sanitise your inputs, string manipulation is a fraught process and syntax
 > errors await you. Although it might seem harder than string munging, the ARQ
 > API is your friend in the long run.”
+> (source:
+> https://jena.apache.org/documentation/query/manipulating_sparql_using_arq.html )
 
 See also https://en.wikipedia.org/wiki/SQL_injection
 
-## Java API 1) syntax build
+### Java API 1) syntax form of the query
 
 See the official doc presented above and
 also:
@@ -174,27 +191,57 @@ But we could see that it's very verbose. Maybe it's a little bit more
 understandable, because contrary to Algebra form, we could define
 `CONSTRUCT clause` before the `WHERE clause`.
 
-## Java API 2) Algebra
+### Java API 2) Algebra form of the query
 
 
 I believe the best solution is to use directly Sparql Algebra.
 To understand what is Spqral Algebra,
 1. First see official doc presented above
-2. See definition of Algebra in official doc at
+2. Very important doc:
+    https://jena.apache.org/documentation/query/arq-query-eval.html#opexecutor
+3. See definition of Algebra in official doc at
     https://jena.apache.org/documentation/query/algebra.html
-3. See the official example
+    * ***Important note*** : to print the algebra form of the query, use
+        /opt/apache-jena/bin/qparse and not `arq.qparse` (it doesn't exist).
+4. See the official example
     https://github.com/apache/jena/blob/master/jena-arq/src-examples/arq/examples/AlgebraExec.java
-4. The Power Point
+5. The Power Point
     https://afia.asso.fr/wp-content/uploads/2018/01/Corby_PDIA2017_RechercheSemantique.pdf
     (they explain also what is a BGP, a Basic Graph Pattern).
-5. As they said at
+6. As they said at
     https://www.programcreek.com/java-api-examples/?api=org.apache.jena.sparql.syntax.ElementFilter (https://www.programcreek.com/java-api-examples/?code=xcurator/xcurator/xcurator-master/lib/new_libs/apache-jena-3.1.0/src-examples/arq/examples/propertyfunction/labelSearch.java)
     “The better design is to build the Op structure programmatically,”.
     Note they call `op = Algebra.optimize`, but I didn't explored that.
-6. https://www.w3.org/2011/09/SparqlAlgebra/ARQalgebra , a very detailed
+7. https://www.w3.org/2011/09/SparqlAlgebra/ARQalgebra , a very detailed
     explanation (maybe too much).
 
-## Java API, Query
+Note:
+As explained in function `listSubClassesOf`, following works only
+with SELECT clause, but bug with CONSTRUCT clause (no investigate further why,
+and if I've forgotten something).
+
+```java
+        op = new OpProject(op,
+                    Arrays.asList(
+                        new Var[] {
+                            Var.alloc("s"),
+                            Var.alloc(RDFS.label.asNode()),
+                            Var.alloc("o")
+                        }
+                    )
+                );
+```
+
+Use instead:
+
+```java
+        BasicPattern basicPatternConstructClause = new BasicPattern();
+        basicPatternConstructClause.add(tripleRDFType);
+        queryAlgebraBuild.setConstructTemplate(
+                new Template(basicPatternConstructClause));
+```
+
+### Java API, Query
 
 Even if we use directly Algebra, as:
 
@@ -205,7 +252,7 @@ Even if we use directly Algebra, as:
 
 You should see https://jena.apache.org/documentation/query/app_api.html
 
-## See also
+### See also
 
 * As **I don't use all examples of the teacher**, you must study
     ./teacherExample/src/main/java/fr/uga/miashs/sempic/rdf/RDFStore.java
@@ -232,7 +279,7 @@ You should see https://jena.apache.org/documentation/query/app_api.html
     They show the “StringBuilder style API for building query/update strings and
     parameterizing them if desired”.
 
-# Jena DELETE
+## Jena DELETE
 
 * For model already persisted in database,
     the method `deleteModel(Model m)` presented at
@@ -254,6 +301,12 @@ You should see https://jena.apache.org/documentation/query/app_api.html
     To write the method `deleteResource(Rsource r)` with Java API, I was
     inspired by the method `deleteModel(Model m)` of the teacher.
 
+# TODO
+
+* Factorize
+    ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/sempic/RDFStore.java ,
+    (creation of Query could be factorize), but actually I not factorize to
+    keep an example.
 
 # Credits
 

@@ -34,6 +34,7 @@ public class SempicRest {
 
     /**
      * GET  //rdfquery_listsubclassof/:classQuery : get subclasses of classQuery
+     *      (ontology SempicOnto)
      *
      * @return the response with status 200 (OK) and the result of rdfquery in body
      *  or response with status 404 if ":classQuery" doesn't exist
@@ -49,12 +50,7 @@ public class SempicRest {
         ArrayList<String> results = new ArrayList<String>();
 
         List<Resource> classes =
-            rdfStore.listSubClassesOf(
-                    // Note: we could use directly string uri, but it becomes
-                    // vulnerable to SQL injection
-                    ModelFactory.createDefaultModel().createResource(
-                        SempicOnto.NS + classQuery
-                    ));
+            rdfStore.listSubClassesOf(SempicOnto.NS + classQuery);
         classes.forEach(c -> { results.add(c.toString()); });
 
         return ResponseEntity.ok()
@@ -118,7 +114,8 @@ public class SempicRest {
         model.write(System.out, "turtle");
 
         // print the graph on the standard output
-        System.out.println("BELOW: PRINT RESOURCE\n—————————————");
+        System.out.println("BELOW: PRINT RESOURCE BEFORE IT SAVED"
+                + "\n—————————————");
         photoResource.getModel().write(System.out, "turtle");
 
         rdfStore.saveModel(model);
