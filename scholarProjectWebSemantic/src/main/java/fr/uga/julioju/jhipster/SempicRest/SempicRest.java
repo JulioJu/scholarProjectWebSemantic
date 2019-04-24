@@ -114,20 +114,20 @@ public class SempicRest {
             model.add(photoResource, SempicOnto.depicts, descriptionResource);
         }
 
-        System.out.println("Below: model before it saved");
+        System.out.println("BELOW: MODEL BEFORE IT SAVED\n—————————————");
         model.write(System.out, "turtle");
 
         // print the graph on the standard output
-        System.out.println("Below: print resource");
+        System.out.println("BELOW: PRINT RESOURCE\n—————————————");
         photoResource.getModel().write(System.out, "turtle");
 
         rdfStore.saveModel(model);
-        System.out.println("Below: model saved: TODO, WHY IT'S NOT THE SAME AS ABOVE");
-        rdfStore.readPhoto(photoRDF.getPhotoId())
+        System.out.println("BELOW: PRINT MODEL SAVED\n—————————————");
+        rdfStore.readPhoto(photoRDF.getPhotoId(), true)
             .getModel().write(System.out, "turtle");
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        rdfStore.readPhoto(photoRDF.getPhotoId())
+        rdfStore.readPhoto(photoRDF.getPhotoId(), false)
             .getModel().write(baos, "n-triple");
         photoRDF.setTurtleRepresString(baos.toString("utf8"));
 
@@ -144,37 +144,6 @@ public class SempicRest {
         log.debug("REST request to get RestStore");
 
         System.out.println("\n\n\nStart of app\n————————————\n\n");
-
-
-        RDFStore rdfStore = new RDFStore();
-
-        // ————————————————————————————
-        System.out.println("\n\nStart of create triples\n————————————");
-
-        Resource photoResource = rdfStore.createPhoto(12, 1, 1);
-        Model model = ModelFactory.createDefaultModel();
-
-        // animalResource
-        Resource animalResource = model.createResource(SempicOnto.Animal);
-        animalResource.addLiteral(RDFS.label, "Médor");
-        model.add(photoResource, SempicOnto.depicts, animalResource);
-
-        // Print
-        model.write(System.out, "turtle");
-        System.out.println("Coucou 1");
-
-        // personResource
-        Resource personResource = model.createResource(SempicOnto.Person);
-        personResource.addLiteral(RDFS.label, "Charlemagne");
-        model.add(photoResource, SempicOnto.depicts, personResource);
-
-        // Print
-        model.write(System.out, "turtle");
-        System.out.println("End of create triples\n————————————\n\n");
-        // ————————————————————————————
-
-        rdfStore.saveModel(model);
-
 
         //rdfStore.deleteModel(model);
         //rdfStore.cnx.load(model);
