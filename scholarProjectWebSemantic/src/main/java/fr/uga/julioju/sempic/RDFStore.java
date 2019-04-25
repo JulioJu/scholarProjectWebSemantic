@@ -43,6 +43,8 @@ import org.apache.jena.update.Update;
 import org.apache.jena.update.UpdateRequest;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -50,6 +52,8 @@ import org.apache.jena.vocabulary.RDFS;
  * TODO factorize
  */
 public class RDFStore {
+
+    private final Logger log = LoggerFactory.getLogger(RDFStore.class);
 
     public final static String ENDPOINT_QUERY = "http://localhost:3030/sempic/sparql"; // SPARQL endpoint
     public final static String ENDPOINT_UPDATE = "http://localhost:3030/sempic/update"; // SPARQL UPDATE endpoint
@@ -112,35 +116,39 @@ public class RDFStore {
     }
 
     /**
-     * Delete all the statements where the resource appears as subject or object
-     * @param r The named resource to be deleted (the resource cannot be annonymous)
+     * Delete all the statements where the URI appears as subject or object
+     * @param class the URI clas to be deleted (the class cannot be annonymous)
      */
-    public void deleteResource(Resource r) {
-        if (r.isURIResource()) {
+    public void deleteClassUri(String uriClass) {
             cnx.begin(ReadWrite.WRITE);
 
             // SPARQL syntax
             // —————————————
-            // this.cnxUpdate("DELETE WHERE { <" + r.getURI() + "> ?p ?o }");
-            // this.cnxUpdate("DELETE WHERE { ?s ?p <" + r.getURI() + "> }");
+            // this.cnxUpdate("DELETE WHERE { <" + uriClass + "> ?p ?o }");
+            // this.cnxUpdate("DELETE WHERE { ?uriClass ?p <" + uri + "> }");
 
             // Java
             // —————————————
             QuadAcc acc = new QuadAcc();
-            acc.addTriple(new Triple(r.asNode(),
+            acc.addTriple(
+                    new Triple(
+                        NodeFactory.createURI(uriClass),
                         Var.alloc("p"),
-                        Var.alloc("o")));
+                        Var.alloc("o"))
+            );
             Update u1 = new UpdateDeleteWhere(acc);
             QuadAcc acc2 = new QuadAcc();
-            acc2.addTriple(new Triple(r.asNode(),
+            acc2.addTriple(
+                    new Triple(
+                        Var.alloc("s"),
                         Var.alloc("p"),
-                        Var.alloc("o")));
+                        NodeFactory.createURI(uriClass))
+            );
             Update u2 = new UpdateDeleteWhere(acc2);
             UpdateRequest updateRequest = new UpdateRequest(u1).add(u2);
-            System.out.println(updateRequest);
+            log.debug("deleteClassUri\n" + updateRequest.toString());
             this.cnxUpdateRequest(updateRequest);
             this.cnxCommit();
-        }
     }
 
     // Reference https://users.jena.apache.narkive.com/dMOMKIO8/sparql-to-check-if-a-specific-uri-exists
@@ -177,12 +185,26 @@ public class RDFStore {
         Query queryAlgebraBuild = OpAsQuery.asQuery(op);
         queryAlgebraBuild.setQueryAskType();
 
-        System.out.println("testIfUriIsClass " + queryAlgebraBuild);
+        log.debug("testIfUriIsClass\n" + queryAlgebraBuild);
 
         if (!this.cnxQueryAsk(queryAlgebraBuild)) {
             throw new FusekiJenaQueryException(
                     "'" + uri + "' is not a RDF class");
         }
+    }
+
+    public boolean isUriIsSubject(String uri) {
+        Triple triple = Triple.create(
+                    NodeFactory.createURI(uri),
+                    Var.alloc("p"),
+                    Var.alloc("o"));
+        BasicPattern basicPattern = new BasicPattern();
+        basicPattern.add(triple);
+        Op op = new OpBGP(basicPattern);
+        Query queryAlgebraBuild = OpAsQuery.asQuery(op);
+        queryAlgebraBuild.setQueryAskType();
+        log.debug("isUriIsSubject\n" + queryAlgebraBuild);
+        return this.cnxQueryAsk(queryAlgebraBuild);
     }
 
     /**
@@ -240,7 +262,7 @@ public class RDFStore {
         queryAlgebraBuild.setConstructTemplate(
                 new Template(basicPatternConstructClause));
 
-        System.out.println("listSubClassesOf " + queryAlgebraBuild);
+        log.debug("listSubClassesOf\n" + queryAlgebraBuild);
 
         Model m = this.cnxQueryConstruct(queryAlgebraBuild);
         return m.listSubjects().toList();
@@ -383,7 +405,7 @@ public class RDFStore {
 
             querySyntaxBuild.setQueryPattern(elementGroup);
 
-            System.out.println("querySyntaxBuild " + querySyntaxBuild);
+            log.debug("querySyntaxBuild\n" + querySyntaxBuild);
         }
 
         // Java API 2) Algebra form of the query
@@ -413,7 +435,7 @@ public class RDFStore {
         queryAlgebraBuild.setConstructTemplate(new Template(basicPattern));
 
         if (shouldPrint) {
-            System.out.println("queryAlgebraBuild " + queryAlgebraBuild);
+            log.debug("queryAlgebraBuild\n" + queryAlgebraBuild);
         }
 
         // Execution

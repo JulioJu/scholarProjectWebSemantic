@@ -13,14 +13,14 @@ import javax.validation.Valid;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 
+import fr.uga.julioju.sempic.Namespaces;
 import fr.uga.julioju.sempic.RDFStore;
-import fr.uga.julioju.sempic.RDFStoreModel;
 import fr.uga.julioju.sempic.ResponseQuery;
+import fr.uga.julioju.sempic.Exceptions.FusekiJenaQueryException;
 import fr.uga.miashs.sempic.model.rdf.SempicOnto;
 
 /**
@@ -52,13 +52,14 @@ public class SempicRest {
         List<Resource> classes =
             rdfStore.listSubClassesOf(SempicOnto.NS + classQuery);
         classes.forEach(c -> { results.add(c.toString()); });
+        log.debug("Subclasses: ", classes.toString());
 
         return ResponseEntity.ok()
             .body(new ResponseQuery(results));
     }
 
     /**
-     * {@code PUT  /photo} : Creates or Updates a photoRDF
+     * {@code PUT  /photoRDF} : Creates or Updates a photoRDF
      *
      * @param photoRDF the photoRDF to update.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated photoRDF,
@@ -67,7 +68,7 @@ public class SempicRest {
      * @throws UnsupportedEncodingException
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PutMapping("/photo")
+    @PutMapping("/photoRDF")
     public ResponseEntity<PhotoRDF> updatePhotoRDF(
             @Valid @RequestBody PhotoRDF photoRDF)
             throws UnsupportedEncodingException {
@@ -80,7 +81,7 @@ public class SempicRest {
                 photoRDF.getAlbumId(), photoRDF.getOwnerId());
 
         // Delete photos before update, otherwise it appends
-        rdfStore.deleteResource(photoResource);
+        rdfStore.deleteClassUri(photoResource.getURI());
 
         Model model = photoResource.getModel();
 
@@ -110,16 +111,16 @@ public class SempicRest {
             model.add(photoResource, SempicOnto.depicts, descriptionResource);
         }
 
-        System.out.println("BELOW: MODEL BEFORE IT SAVED\n—————————————");
+        log.debug("BELOW: MODEL BEFORE IT SAVED\n—————————————");
         model.write(System.out, "turtle");
 
         // print the graph on the standard output
-        System.out.println("BELOW: PRINT RESOURCE BEFORE IT SAVED"
+        log.debug("BELOW: PRINT RESOURCE BEFORE IT SAVED"
                 + "\n—————————————");
         photoResource.getModel().write(System.out, "turtle");
 
         rdfStore.saveModel(model);
-        System.out.println("BELOW: PRINT MODEL SAVED\n—————————————");
+        log.debug("BELOW: PRINT MODEL SAVED\n—————————————");
         rdfStore.readPhoto(photoRDF.getPhotoId(), true)
             .getModel().write(System.out, "turtle");
 
@@ -132,28 +133,36 @@ public class SempicRest {
     }
 
     /**
-     * GET  /rdfStores : get a rdfStores.
+     * {@code DELETE  /photoRDF/:id} : delete the "id" photoRDF.
      *
-     * @return the response with status 200 (OK) and the list of rdfStores in body
+     * @param id the id of the photoRDF to delete.
+     * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
-    @GetMapping("/rdfstore")
-    public ResponseEntity<RDFStoreModel> getRdfStore() {
-        log.debug("REST request to get RestStore");
+    @DeleteMapping("/photoRDF/{id}")
+    public ResponseEntity<Void> deletePhoto(@PathVariable Long id) {
+        log.debug("REST request to delete PhotoRDF : {}", id);
 
-        System.out.println("\n\n\nStart of app\n————————————\n\n");
+        String photoUri = Namespaces.getPhotoUri(id);
 
-        //rdfStore.deleteModel(model);
-        //rdfStore.cnx.load(model);
+        RDFStore rdfStore = new RDFStore();
 
-        //rdfStore.deleteModel(model);
-        //rdfStore.readPhoto(1).getModel().write(System.out,"turtle");
-        // print the graph on the standard output
-        //photoResource.getModel().write(System.out);
+        if (!rdfStore.isUriIsSubject(photoUri)) {
+            log.error("Photo with id '" + id + "' doesn't exist"
+                    + " (at least not a RDF subject)"
+                    + ", can't be deleted.");
+            return ResponseEntity.notFound().build();
+        }
+        log.debug("Photo with uri '" + photoUri + "' exists"
+                + ", this RDF subject will be deleted.");
 
-        System.out.println("\n\n\nEnd of app\n————————————\n\n");
-
-        return ResponseEntity.ok()
-            .body(new RDFStoreModel("bbbb"));
+        rdfStore.deleteClassUri(photoUri);
+        if (rdfStore.isUriIsSubject(photoUri)) {
+            throw new FusekiJenaQueryException("Photo with uri " + photoUri
+                    + " not deleted.");
+        }
+        log.debug("Photo with uri '" + photoUri + "' doesn't exist"
+                + ", therefore it was deleted.");
+        return ResponseEntity.noContent().build();
     }
 
 }
