@@ -36,6 +36,10 @@ GET {root}/api/rdfquery_listsubclassof/Person
 
 GET {root}/api/rdfquery_listsubclassof/jioejiewijweiojfeji
 
+# GET
+# ———————————————
+GET {root}/api/photoRDF/2
+
 # Delete
 # ———————————————
 
@@ -47,12 +51,12 @@ DELETE {root}/api/photoRDF/1
 PUT {root}/api/photoRDF << END
 {{
     "photoId": 1,
-    "albumId": 1,
-    "ownerId": 1,
+    "albumId": 2,
+    "ownerId": 3,
     "depiction": []
 }}
-
 END
+
 PUT {root}/api/photoRDF << END
 {{
     "photoId": 1,

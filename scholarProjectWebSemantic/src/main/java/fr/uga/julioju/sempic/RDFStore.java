@@ -310,7 +310,7 @@ public class RDFStore {
      * @param id
      * @return
      */
-    public Resource readPhoto(long id, boolean shouldPrint) {
+    public Model readPhoto(long id, boolean shouldPrint) {
         String photoUri = Namespaces.getPhotoUri(id);
 
         // // SPARQL syntax
@@ -443,7 +443,7 @@ public class RDFStore {
         // Here we execute only queryAlgebraBuild and not querySyntaxBuild
 
         Model m = this.cnxQueryConstruct(queryAlgebraBuild);
-        return m.getResource(photoUri);
+        return m;
     }
 
 }

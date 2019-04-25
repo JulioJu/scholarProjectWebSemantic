@@ -10,7 +10,21 @@ public class PhotoRDF  {
 
     private PhotoDepictionRDF[] depiction;
 
-    private String turtleRepresString;
+    // Needed for Jackson if an other constructor is defined
+    public PhotoRDF() {
+    }
+
+    public PhotoRDF(
+            long photoId,
+            long albumId,
+            long ownerId,
+            PhotoDepictionRDF[] depiction
+            ) {
+           this.photoId             = photoId;
+           this.albumId             = albumId;
+           this.ownerId             = ownerId;
+           this.depiction           = depiction;
+    }
 
     public long getPhotoId() {
         return photoId;
@@ -22,14 +36,6 @@ public class PhotoRDF  {
 
     public long getOwnerId() {
         return ownerId;
-    }
-
-    public String getTurtleRepresString() {
-        return turtleRepresString;
-    }
-
-    public void setTurtleRepresString(String turtleRepresString) {
-        this.turtleRepresString = turtleRepresString;
     }
 
     public PhotoDepictionRDF[] getDepiction() {
