@@ -4,7 +4,6 @@
 set root http://127.0.0.1:8080
 Accept: application/json, text/plain
 content-type: application/json
-Referer: http://localhost:9000
 # Press ENTER key on the following url
 POST {root}/api/authenticate << END
 {{"username":"admin","password":"admin","rememberMe":true}}
@@ -38,7 +37,7 @@ GET {root}/api/rdfquery_listsubclassof/jioejiewijweiojfeji
 
 # GET
 # ———————————————
-GET {root}/api/photoRDF/2
+GET {root}/api/photoRDF/1
 
 # Delete
 # ———————————————

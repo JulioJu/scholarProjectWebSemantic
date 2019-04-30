@@ -64,6 +64,7 @@ Start the Fuseki server ***at path ./scholarProjectWebSemanticFusekiDatabase/***
 
 On Arch Linux, with the official https://aur.archlinux.org/packages/apache-jena-fuseki/
 run simply:
+
 ```sh
 cd ./scholarProjectWebSemanticFusekiDatabase/
 fuseki-server
@@ -260,7 +261,23 @@ You should see https://jena.apache.org/documentation/query/app_api.html
 * To understand how it works, don't forget that
     1. `FrontsNode <-- RDFNode <-- Resource <-- Property` (inheritance).
     2. `FrontsNode` has a `Node` Property (`protected`), and therefore
-        has a public method `Node.asNode()`
+        has a public method `FrontsNode.asNode()`
+    3. There are severals type of Node:
+        `Node_Blank, Node_Anon, Node_URI, Node_Variable, and Node_ANY`
+    4. An RDF model is a set of Statements.
+    5. `StatementImpl` has three `protected` attributes: `Resource subject`,
+        `Property predicate`
+        `RDFNode object`, and its three corresponding getter.
+        It has a function `createReifiedStatement()`. `ReifiedStatement`
+        extends `Resource` and `ReifiedStatementImpl` has a `protected`
+        attribute `Statement` and its public getter. `rdf:statement` is
+        an rdf uri https://www.w3.org/TR/rdf-schema/#ch_statement .
+    6. `ResourceImpl.addLiteral()` add literal to the Model
+        (`ModelCom` that implements `Model`) of the Resource
+        (if exists, otherwise raise exception).
+    7. `RDFNode` doesn't have `ModelCom`.
+    8. See also https://www.w3.org/TR/rdf-schema/#ch_class
+
 
 * As the official doc is a little bit poor of examples, don't forget
     to use https://www.programcreek.com/java-api-examples/
@@ -278,6 +295,48 @@ You should see https://jena.apache.org/documentation/query/app_api.html
     https://stackoverflow.com/questions/7250189/how-to-build-sparql-queries-in-java
     They show the “StringBuilder style API for building query/update strings and
     parameterizing them if desired”.
+
+* The Course of M.  Atencias: http://imss-www.upmf-grenoble.fr/~atenciam/WS/
+    * Two well understand http://imss-www.upmf-grenoble.fr/~atenciam/WS/5-owl.pdf
+        see the Protege software.
+    * What is a statement: https://stackoverflow.com/questions/21391135/what-is-the-owlnothing-class-designed-to-do/21391737
+    * Nodes in hierarchy:
+        * http://soft.vub.ac.be/svn-pub/PlatformKit/platformkit-kb-owlapi3-doc/doc/owlapi3/javadoc/org/semanticweb/owlapi/reasoner/Node.html
+        * https://stackoverflow.com/questions/21391135/what-is-the-owlnothing-class-designed-to-do/21391737
+        * https://en.wikipedia.org/wiki/Semantic_Web
+
+* See also
+    * https://en.wikipedia.org/wiki/Template:Semantic_Web
+    * https://www.w3.org/wiki/Good_Ontologies
+
+* Maybe a good model to make a new Ontology is
+    https://www.w3.org/Submission/vcard-rdf/
+    It's a [member submission](https://www.w3.org/wiki/Good_Ontologies),
+    therefore less than a draft!
+    But it's a very simple Ontology
+    See an example non official of an Ontology :
+    http://content.scottstreit.com/Semantic_Web/Assignments/Resources/Protege/protegeLab/original_vCard/vCard.owl
+    (should be downloaded, or view-source in Firefox).
+
+> The Semantic Web provides a common framework that allows data to be shared and
+> reused across application, enterprise, and community boundaries
+> (W3C)
+
+* Ontology
+     > Ontologies are a formal way to describe taxonomies and classification
+     > networks, essentially defining the structure of knowledge for various
+     > domains: the nouns representing classes of objects and the verbs
+     > representing relations between the objects.
+     > https://en.wikipedia.org/wiki/Web_Ontology_Language
+     * See also https://en.wikipedia.org/wiki/Web_Ontology_Language#Ontologies
+        https://en.wikipedia.org/wiki/Ontology_(information_science)#Components
+    * RDF is an Ontology language
+        https://en.wikipedia.org/wiki/Web_Ontology_Language#Ontologies
+
+* Why the original idea of Tim Beners-Lee is dead.
+    * https://hackernoon.com/semantic-web-is-dead-long-live-the-ai-2a5ea0cf6423
+    * https://twobithistory.org/2018/05/27/semantic-web.html
+    * https://www.forbes.com/sites/cognitiveworld/2018/08/03/the-importance-of-schema-org/
 
 ## Jena DELETE
 
