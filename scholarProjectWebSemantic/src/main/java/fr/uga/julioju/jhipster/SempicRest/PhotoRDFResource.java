@@ -1,11 +1,7 @@
 package fr.uga.julioju.jhipster.SempicRest;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,25 +9,52 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import fr.uga.julioju.jhipster.FusekiServerConn;
+import fr.uga.julioju.jhipster.service.UserService;
+import fr.uga.julioju.sempic.CreateResource;
 import fr.uga.julioju.sempic.Namespaces;
+import fr.uga.julioju.sempic.RDFConn;
 import fr.uga.julioju.sempic.RDFStore;
 import fr.uga.julioju.sempic.ResponseQuery;
-import fr.uga.julioju.sempic.Exceptions.FusekiJenaQueryException;
+import fr.uga.julioju.sempic.Exceptions.FusekiUriNotAClass;
+import fr.uga.julioju.sempic.entities.PhotoDepictionAnonRDF;
+import fr.uga.julioju.sempic.entities.PhotoRDF;
 import fr.uga.miashs.sempic.model.rdf.SempicOnto;
 
 /**
- * REST controller for managing RDFStore.
+ * REST controller for managing PhotoRDFResource.
  */
 @RestController
 @RequestMapping("/api")
-public class SempicRest {
+public class PhotoRDFResource {
 
-    private final Logger log = LoggerFactory.getLogger(SempicRest.class);
+    private final Logger log = LoggerFactory.getLogger(PhotoRDFResource.class);
+
+    private UserService userService;
+
+    private FusekiServerConn fusekiServerConn;
+
+    public PhotoRDFResource(FusekiServerConn fusekiServerConn,
+            UserService userService) {
+        this.fusekiServerConn = fusekiServerConn;
+        this.userService = userService;
+    }
 
     /**
      * GET  //rdfquery_listsubclassof/:classQuery : get subclasses of classQuery
@@ -46,12 +69,10 @@ public class SempicRest {
 
         log.debug("REST request to get subclass of:", classQuery);
 
-        RDFStore rdfStore = new RDFStore();
-
         ArrayList<String> results = new ArrayList<String>();
 
         List<Resource> classes =
-            rdfStore.listSubClassesOf(SempicOnto.NS + classQuery);
+            RDFStore.listSubClassesOf(SempicOnto.NS + classQuery);
         classes.forEach(c -> { results.add(c.toString()); });
         log.debug("Subclasses: ", classes.toString());
 
@@ -67,23 +88,27 @@ public class SempicRest {
      * or with status {@code 400 (Bad Request)} if the photoRDF is not valid,
      * or with status {@code 500 (Internal Server Error)} if the photoRDF couldn't be updated.
      * @throws UnsupportedEncodingException
+     * @throws InterruptedException
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/photoRDF")
     public ResponseEntity<PhotoRDF> updatePhotoRDF(
             @Valid @RequestBody PhotoRDF photoRDF)
-            throws UnsupportedEncodingException {
+            throws UnsupportedEncodingException, InterruptedException {
         log.debug("REST request to update PhotoRDF : {}", photoRDF);
 
-        RDFStore rdfStore = new RDFStore();
+        Model model = ModelFactory.createDefaultModel();
 
-        Resource photoResource = rdfStore.createPhoto(photoRDF.getPhotoId(),
-                photoRDF.getAlbumId(), photoRDF.getOwnerId());
+        Resource photoResource = CreateResource.create(
+                model,
+                photoRDF,
+                this.userService
+                );
+
+        fusekiServerConn.serverRestart();
 
         // Delete photos before update, otherwise it appends
-        rdfStore.deleteClassUri(photoResource.getURI());
-
-        Model model = photoResource.getModel();
+        RDFStore.deleteClassUri(photoResource.getURI());
 
         // TODO use bag
         for (int depictionIndex = 0 ;
@@ -92,7 +117,7 @@ public class SempicRest {
             String depictionURI = SempicOnto.NS
                 + photoRDF.getDepiction()[depictionIndex].getDepiction();
             Resource sempicOntoResource = model.createResource(depictionURI);
-            rdfStore.testIfUriIsClass(sempicOntoResource.getURI());
+            RDFStore.testIfUriIsClass(sempicOntoResource.getURI());
 
             Resource descriptionResource = model.createResource();
 
@@ -118,9 +143,9 @@ public class SempicRest {
                 + "\n—————————————");
         photoResource.getModel().write(System.out, "turtle");
 
-        rdfStore.saveModel(model);
+        RDFConn.saveModel(model);
         log.debug("BELOW: PRINT MODEL SAVED\n—————————————");
-        rdfStore.readPhoto(photoRDF.getPhotoId(), true)
+        RDFStore.readPhoto(photoRDF.getId(), true)
             .write(System.out, "turtle");
 
         return ResponseEntity.ok().body(photoRDF);
@@ -135,28 +160,26 @@ public class SempicRest {
     @GetMapping("/photoRDF/{id}")
     public ResponseEntity<PhotoRDF> getAlbum(@PathVariable Long id) {
         log.debug("REST request to get photoRDF : {}", id);
-        RDFStore rdfStore = new RDFStore();
-        if (!rdfStore.isUriIsSubject(Namespaces.getPhotoUri(id))) {
+        if (!RDFStore.isUriIsSubject(Namespaces.getPhotoUri(id))) {
             log.error("PhotoRDF with uri '"
                     + Namespaces.getPhotoUri(id)
                     + "' doesn't exist in Fuseki Database"
                     + " (at least not a RDF subject).");
             return ResponseEntity.notFound().build();
         }
-        Model model = rdfStore.readPhoto(id, true);
-        long albumId = Integer.parseInt(
+        Model model = RDFStore.readPhoto(id, true);
+        String albumIdWithDatatype =
                 model.listObjectsOfProperty(SempicOnto.albumId)
-                .toList().get(0).toString().substring(0, 1)
-                );
-        long ownerId = Integer.parseInt(
-                model.listObjectsOfProperty(SempicOnto.ownerId)
-                .toList().get(0).toString().substring(0, 1)
+                .toList().get(0).toString();
+        long albumId = Integer.parseInt(
+                albumIdWithDatatype
+                .substring(albumIdWithDatatype.lastIndexOf('/')+1)
                 );
         List<Resource> depictObjects =
             model.listObjectsOfProperty(SempicOnto.depicts)
             .toList().parallelStream().map(RDFNode::asResource)
             .collect(Collectors.toList());
-        PhotoDepictionRDF[] photoDepictionRDF =
+        PhotoDepictionAnonRDF[] photoDepictionRDF =
             depictObjects.parallelStream().map(
                 r -> {
                     String[] literalResources =
@@ -168,20 +191,19 @@ public class SempicRest {
                     // Not know if it's always that.
                     List<RDFNode> properties =
                         model.listObjectsOfProperty(r, RDF.type).toList();
-                    return new PhotoDepictionRDF(
+                    return new PhotoDepictionAnonRDF(
                         properties.get(properties.size() - 1).toString(),
                         literalResources
                     );
                 }
-            ).toArray(PhotoDepictionRDF[]::new);
+            ).toArray(PhotoDepictionAnonRDF[]::new);
         PhotoRDF photoRDF = new PhotoRDF(
                 id,
                 albumId,
-                ownerId,
                 photoDepictionRDF
                 );
         log.debug("BELOW: PRINT MODEL RETRIEVED\n—————————————");
-        rdfStore.readPhoto(photoRDF.getPhotoId(), true)
+        RDFStore.readPhoto(photoRDF.getId(), true)
             .write(System.out, "turtle");
         return ResponseEntity.ok().body(photoRDF);
     }
@@ -198,9 +220,7 @@ public class SempicRest {
 
         String photoUri = Namespaces.getPhotoUri(id);
 
-        RDFStore rdfStore = new RDFStore();
-
-        if (!rdfStore.isUriIsSubject(photoUri)) {
+        if (!RDFStore.isUriIsSubject(photoUri)) {
             log.error("Photo with uri '" + photoUri + "' doesn't exist"
                     + " in Fuseki database"
                     + " (at least not a RDF subject)"
@@ -210,9 +230,9 @@ public class SempicRest {
         log.debug("Photo with uri '" + photoUri + "' exists"
                 + ", this RDF subject will be deleted.");
 
-        rdfStore.deleteClassUri(photoUri);
-        if (rdfStore.isUriIsSubject(photoUri)) {
-            throw new FusekiJenaQueryException("Photo with uri " + photoUri
+        RDFStore.deleteClassUri(photoUri);
+        if (RDFStore.isUriIsSubject(photoUri)) {
+            throw new FusekiUriNotAClass("Photo with uri " + photoUri
                     + " not deleted.");
         }
         log.debug("Photo with uri '" + photoUri + "' doesn't exist"

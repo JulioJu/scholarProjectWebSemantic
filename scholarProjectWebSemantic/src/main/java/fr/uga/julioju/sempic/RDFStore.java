@@ -1,23 +1,13 @@
 package fr.uga.julioju.sempic;
 
-import fr.uga.julioju.sempic.Exceptions.FusekiDownException;
-import fr.uga.julioju.sempic.Exceptions.FusekiJenaQueryException;
-import fr.uga.miashs.sempic.model.rdf.SempicOnto;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.jena.atlas.web.HttpException;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryException;
-import org.apache.jena.query.ReadWrite;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpAsQuery;
 import org.apache.jena.sparql.algebra.op.OpBGP;
@@ -26,7 +16,6 @@ import org.apache.jena.sparql.algebra.op.OpLeftJoin;
 import org.apache.jena.sparql.algebra.op.OpUnion;
 import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.Var;
-import org.apache.jena.sparql.engine.http.QueryExceptionHTTP;
 import org.apache.jena.sparql.expr.E_OneOf;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprList;
@@ -46,6 +35,9 @@ import org.apache.jena.vocabulary.RDFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fr.uga.julioju.sempic.Exceptions.FusekiUriNotAClass;
+import fr.uga.miashs.sempic.model.rdf.SempicOnto;
+
 /**
  *
  * @author https://github.com/JulioJu
@@ -53,74 +45,13 @@ import org.slf4j.LoggerFactory;
  */
 public class RDFStore {
 
-    private final Logger log = LoggerFactory.getLogger(RDFStore.class);
-
-    public final static String ENDPOINT_QUERY = "http://localhost:3030/sempic/sparql"; // SPARQL endpoint
-    public final static String ENDPOINT_UPDATE = "http://localhost:3030/sempic/update"; // SPARQL UPDATE endpoint
-    public final static String ENDPOINT_GSP = "http://localhost:3030/sempic/data"; // Graph Store Protocol
-
-    protected final RDFConnection cnx;
-
-    public RDFStore() {
-        cnx = RDFConnectionFactory.connect(ENDPOINT_QUERY, ENDPOINT_UPDATE, ENDPOINT_GSP);
-    }
-
-    private void cnxCommit() {
-        try {
-            cnx.commit();
-        } catch (HttpException e) {
-            throw new FusekiDownException();
-        }
-    }
-
-    private void cnxUpdateRequest (UpdateRequest u) {
-        try {
-            cnx.update(u);
-        } catch (HttpException e) {
-            throw new FusekiDownException();
-        }
-    }
-
-    private Model cnxQueryConstruct (Query q) {
-        try {
-            return cnx.queryConstruct(q);
-        } catch (QueryExceptionHTTP e) {
-            throw new FusekiDownException();
-        } catch (QueryException e) {
-            throw new FusekiJenaQueryException(e.toString());
-        }
-    }
-
-    private boolean cnxQueryAsk (Query q) {
-        try {
-            return cnx.queryAsk(q);
-        } catch (QueryExceptionHTTP e) {
-            throw new FusekiDownException();
-        } catch (QueryException e) {
-            throw new FusekiJenaQueryException(e.toString());
-        }
-    }
-
-    /**
-     * Save the given model into the triple store.
-     * @param m THe Jena model to be persisted
-     */
-    public void saveModel(Model m) {
-        cnx.begin(ReadWrite.WRITE);
-        try {
-            cnx.load(m);
-        } catch (HttpException e) {
-            throw new FusekiDownException();
-        }
-        this.cnxCommit();
-    }
+    private static final Logger log = LoggerFactory.getLogger(RDFStore.class);
 
     /**
      * Delete all the statements where the URI appears as subject or object
      * @param class the URI clas to be deleted (the class cannot be annonymous)
      */
-    public void deleteClassUri(String uriClass) {
-            cnx.begin(ReadWrite.WRITE);
+    public static void deleteClassUri(String uriClass) {
 
             // SPARQL syntax
             // —————————————
@@ -147,12 +78,11 @@ public class RDFStore {
             Update u2 = new UpdateDeleteWhere(acc2);
             UpdateRequest updateRequest = new UpdateRequest(u1).add(u2);
             log.debug("deleteClassUri\n" + updateRequest.toString());
-            this.cnxUpdateRequest(updateRequest);
-            this.cnxCommit();
+            RDFConn.cnxUpdateRequest(updateRequest);
     }
 
     // Reference https://users.jena.apache.narkive.com/dMOMKIO8/sparql-to-check-if-a-specific-uri-exists
-    public void testIfUriIsClass(String uri) {
+    public static void testIfUriIsClass(String uri) {
         // String s = "ASK WHERE {"
         //     + "{ <" + uri + "> ?p ?o . }"
         //     + " UNION "
@@ -187,13 +117,12 @@ public class RDFStore {
 
         log.debug("testIfUriIsClass\n" + queryAlgebraBuild);
 
-        if (!this.cnxQueryAsk(queryAlgebraBuild)) {
-            throw new FusekiJenaQueryException(
-                    "'" + uri + "' is not a RDF class");
+        if (!RDFConn.cnxQueryAsk(queryAlgebraBuild)) {
+            throw new FusekiUriNotAClass("'" + uri + "' is not a RDF class");
         }
     }
 
-    public boolean isUriIsSubject(String uri) {
+    public static boolean isUriIsSubject(String uri) {
         Triple triple = Triple.create(
                     NodeFactory.createURI(uri),
                     Var.alloc("p"),
@@ -204,7 +133,8 @@ public class RDFStore {
         Query queryAlgebraBuild = OpAsQuery.asQuery(op);
         queryAlgebraBuild.setQueryAskType();
         log.debug("isUriIsSubject\n" + queryAlgebraBuild);
-        return this.cnxQueryAsk(queryAlgebraBuild);
+        boolean result = RDFConn.cnxQueryAsk(queryAlgebraBuild);
+        return result;
     }
 
     /**
@@ -215,9 +145,9 @@ public class RDFStore {
      *  (the resource cannot be annonymous)
      * @return
      */
-    public List<Resource> listSubClassesOf(String uriClass) {
+    public static List<Resource> listSubClassesOf(String uriClass) {
 
-        this.testIfUriIsClass(uriClass);
+        RDFStore.testIfUriIsClass(uriClass);
 
         // String s = "CONSTRUCT { "
         //     + "?s <" + RDFS.label + "> ?o "
@@ -264,41 +194,8 @@ public class RDFStore {
 
         log.debug("listSubClassesOf\n" + queryAlgebraBuild);
 
-        Model m = this.cnxQueryConstruct(queryAlgebraBuild);
+        Model m = RDFConn.cnxQueryConstruct(queryAlgebraBuild);
         return m.listSubjects().toList();
-    }
-
-    /**
-     * Create a list of anonymous instances for each of the classes
-     * given as parameter. The created instances have a label "a "+ label of the class.
-     * @param classes
-     * @return
-     */
-    public List<Resource> createAnonInstances(List<Resource> classes) {
-        Model m = ModelFactory.createDefaultModel();
-        List<Resource> res = new ArrayList<>();
-        for (Resource c : classes) {
-            Resource instance = m.createResource(c);
-            instance.addLiteral(RDFS.label, "a " + c.getProperty(RDFS.label).getLiteral());
-            res.add(instance);
-        }
-        return res;
-    }
-
-
-    public Resource createPhoto(long photoId, long albumId, long ownerId) {
-        // create an empty RDF graph
-        Model m = ModelFactory.createDefaultModel();
-        // create an instance of Photo in Model m
-        Resource photoResource = m.createResource(
-                Namespaces.getPhotoUri(photoId),
-                SempicOnto.Photo
-                );
-
-        photoResource.addLiteral(SempicOnto.albumId, albumId);
-        photoResource.addLiteral(SempicOnto.ownerId, ownerId);
-
-        return photoResource;
     }
 
     /**
@@ -310,7 +207,7 @@ public class RDFStore {
      * @param id
      * @return
      */
-    public Model readPhoto(long id, boolean shouldPrint) {
+    public static Model readPhoto(long id, boolean shouldPrint) {
         String photoUri = Namespaces.getPhotoUri(id);
 
         // // SPARQL syntax
@@ -442,7 +339,7 @@ public class RDFStore {
         // —————————
         // Here we execute only queryAlgebraBuild and not querySyntaxBuild
 
-        Model m = this.cnxQueryConstruct(queryAlgebraBuild);
+        Model m = RDFConn.cnxQueryConstruct(queryAlgebraBuild);
         return m;
     }
 

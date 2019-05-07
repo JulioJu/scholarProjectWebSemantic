@@ -1,13 +1,14 @@
-package fr.uga.julioju.jhipster.SempicRest;
+package fr.uga.julioju.sempic.entities;
 
-public class PhotoDepictionRDF  {
+/** Anonyme, therefore don't extend {@link AbstractRDF} */
+public class PhotoDepictionAnonRDF  {
     private String depiction;
     private String[] literals;
 
-    public PhotoDepictionRDF() {
+    public PhotoDepictionAnonRDF() {
     }
 
-    public PhotoDepictionRDF(
+    public PhotoDepictionAnonRDF(
         String depiction,
         String[] literals
     ) {

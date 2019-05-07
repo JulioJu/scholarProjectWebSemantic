@@ -6,9 +6,24 @@ package fr.uga.julioju.sempic;
  */
 public class Namespaces {
 
-    public final static String photoNS = "http://http://miashs.univ-grenoble-alpes.fr/photo/";
+    private final static String NS = "http://fr.uga.julioju.sempic/ResourcesCreated/";
+
+    private final static String photoNS = Namespaces.NS + "photo/";
+
+    private final static String albumNS = Namespaces.NS + "album/";
+
+    private final static String userNS = Namespaces.NS + "user/";
 
     public static String getPhotoUri(long photoId) {
         return photoNS+photoId;
     }
+
+    public static String getAlbumUri(long albumId) {
+        return albumNS+albumId;
+    }
+
+    public static String getUserUri(long ownerId) {
+        return userNS+ownerId;
+    }
+
 }

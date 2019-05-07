@@ -303,7 +303,6 @@
         </dependency>
         <!-- jhipster-needle-maven-add-dependency -->
 
-
         <!-- Added by JulioJu -->
         <!-- ———————————————— -->
 
@@ -312,8 +311,17 @@
             <groupId>org.apache.jena</groupId>
             <artifactId>apache-jena</artifactId>
             <type>zip</type>
-            <version> 3.10.0 </version>
+            <version> 3.11.0 </version>
         </dependency>
+
+
+        <!-- Fuseki Server (to embedded Fuseki in Server) -->
+        <dependency>
+            <groupId>org.apache.jena</groupId>
+            <artifactId>jena-fuseki-main</artifactId>
+            <version>3.11.0</version> <!-- Set the version -->
+        </dependency>
+
         <!-- https://jena.apache.org/documentation/tools/schemagen.html#using-schemagen-with-maven -->
         <!-- ———————————————— -->
         <dependency>
@@ -342,6 +350,14 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
+
+                    <!-- Added by JulioJu -->
+                    <!-- ———————————————— -->
+                    <!-- See README.md, for compilation optimization -->
+                    <compilerArg>-noverify</compilerArg>
+                    <compilerArg>-XX:TieredStopAtLevel=1</compilerArg>
+                    <!-- End added by JulioJu -->
+
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.mapstruct</groupId>
@@ -914,28 +930,6 @@
                 <!-- default Spring profiles -->
                 <spring.profiles.active>dev${profile.tls}${profile.no-liquibase}</spring.profiles.active>
             </properties>
-
-            <!-- Added by JulioJu -->
-            <!-- ———————————————— -->
-            <!--
-            To trigger hot swapping when it's `mvn` is triggered outside an IDE
-            (see also README.md)
-            -->
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.springframework.boot</groupId>
-                        <artifactId>spring-boot-maven-plugin</artifactId>
-                        <configuration>
-                            <configuration>
-                                <excludeDevtools>false</excludeDevtools>
-                            </configuration>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-            <!-- End added by JulioJu -->
-
         </profile>
         <profile>
             <id>prod</id>
@@ -1142,6 +1136,26 @@
                                                 <ignore/>
                                             </action>
                                         </pluginExecution>
+
+                                        <!-- Added by JulioJu -->
+                                        <!-- ———————————————— -->
+                                        <!-- https://www.eclipse.org/m2e/documentation/m2e-execution-not-covered.html -->
+                                        <pluginExecution>
+                                            <pluginExecutionFilter>
+                                                <groupId>org.codehaus.mojo</groupId>
+                                                <artifactId>exec-maven-plugin</artifactId>
+                                                <versionRange>[1.6.0,)</versionRange>
+                                                <goals>
+                                                    <goal>java</goal>
+                                                    <goal>exec</goal>
+                                                </goals>
+                                            </pluginExecutionFilter>
+                                            <action>
+                                                <ignore/>
+                                            </action>
+                                        </pluginExecution>
+                                        <!-- End added by JulioJu -->
+
                                     </pluginExecutions>
                                 </lifecycleMappingMetadata>
                             </configuration>

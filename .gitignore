@@ -8,10 +8,12 @@
 
 !/scholarProjectWebSemantic/target/generated-sources/java/fr/uga/miashs/sempic/model/rdf/*
 # See https://github.com/neoclide/coc-java/issues/18
-!/scholarProjectWebSemantic/.settings/org.eclipse.core.resources.prefs
+!/scholarProjectWebSemantic/.settings/org.eclipse.jdt.core.prefs
 /scholarProjectWebSemantic/yarn.lock
 
 !/scholarProjectWebSemanticFusekiDatabase/run/configuration/sempic.ttl
 /scholarProjectWebSemanticFusekiDatabase/run/*
 
 /scholarProjectWebSemantic/yarn.lock
+
+/scholarProjectWebSemantic/run

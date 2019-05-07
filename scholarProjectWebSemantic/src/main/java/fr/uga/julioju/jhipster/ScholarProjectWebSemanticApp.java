@@ -28,7 +28,14 @@ public class ScholarProjectWebSemanticApp implements InitializingBean {
 
     private final Environment env;
 
-    public ScholarProjectWebSemanticApp(Environment env) {
+    public ScholarProjectWebSemanticApp(
+            Environment env,
+        // Added by JulioJu
+        // ————————————————
+            FusekiServerConn fusekiServerConn
+            ) {
+        fusekiServerConn.serverStart();
+        // End of added by JulioJu
         this.env = env;
     }
 
@@ -45,10 +52,6 @@ public class ScholarProjectWebSemanticApp implements InitializingBean {
         if (activeProfiles.contains(JHipsterConstants.SPRING_PROFILE_DEVELOPMENT) && activeProfiles.contains(JHipsterConstants.SPRING_PROFILE_PRODUCTION)) {
             log.error("You have misconfigured your application! It should not run " +
                 "with both the 'dev' and 'prod' profiles at the same time.");
-        }
-        if (activeProfiles.contains(JHipsterConstants.SPRING_PROFILE_DEVELOPMENT) && activeProfiles.contains(JHipsterConstants.SPRING_PROFILE_CLOUD)) {
-            log.error("You have misconfigured your application! It should not " +
-                "run with both the 'dev' and 'cloud' profiles at the same time.");
         }
     }
 
