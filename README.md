@@ -4,6 +4,8 @@
 * [How to](#how-to)
     * [Teacher example](#teacher-example)
     * [scholarProjectWebSemantic](#scholarprojectwebsemantic)
+        * [Fuseki embedded](#fuseki-embedded)
+        * [Fuseki non embedded](#fuseki-non-embedded)
     * [Jena doc](#jena-doc)
 * [Teacher's instructions](#teachers-instructions)
 * [scholarProjectWebSemantic details](#scholarprojectwebsemantic-details)
@@ -76,8 +78,11 @@ see https://github.com/protegeproject/protege/issues/822 .
 
 ## scholarProjectWebSemantic
 
-***SECTION OUTDATED***
-***As Fuseki Server is now embedded, simply run `rm -Rf target && mvn -P \!webpack`***
+### Fuseki embedded
+
+`$ mvn -P \!webpack -Dspring-boot.run.arguments="fusekiServerEmbedded"`
+
+### Fuseki non embedded
 
 Start the Fuseki server ***at path ./scholarProjectWebSemanticFusekiDatabase/***.
 
@@ -92,7 +97,7 @@ fuseki-server
 To run the app, run:
 ```sh
 cd ./scholarProjectWebSemantic/
-mvn
+$ mvn -P \!webpack -Dspring-boot.run.arguments="fusekiServerNoEmbedded"
 yarn start
 ```
 
@@ -100,6 +105,11 @@ To run server side in one line:
 ```sh
 $ pushd ../scholarProjectWebSemanticFusekiDatabase && fuseki-server > /dev/null 2> /dev/null & ; popd &&  rm -Rf target && mvn -P \!webpack
 ```
+
+* Important notes functions of:
+    ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/sempic/FusekiServerConn.java
+    are `return;` before any action.
+
 
 ## Jena doc
 
@@ -111,6 +121,13 @@ $ pushd ../scholarProjectWebSemanticFusekiDatabase && fuseki-server > /dev/null 
     (e.g. ARQ, Fuseki, Core, etc.) check the start of URL.
 
 * All JavaDoc for all projects are at https://jena.apache.org/documentation/javadoc/
+
+* To understand the file `sempic.ttl` give by the teacher, read
+
+> The TDB2 database can be in a configuration file, either a complete server
+> configuration (see below) or as an entry in the FUSEKI_BASE/configuration/
+> area of the full server.
+https://jena.apache.org/documentation/tdb2/tdb2_fuseki.html
 
 # Teacher's instructions
 
@@ -143,8 +160,7 @@ All my code is under
     . With the current config, Spring could only automatically load REST routes
     defined under its root folder.
 
-3. ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/jhipster/FusekiServerConn.java
-    to start Fuseki. It's started under the `main` method of
+* There are one add under
     ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/jhipster/ScholarProjectWebSemanticApp.java
 
 ## Implementation notes
@@ -224,7 +240,8 @@ See https://maven.apache.org/plugins/maven-compiler-plugin/examples/pass-compile
 
 * On reload, when FusekiServer was started, HTTP port 3030 is not released.
     It's a very big problem.
-    I've tested with Eclipse, I have the problem.
+    I've tested with Eclipse, I have the problem. Furthermore, the object
+    link to the FusekiServer is garbaged (it's normal, see below).
 
 * There is no this problem with IntelliJ as IntelliJ kill properly the app
     between each rebuild and no use spring-boot dev tools.
@@ -263,8 +280,27 @@ See https://maven.apache.org/plugins/maven-compiler-plugin/examples/pass-compile
 
 ##### kill the thread using port
 
-* See ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/jhipster/FusekiServerConn.java , the commented method `killThreadOnPort3030()`. It works, port is
+* See ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/sempic/FusekiServerConn.java , the commented method `killThreadOnPort3030()`. It works, port is
 released, but Fuseki is not started correctly. Don't know why.
+
+In this case the TDB2 database
+(./scholarProjectWebSemanticFusekiDatabase/run/configuration/sempic.ttl)
+is partially loaded.
+
+Following is not loaded.
+```
+:sempicdata a tdb2:GraphTDB2 ;
+	tdb2:location "./run/databases/sempic-data" .
+```
+
+Following is loaded
+```
+:sempiconto
+	a ja:MemoryModel ;
+ja:content [
+		ja:externalContent "../scholarProjectWebSemantic/src/main/resources/sempiconto.owl"
+	].
+```
 
 ##### Use IntelliJ
 
@@ -279,7 +315,7 @@ released, but Fuseki is not started correctly. Don't know why.
 ##### Use loop to restart mvn
 
 * Actually, when port 3030 is not free, the app is killed with error code.
-In ./scholarProjectWebSemantic/MAKEFILE.sh is use an infinite loop to restart automatically
+In ./MAKEFILE.sh is use an infinite loop to restart automatically
 `mvn \!webpack` .
 
 I've also tested with `inotify` to trigger automatically `$ kill $(pgrep -P $$)`
@@ -521,8 +557,20 @@ You should see https://jena.apache.org/documentation/query/app_api.html
 # Fuseki non solvable serious troubleshooting
 
 Use FusekiServer embedded is a workaround to the bug
- bug described at https://mail-archives.us.apache.org/mod_mbox/jena-users/201810.mbox/<86F3462C-AFEF-4327-8DCF-8AAFDF7EB0A1@dotnetrdf.org>
+ bug described at https://mail-archives.us.apache.org/mod_mbox/jena-users/201810.mbox/<51361cde-332c-ffb7-4ba4-b73d43bd4cf5@apache.org>
+ (see the full clear mail thread at https://mail-archives.us.apache.org/mod_mbox/jena-users/201810.mbox/thread)
 ***Iterator used inside a different transaction"***
+ > The stack trace looks like you have configured a dataset with some inference.
+ > It is possible that the inference layer is not using transactions on the
+ > underlying dataset properly, and/or caching some data that is tied to a
+ > specific transaction.
+
+* When we we start the app with a Fuseki not embedded
+    , the Fuseki server
+    show a StackTrace similar to those described
+    in the link above.
+    (I've disabled the logs of the embedded Fuseki because there are
+    too much logs).
 
 As they say, it seams there is a bug under Fuseki Server. If we use an external
 Fuseki Server, we can't stop the server before the bug appears. My workaround
@@ -584,15 +632,12 @@ See
     * https://jena.apache.org/documentation/fuseki2/fuseki-main
     * https://jena.apache.org/documentation/fuseki2/fuseki-run.html
     * https://github.com/apache/jena/blob/master/jena-rdfconnection/src/main/java/org/apache/jena/rdfconnection/examples/RDFConnectionExample6.java
-    * My example into ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/jhipster/FusekiServerConn.java and API Doc.
+    * My example into ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/sempic/FusekiServerConn.java and API Doc.
 
 * **I've tested from with Fuseki 3.6, 3.7, 1.9, 1.10, 1.11 without success**.
     Fuseki 1.5 doesn't work with the current Sempic.ttl file, therefore
     can't test with it.
 
-* At the beginning, I've tried also tu use Transaction API. But as I've discovered
-that HTTP GET then HTTP POST are strictly the same, I believe using
-Transaction API couldn't help.
 * Transaction API
     * Actually I don't know how to retrieve Dataset from fuseki.
     See an example of utilisation into
@@ -601,6 +646,15 @@ Transaction API couldn't help.
     * https://jena.apache.org/documentation/txn/txn.html TODO not used.
     * https://jena.apache.org/documentation/txn/transactions_api.html
     * Maybe see also (outdated) https://stackoverflow.com/questions/46876859/org-apache-jena-atlas-web-httpexception-405-http-method-post-is-not-supported
+    * At the beginning, I've tried also tu use Transaction API. But as I've discovered
+        that HTTP GET then HTTP POST are strictly the same, I believe using
+        Transaction API couldn't help. Furthermore, probably we can't access
+        `TDB2` datasets. Transactions are managed by FusekiServer. Probably
+        those examples are only for Dataset loaded in memory.
+        * In the preceding examples, probably `FusekiServer.create().add(...)`
+            are for in memory Dataset.
+            Use `FusekiServer.create().add("/sempic")` complains that `\sempic`
+            is already in use (loaded thanks `.parseConfigFile()`).
 
 * Actually, it seems we cant restart fuseki simply thanks REST API:
     https://jena.apache.org/documentation/fuseki2/fuseki-server-protocol.html
@@ -634,7 +688,7 @@ Before create a new `RDFConnection` in  RDFConn.java, we could test is the
 port is taken or free. But don't know if it's cool, because maybe the port
 could be taken by Fuseki but in a middle of a reboot process.
 
-In ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/jhipster/FusekiServerConn.java in the method `serverRestart()`, as FusekiServer has no callback to say when
+In ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/sempic/FusekiServerConn.java in the method `serverRestart()`, as FusekiServer has no callback to say when
 it is ready, I've added a delay between `FusekiServer.stop()` and
 `FusekiServer.start()`. Actually it is of 10 secondes, probably too much.
 
@@ -656,6 +710,12 @@ it is ready, I've added a delay between `FusekiServer.stop()` and
     the main method of
     ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/jhipster/ScholarProjectWebSemanticApp.java
 
+* Constructors are called before `static void main(String[] args)`
+    in ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/jhipster/ScholarProjectWebSemanticApp.java
+
+* `@ApplicationScoped` is not very useful. Use simply `static` class properties
+    and method.
+
 ## Others bugs with Fuseki
 
 * I've noticed a time than my code stop to work, even if I `kill -9` all java
@@ -675,6 +735,15 @@ then restart server. Only restart the computer solve my issue.
 
 * Actually there are lot of stack trace bugs, especially when we run into
     Eclipse. Not know why, but probably note du to my code.
+
+* Test if in an Normal application, without spring-boot, therefore
+    without spring-boot devtools, with Eclipse
+    when code is automatically rebuild on change, the FusekiServer thread stay.
+
+* Maybe RDFConnect could become global to all application as the teacher as done
+    in its example, but contrary to the tutorials (see above, I've added
+    explanations into parenthesis)
+
 
 # Credits
 

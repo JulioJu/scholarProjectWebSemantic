@@ -1,4 +1,4 @@
-package fr.uga.julioju.jhipster;
+package fr.uga.julioju.sempic;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -8,24 +8,27 @@ import java.util.concurrent.TimeUnit;
 import org.apache.jena.fuseki.main.FusekiServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-import org.springframework.web.context.annotation.ApplicationScope;
 
-@Component
-@ApplicationScope
 public class FusekiServerConn  {
 
-    private final Logger log = LoggerFactory.getLogger(FusekiServerConn.class);
+    private static final Logger log =
+        LoggerFactory.getLogger(FusekiServerConn.class);
 
-    private FusekiServer fusekiServer;
+    private static FusekiServer fusekiServer;
+
+    private static boolean isEmbeddedFuseki = true;
 
     // private DatasetGraph datasetGraph;
 
     // private Dataset dataset;
 
-    private final int port = 3030;
+    private static final int port = 3030;
 
-    public void serverStart() {
+    public static void serverStart(boolean isEmbeddedFuseki) {
+        if (!isEmbeddedFuseki) {
+            FusekiServerConn.isEmbeddedFuseki = false;
+            return;
+        }
 
         // https://stackoverflow.com/questions/434718/sockets-discover-port-availability-using-java
         try (ServerSocket ss = new ServerSocket(port)) {
@@ -38,7 +41,7 @@ public class FusekiServerConn  {
 
         // To enable complete logging, uncomment `.verbose(true)` line above too
         // FusekiLogging.setLogging();
-        this.fusekiServer = FusekiServer.create()
+        FusekiServerConn.fusekiServer = FusekiServer.create()
             .port(port)
             .loopback(true)
             .parseConfigFile(
@@ -53,8 +56,8 @@ public class FusekiServerConn  {
             // .verbose(true)
             .build();
         log.debug("Server Fuseki succesfully instanciated."
-                + " Its port is " + this.port);
-        this.fusekiServer.start();
+                + " Its port is " + FusekiServerConn.port);
+        FusekiServerConn.fusekiServer.start();
     }
 
     // private void killThreadOnPort3030() {
@@ -80,20 +83,19 @@ public class FusekiServerConn  {
     //     }
     // }
 
-    private void serverStop() {
+    private static void serverStop() {
         log.debug("Server Fuseki succesfully destroyed."
-                + " Its port " + this.port + " is released.");
+                + " Its port " + FusekiServerConn.port + " is released.");
         fusekiServer.stop();
     }
 
-    public void serverRestart() throws InterruptedException {
-        this.serverStop();
+    public static void serverRestart() throws InterruptedException {
+        if (!FusekiServerConn.isEmbeddedFuseki) {
+            return;
+        }
+        FusekiServerConn.serverStop();
         TimeUnit.SECONDS.sleep(10);
-        this.serverStart();
+        FusekiServerConn.serverStart(FusekiServerConn.isEmbeddedFuseki);
     }
-
-    // public Dataset getDataset() {
-    //     return dataset;
-    // }
 
 }

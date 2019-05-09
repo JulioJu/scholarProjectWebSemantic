@@ -5,6 +5,8 @@
 @prefix fuseki: <http://jena.apache.org/fuseki#> .
 @prefix tdb2:    <http://jena.apache.org/2016/tdb#>.
 
+# To well undestand, see https://jena.apache.org/documentation/tdb2/tdb2_fuseki.html
+
 :service_sempic_all  a                   fuseki:Service ;
         rdfs:label                    "Sempic data + ontology with reasoner" ;
         fuseki:dataset                :infdataset ;

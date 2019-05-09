@@ -1,9 +1,9 @@
 package fr.uga.julioju.jhipster;
 
-import fr.uga.julioju.jhipster.config.ApplicationProperties;
-import fr.uga.julioju.jhipster.config.DefaultProfileUtil;
-
-import io.github.jhipster.config.JHipsterConstants;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.Collection;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -15,10 +15,10 @@ import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.core.env.Environment;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Arrays;
-import java.util.Collection;
+import fr.uga.julioju.jhipster.config.ApplicationProperties;
+import fr.uga.julioju.jhipster.config.DefaultProfileUtil;
+import fr.uga.julioju.sempic.FusekiServerConn;
+import io.github.jhipster.config.JHipsterConstants;
 
 @SpringBootApplication
 @EnableConfigurationProperties({LiquibaseProperties.class, ApplicationProperties.class})
@@ -28,14 +28,7 @@ public class ScholarProjectWebSemanticApp implements InitializingBean {
 
     private final Environment env;
 
-    public ScholarProjectWebSemanticApp(
-            Environment env,
-        // Added by JulioJu
-        // ————————————————
-            FusekiServerConn fusekiServerConn
-            ) {
-        fusekiServerConn.serverStart();
-        // End of added by JulioJu
+    public ScholarProjectWebSemanticApp(Environment env) {
         this.env = env;
     }
 
@@ -65,7 +58,34 @@ public class ScholarProjectWebSemanticApp implements InitializingBean {
         DefaultProfileUtil.addDefaultProfile(app);
         Environment env = app.run(args).getEnvironment();
         logApplicationStartup(env);
+    // Added by JulioJu
+    // ————————————————
+        if (args.length == 0) {
+            ScholarProjectWebSemanticApp.mvnArgumentError();
+        }
+        switch (args[0]) {
+            case "fusekiServerEmbedded":
+                FusekiServerConn.serverStart(true);
+            break;
+            case "fusekiServerNoEmbedded":
+                FusekiServerConn.serverStart(false);
+            break;
+            default:
+                ScholarProjectWebSemanticApp.mvnArgumentError();
+            break;
+
+        }
     }
+
+    private static void mvnArgumentError() {
+        log.error("FATAL: The first argument should not be null.\n"
+                + "Call `$ mvn' either like:\n"
+                + "\t`$ mvn -Dspring-boot.run.arguments=\"fusekiServerEmbedded\"\n'"
+                + "\t`$ mvn -Dspring-boot.run.arguments=\"fusekiServerNoEmbedded\"\n'"
+                );
+        System.exit(29);
+    }
+    // End of added by JulioJu
 
     private static void logApplicationStartup(Environment env) {
         String protocol = "http";

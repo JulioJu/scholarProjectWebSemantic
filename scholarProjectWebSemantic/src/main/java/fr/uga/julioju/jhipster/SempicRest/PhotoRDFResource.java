@@ -25,9 +25,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import fr.uga.julioju.jhipster.FusekiServerConn;
 import fr.uga.julioju.jhipster.service.UserService;
 import fr.uga.julioju.sempic.CreateResource;
+import fr.uga.julioju.sempic.FusekiServerConn;
 import fr.uga.julioju.sempic.Namespaces;
 import fr.uga.julioju.sempic.RDFConn;
 import fr.uga.julioju.sempic.RDFStore;
@@ -48,11 +48,7 @@ public class PhotoRDFResource {
 
     private UserService userService;
 
-    private FusekiServerConn fusekiServerConn;
-
-    public PhotoRDFResource(FusekiServerConn fusekiServerConn,
-            UserService userService) {
-        this.fusekiServerConn = fusekiServerConn;
+    public PhotoRDFResource(UserService userService) {
         this.userService = userService;
     }
 
@@ -105,7 +101,7 @@ public class PhotoRDFResource {
                 this.userService
                 );
 
-        fusekiServerConn.serverRestart();
+        FusekiServerConn.serverRestart();
 
         // Delete photos before update, otherwise it appends
         RDFStore.deleteClassUri(photoResource.getURI());

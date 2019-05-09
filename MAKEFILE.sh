@@ -6,8 +6,10 @@
 # while inotifywait -rd -o ${tmpfile} --event modify --event move \
 #  --event delete --event create "$dir1"; do
 
+cd ./scholarProjectWebSemantic || exit
+
 while true
 do
-    mvn -P \!webpack
+    mvn -P \!webpack -Dspring-boot.run.arguments="fusekiServerEmbedded"
 done
 
