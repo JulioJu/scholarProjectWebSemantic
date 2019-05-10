@@ -30,6 +30,8 @@ public class FusekiServerConn  {
             return;
         }
 
+        // FusekiServerConn.killThreadOnPort3030();
+
         // https://stackoverflow.com/questions/434718/sockets-discover-port-availability-using-java
         try (ServerSocket ss = new ServerSocket(port)) {
         } catch (IOException e) {
@@ -39,8 +41,9 @@ public class FusekiServerConn  {
             System.exit(30);
         }
 
-        // To enable complete logging, uncomment `.verbose(true)` line above too
-        // FusekiLogging.setLogging();
+        // Done nothing
+        // FusekiLogging.setLogging(FileSystems.getDefault().getPath("/tmp/fusekiLogs.log"));
+
         FusekiServerConn.fusekiServer = FusekiServer.create()
             .port(port)
             .loopback(true)
@@ -51,18 +54,19 @@ public class FusekiServerConn  {
                     // Therefore before the first slash there is two dot
                     + "/scholarProjectWebSemanticFusekiDatabase/run/configuration/sempic.ttl"
                     )
-            // To enable logging, uncomment also FusekiLogging.setLogging() line
-            // above
-            // .verbose(true)
+            // To enable logging, change value to true
+            .verbose(false)
             .build();
         log.debug("Server Fuseki succesfully instanciated."
                 + " Its port is " + FusekiServerConn.port);
         FusekiServerConn.fusekiServer.start();
     }
 
-    // private void killThreadOnPort3030() {
+    // private static void killThreadOnPort3030() {
     //     try (ServerSocket ss = new ServerSocket(port)) {
     //     } catch (IOException e) {
+    //         log.error("Port " + port + " already in used. "
+    //                 + " First interrupt thread on Port 3030, then instantiate Fuseki.");
     //         log.error("Port " + port + " already in used. "
     //                 + " First interrupt thread on Port 3030, then instantiate Fuseki.");
     //

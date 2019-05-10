@@ -5,23 +5,26 @@
     * [Teacher example](#teacher-example)
     * [scholarProjectWebSemantic](#scholarprojectwebsemantic)
         * [Fuseki embedded](#fuseki-embedded)
+            * [Wireshark](#wireshark)
         * [Fuseki non embedded](#fuseki-non-embedded)
+        * [How to develop](#how-to-develop)
     * [Jena doc](#jena-doc)
 * [Teacher's instructions](#teachers-instructions)
 * [scholarProjectWebSemantic details](#scholarprojectwebsemantic-details)
     * [Where is my code](#where-is-my-code)
+    * [Why JHipster](#why-jhipster)
     * [Implementation notes](#implementation-notes)
     * [Test API without front (resolve authentification problem)](#test-api-without-front-resolve-authentification-problem)
     * [Jena](#jena)
     * [Spring Dev tools and Hot swapping (watch mode)](#spring-dev-tools-and-hot-swapping-watch-mode)
         * [Start quickly Spring boot](#start-quickly-spring-boot)
         * [Conflict with org.apache.jena.fuseki.main.FusekiServer.html](#conflict-with-orgapachejenafusekimainfusekiserverhtml)
-            * [Solution](#solution)
+            * [Solutions tested](#solutions-tested)
                 * [Reload instead of Restart](#reload-instead-of-restart)
                     * [DCEVM](#dcevm)
                 * [kill the thread using port](#kill-the-thread-using-port)
-                * [Use IntelliJ](#use-intellij)
                 * [Use loop to restart mvn](#use-loop-to-restart-mvn)
+                * [The solution](#the-solution)
             * [FusekiServerConn for every request](#fusekiserverconn-for-every-request)
     * [Construct a Jena Query](#construct-a-jena-query)
         * [Sparql syntax](#sparql-syntax)
@@ -30,13 +33,12 @@
         * [Java API, Query](#java-api-query)
         * [See also](#see-also)
     * [Jena DELETE](#jena-delete)
-* [Fuseki non solvable serious troubleshooting](#fuseki-non-solvable-serious-troubleshooting)
-    * [How to activate log](#how-to-activate-log)
+* [Fuseki non solvable, serious troubleshooting](#fuseki-non-solvable-serious-troubleshooting)
     * [See also](#see-also-1)
     * [Limitations](#limitations)
+    * [StackTrace « Iterator used inside a different transaction »](#stacktrace-iterator-used-inside-a-different-transaction)
+* [Notes about IDE (Eclipse, NetBeans, IntelliJ)](#notes-about-ide-eclipse-netbeans-intellij)
 * [Eclipse problems](#eclipse-problems)
-* [Notes about Spring and Java EE](#notes-about-spring-and-java-ee)
-    * [Others bugs with Fuseki](#others-bugs-with-fuseki)
 * [Others bugs and TODO](#others-bugs-and-todo)
 * [Credits](#credits)
 
@@ -82,6 +84,22 @@ see https://github.com/protegeproject/protege/issues/822 .
 
 `$ mvn -P \!webpack -Dspring-boot.run.arguments="fusekiServerEmbedded"`
 
+####  Wireshark
+
+To trace call, use Wireshark.
+
+Start Wireshark with `gksudo wireshark & ; disown %1`
+
+1.  ...using this filter `tcp port 3030`
+
+2. Use interface `Loopback:lo`
+
+3. `menu -> capture -> start`
+
+4. In « Apply a display filter », type `http`
+
+Note: verify the tcpdump is ordered by `N°`.
+
 ### Fuseki non embedded
 
 Start the Fuseki server ***at path ./scholarProjectWebSemanticFusekiDatabase/***.
@@ -111,8 +129,14 @@ $ pushd ../scholarProjectWebSemanticFusekiDatabase && fuseki-server > /dev/null 
     are `return;` before any action.
 
 
-## Jena doc
+### How to develop
 
+* Se section « The solution » below.
+
+    ***DO NOT USE `mvn`*** (only for the first compilation).
+    Because it is very very very slow!!!!
+
+## Jena doc
 
 * Note that Fuseki documentation has several break links. Use Google to
     search pages pointed by dead links.
@@ -162,6 +186,50 @@ All my code is under
 
 * There are one add under
     ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/jhipster/ScholarProjectWebSemanticApp.java
+
+## Why JHipster
+
+* I used JHipster because I know it very very well (see my Pull Requests and issues
+    on https://github.com/jhipster/generator-jhipster ). I've followed
+    last year severals conferences about it Grenoble and Paris.
+    Mainly, I've follow the JHipster conf 2018 during one day in Paris
+
+* Actually JHipster is not very used in this project. Used only to manage
+    authentifications with users. Probably I could easy use a fake
+    authentification process with fakes [JWT](https://jwt.io/) tokens (TODO).
+
+    The front-end is not used at all. Only Back-end is used currently.
+
+* Probably it's a cool solution as Proof of Concept, even if for the current
+    project. In fact, I don't know hot to deploy a Spring boot application
+    and configure well Jackson, Zalando, Spring REST, and maybe others.
+    Furthermore, I as it I didn't implemented a fake authentification server,
+    or even more so a real authentification server. Furthermore we could
+    trust the authentification server of JHipster.
+
+* Conversely, we have lot of dependencies and a fat app, even
+    if we consider only Server Side, and I don't like that. We have Hibernate,
+    Zalando, a SQL database, and lot of others stuffs not really needed.
+    I believe it could be cool to implement something 100% Sparql without
+    SQL.
+
+* Note, JWT is stateless. Therefore it could be very easy to implement. No
+    cookies, no token saved in database. JWT use simply a pair public key /
+    private key and hash the token containing some informations about
+    authentification (name of the user, date, etc.). Seems very cool for us
+    if I have time to eject JHipster! Take model on what they have done.
+    But implement a cool authentification system is not asked by the teacher
+    for the current project. If I have one, it's cool, but no more. The
+    others students have a small one gave by the teacher.
+
+* For the FrontEnd, I believe I could use my work about
+    https://github.com/JulioJu/medicalCentre . To make forms it could be very
+    cool. My forms are discribed in JSON
+    (thanks https://angular.io/guide/dynamic-form). It is very factorised,
+    with good functionalities,
+    and the teacher was happy with it. But make a front-end is not asked
+    for the current scholar project.
+
 
 ## Implementation notes
 
@@ -243,9 +311,6 @@ See https://maven.apache.org/plugins/maven-compiler-plugin/examples/pass-compile
     I've tested with Eclipse, I have the problem. Furthermore, the object
     link to the FusekiServer is garbaged (it's normal, see below).
 
-* There is no this problem with IntelliJ as IntelliJ kill properly the app
-    between each rebuild and no use spring-boot dev tools.
-
 * With Spring-boot dev tools, it seems not have solutions. `@PreDestroy`
     is never called. I've tested several solutions,
     * `Runtime.getRuntime().addShutdownHook(` https://stackoverflow.com/questions/16373276/predestroy-method-of-a-spring-singleton-bean-not-called
@@ -260,7 +325,7 @@ See https://maven.apache.org/plugins/maven-compiler-plugin/examples/pass-compile
     * Maybe, I should have use ApplicationWebXml.java to instantiate context
         (not tested)
 
-#### Solution
+#### Solutions tested
 
 ##### Reload instead of Restart
 * See https://github.com/jhipster/generator-jhipster/issues/6573
@@ -281,36 +346,12 @@ See https://maven.apache.org/plugins/maven-compiler-plugin/examples/pass-compile
 ##### kill the thread using port
 
 * See ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/sempic/FusekiServerConn.java , the commented method `killThreadOnPort3030()`. It works, port is
-released, but Fuseki is not started correctly. Don't know why.
+released, but Fuseki is not started correctly. Maybe because there are
+others thread own by FusekiServer.
 
 In this case the TDB2 database
 (./scholarProjectWebSemanticFusekiDatabase/run/configuration/sempic.ttl)
-is partially loaded.
-
-Following is not loaded.
-```
-:sempicdata a tdb2:GraphTDB2 ;
-	tdb2:location "./run/databases/sempic-data" .
-```
-
-Following is loaded
-```
-:sempiconto
-	a ja:MemoryModel ;
-ja:content [
-		ja:externalContent "../scholarProjectWebSemantic/src/main/resources/sempiconto.owl"
-	].
-```
-
-##### Use IntelliJ
-
-* Works perfectly with IntelliJ Ultimate Edition. Port is released.
-    To reset IntelliJ Ultimate Edition trial use
-    https://gist.github.com/denis111/c3e08bd7c60febc1de8219930a97c2f6 .
-    Actually I'm student, therefore no need… But in the Future.
-
-* Actually, IntelliJ community doesn't support Spring boot. Anyway, maybe
-    could work, but no tested.
+is not loaded. Don't know why. TODO why??
 
 ##### Use loop to restart mvn
 
@@ -323,10 +364,44 @@ I've also tested with `inotify` to trigger automatically `$ kill $(pgrep -P $$)`
 watched only `src/main/java/sempic` `src/main/java/jhipster/SempicRest` folders,
 but it complains inotify is very slow when Maven start. Don't know why, no
 search further. Maybe there are others watchers, with Node for instance, but
-not tested further and no investigated.
+not tested further and no investigated. It's not interesting.
+See the solution below.
 
 In any case, restart totally `mvn`
 take a long time. Therefore solutions discussed in this section are not good.
+
+A major problem with Spring devtools it's that it restarts the app often
+even if nothing is saved.
+
+##### The solution
+
+* Disable devtools (comment or remove it in pom.xml)
+
+* Configure your IDE or Editor to build automatically one save.
+
+* If your Editor has no good build process
+    (like Eclipse, see my notes about Eclipse below) use ./MAKEFILE.sh
+
+* ./MAKEFILE.sh is a result of copy and past from the Build's Console of IntelliJ.
+    In IntelliJ, when you click to « Build », a new Console appears. Copy and
+    past the first line.
+
+* This MAKEFILE.sh is very more quick than `mvn`. Take around 8 secondes.
+    A `mvn -P \-webpack` takes near 30 secondes!!!!!
+
+* On Neovim, I use the following macro
+
+* Warning, with this solution, mvn goals are not used, therefore
+    ./scholarProjectWebSemantic/target/generated-sources/java/fr/uga/miashs/sempic/model/rdf/SempicOnto.java is not generated.
+
+* ***With NeoVim** use the following macro***:
+    ```vim
+    nmap <F3> 1gt<C-w>j:bd!<CR>:sp enew<CR>:call termopen("bash ../MAKEFILE.sh")<CR>:sleep 4000ms<CR>a<C-\><C-n><C-w>ka
+    ```
+* As explained below (in section Eclipse), do not delete
+    `./scholarProjectWebSemantic/target`
+    even only `./scholarProjectWebSemantic/target/classes` .
+    In this case, run again `./mvn -P \!webpack`
 
 #### FusekiServerConn for every request
 
@@ -554,7 +629,7 @@ You should see https://jena.apache.org/documentation/query/app_api.html
     To write the method `deleteResource(Rsource r)` with Java API, I was
     inspired by the method `deleteModel(Model m)` of the teacher.
 
-# Fuseki non solvable serious troubleshooting
+# Fuseki non solvable, serious troubleshooting
 
 Use FusekiServer embedded is a workaround to the bug
  bug described at https://mail-archives.us.apache.org/mod_mbox/jena-users/201810.mbox/<51361cde-332c-ffb7-4ba4-b73d43bd4cf5@apache.org>
@@ -564,6 +639,8 @@ Use FusekiServer embedded is a workaround to the bug
  > It is possible that the inference layer is not using transactions on the
  > underlying dataset properly, and/or caching some data that is tied to a
  > specific transaction.
+
+*See my StackTrace in section below.
 
 * When we we start the app with a Fuseki not embedded
     , the Fuseki server
@@ -624,9 +701,10 @@ DELETE WHERE
 ```
 
 My workaround is simply restart the embedded Fuseki Server before the bug appears.
-
 See
-./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/jhipster/SempicRest/PhotoRDFResource.java
+./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/sempic/RDFStore.java
+in method `deleteClassUri(String uriClass)`.
+I call the method `FusekiServerConn.serverRestart()`
 
 * To start an embedded Fuseki see
     * https://jena.apache.org/documentation/fuseki2/fuseki-main
@@ -659,22 +737,14 @@ See
 * Actually, it seems we cant restart fuseki simply thanks REST API:
     https://jena.apache.org/documentation/fuseki2/fuseki-server-protocol.html
 
-##  How to activate log
-
-Simply uncomment:
-```java
-        // FusekiLogging.setLogging();
-        // (…)
-            // .verbose(true)
-```
-
 ## See also
 See also section « Conflict with org.apache.jena.fuseki.main.FusekiServer.html »
 
 ## Limitations
 
 Anyway, there is no best solution for this. If there are several incoming
-requests, stop then restart Fuseki manually could be break the requests. If
+requests, stop then restart Fuseki manually could maybe break the requests
+(in my opinion, no tested). Indeed, If
 a new request is sent during time of Restart of Request could be problematic.
 
 In this case, we must add a queue to delay request.
@@ -692,7 +762,178 @@ In ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/sempic/FusekiServerC
 it is ready, I've added a delay between `FusekiServer.stop()` and
 `FusekiServer.start()`. Actually it is of 10 secondes, probably too much.
 
+* ***I've also noticed than in context of JHipster, the embedded server
+    Fuseki print lot of error stack trace about it's own server Jetty***
+    In this case, nothing could work and we must restart the server.
 
+    The stack trace is:
+```
+java.nio.channels.CancelledKeyException: null
+        at java.base/sun.nio.ch.SelectionKeyImpl.ensureValid(SelectionKeyImpl.java:71)
+        at java.base/sun.nio.ch.SelectionKeyImpl.readyOps(SelectionKeyImpl.java:130)
+        at org.eclipse.jetty.io.ManagedSelector.safeReadyOps(ManagedSelector.java:294)
+        at org.eclipse.jetty.io.ChannelEndPoint.toEndPointString(ChannelEndPoint.java:433)
+        at org.eclipse.jetty.io.AbstractEndPoint.toString(AbstractEndPoint.java:447)
+        at java.base/java.util.Formatter$FormatSpecifier.printString(Formatter.java:3031)
+        at java.base/java.util.Formatter$FormatSpecifier.print(Formatter.java:2908)
+        at java.base/java.util.Formatter.format(Formatter.java:2673)
+        at java.base/java.util.Formatter.format(Formatter.java:2609)
+        at java.base/java.lang.String.format(String.java:2897)
+        at org.eclipse.jetty.io.AbstractConnection.toString(AbstractConnection.java:290)
+        at org.slf4j.helpers.MessageFormatter.safeObjectAppend(MessageFormatter.java:299)
+        at org.slf4j.helpers.MessageFormatter.deeplyAppendParameter(MessageFormatter.java:271)
+        at org.slf4j.helpers.MessageFormatter.arrayFormat(MessageFormatter.java:233)
+        at org.slf4j.helpers.MessageFormatter.arrayFormat(MessageFormatter.java:173)
+        at org.eclipse.jetty.util.log.JettyAwareLogger.log(JettyAwareLogger.java:680)
+        at org.eclipse.jetty.util.log.JettyAwareLogger.debug(JettyAwareLogger.java:224)
+        at org.eclipse.jetty.util.log.Slf4jLog.debug(Slf4jLog.java:97)
+        at org.eclipse.jetty.io.AbstractConnection.onClose(AbstractConnection.java:221)
+        at org.eclipse.jetty.server.HttpConnection.onClose(HttpConnection.java:520)
+        at org.eclipse.jetty.io.SelectorManager.connectionClosed(SelectorManager.java:345)
+        at org.eclipse.jetty.io.ManagedSelector$DestroyEndPoint.run(ManagedSelector.java:958)
+        at org.eclipse.jetty.util.thread.QueuedThreadPool.runJob(QueuedThreadPool.java:765)
+        at org.eclipse.jetty.util.thread.QueuedThreadPool$2.run(QueuedThreadPool.java:683)
+        at java.base/java.lang.Thread.run(Thread.java:834)
+```
+
+## StackTrace « Iterator used inside a different transaction »
+```
+$ cd ../scholarProjectWebSemanticFusekiDatabase && fuseki-server
+[2019-05-10 18:15:47] Server     INFO  Apache Jena Fuseki 3.11.0
+[2019-05-10 18:15:47] Config     INFO  FUSEKI_HOME=/opt/apache-jena-fuseki
+[2019-05-10 18:15:47] Config     INFO  FUSEKI_BASE=/home/julioprayer/DCISS/webSemantique/scholarProjectWebSemantic/scholarProjectWebSemanticFusekiDatabase/run
+[2019-05-10 18:15:47] Config     INFO  Shiro file: file:///home/julioprayer/DCISS/webSemantique/scholarProjectWebSemantic/scholarProjectWebSemanticFusekiDatabase/run/shiro.ini
+[2019-05-10 18:15:47] Config     INFO  Configuration file: /home/julioprayer/DCISS/webSemantique/scholarProjectWebSemantic/scholarProjectWebSemanticFusekiDatabase/run/config.ttl
+[2019-05-10 18:15:47] Config     INFO  Load configuration: file:///home/julioprayer/DCISS/webSemantique/scholarProjectWebSemantic/scholarProjectWebSemanticFusekiDatabase/run/configuration/sem
+pic.ttl
+[2019-05-10 18:15:48] Config     INFO  Register: /sempic
+[2019-05-10 18:15:48] Config     INFO  Register: /sempic-onto
+[2019-05-10 18:15:48] Config     INFO  Register: /sempic-data
+[2019-05-10 18:15:48] Server     INFO  Started 2019/05/10 18:15:48 CEST on port 3030
+[2019-05-10 18:17:36] Fuseki     INFO  [1] GET http://localhost:3030/sempic/?query=ASK%0AWHERE%0A++%7B+%3Chttp%3A%2F%2Ffr.uga.julioju.sempic%2FResourcesCreated%2Fuser%2F4%3E%0A++++++++++++++%
+3Fp++%3Fo%0A++%7D%0A
+[2019-05-10 18:17:36] Fuseki     INFO  [1] Query = ASK WHERE   { <http://fr.uga.julioju.sempic/ResourcesCreated/user/4>               ?p  ?o   }
+[2019-05-10 18:17:36] Fuseki     INFO  [1] 200 OK (185 ms)
+[2019-05-10 18:17:36] Fuseki     INFO  [2] POST http://localhost:3030/sempic/
+org.apache.jena.dboe.transaction.txn.TransactionException: Iterator used inside a different transaction
+        at org.apache.jena.tdb2.store.IteratorTxnTracker.check(IteratorTxnTracker.java:53)
+        at org.apache.jena.tdb2.store.IteratorTxnTracker.hasNext(IteratorTxnTracker.java:41)
+        at org.apache.jena.atlas.iterator.Iter$2.hasNext(Iter.java:265)
+        at org.apache.jena.atlas.iterator.Iter.hasNext(Iter.java:903)
+        at org.apache.jena.util.iterator.WrappedIterator.hasNext(WrappedIterator.java:90)
+        at org.apache.jena.util.iterator.WrappedIterator.hasNext(WrappedIterator.java:90)
+        at org.apache.jena.util.iterator.FilterIterator.hasNext(FilterIterator.java:55)
+        at org.apache.jena.graph.compose.CompositionBase$1.hasNext(CompositionBase.java:94)
+        at org.apache.jena.util.iterator.NiceIterator$1.hasNext(NiceIterator.java:105)
+        at org.apache.jena.util.iterator.WrappedIterator.hasNext(WrappedIterator.java:90)
+        at org.apache.jena.util.iterator.NiceIterator$1.hasNext(NiceIterator.java:105)
+        at org.apache.jena.reasoner.rulesys.impl.TopLevelTripleMatchFrame.nextMatch(TopLevelTripleMatchFrame.java:55)
+        at org.apache.jena.reasoner.rulesys.impl.LPInterpreter.run(LPInterpreter.java:328)
+        at org.apache.jena.reasoner.rulesys.impl.LPInterpreter.next(LPInterpreter.java:190)
+        at org.apache.jena.reasoner.rulesys.impl.Generator.pump(Generator.java:252)
+        at org.apache.jena.reasoner.rulesys.impl.Generator.pump(Generator.java:239)
+        at org.apache.jena.reasoner.rulesys.impl.LPBRuleEngine.pump(LPBRuleEngine.java:359)
+        at org.apache.jena.reasoner.rulesys.impl.LPTopGoalIterator.moveForward(LPTopGoalIterator.java:107)
+        at org.apache.jena.reasoner.rulesys.impl.LPTopGoalIterator.hasNext(LPTopGoalIterator.java:223)
+        at org.apache.jena.util.iterator.WrappedIterator.hasNext(WrappedIterator.java:90)
+        at org.apache.jena.util.iterator.WrappedIterator.hasNext(WrappedIterator.java:90)
+        at org.apache.jena.util.iterator.FilterIterator.hasNext(FilterIterator.java:55)
+        at org.apache.jena.util.iterator.WrappedIterator.hasNext(WrappedIterator.java:90)
+        at org.apache.jena.util.iterator.FilterIterator.hasNext(FilterIterator.java:55)
+        at org.apache.jena.sparql.engine.iterator.QueryIterTriplePattern$TripleMapper.hasNextBinding(QueryIterTriplePattern.java:135)
+        at org.apache.jena.sparql.engine.iterator.QueryIteratorBase.hasNext(QueryIteratorBase.java:114)
+        at org.apache.jena.sparql.engine.iterator.QueryIterRepeatApply.hasNextBinding(QueryIterRepeatApply.java:74)
+        at org.apache.jena.sparql.engine.iterator.QueryIteratorBase.hasNext(QueryIteratorBase.java:114)
+        at org.apache.jena.sparql.engine.iterator.QueryIterBlockTriples.hasNextBinding(QueryIterBlockTriples.java:63)
+        at org.apache.jena.sparql.engine.iterator.QueryIteratorBase.hasNext(QueryIteratorBase.java:114)
+        at org.apache.jena.sparql.engine.iterator.QueryIteratorWrapper.hasNextBinding(QueryIteratorWrapper.java:39)
+        at org.apache.jena.sparql.engine.iterator.QueryIteratorBase.hasNext(QueryIteratorBase.java:114)
+        at org.apache.jena.sparql.engine.iterator.QueryIteratorWrapper.hasNextBinding(QueryIteratorWrapper.java:39)
+        at org.apache.jena.sparql.engine.iterator.QueryIteratorBase.hasNext(QueryIteratorBase.java:114)
+        at java.base/java.util.Iterator.forEachRemaining(Iterator.java:132)
+        at org.apache.jena.atlas.data.DataBag.addAll(DataBag.java:94)
+        at org.apache.jena.sparql.modify.UpdateEngineWorker.visit(UpdateEngineWorker.java:351)
+        at org.apache.jena.sparql.modify.request.UpdateDeleteWhere.visit(UpdateDeleteWhere.java:38)
+        at org.apache.jena.sparql.modify.UpdateVisitorSink.send(UpdateVisitorSink.java:46)
+        at org.apache.jena.sparql.modify.UpdateVisitorSink.send(UpdateVisitorSink.java:26)
+        at org.apache.jena.atlas.iterator.Iter.sendToSink(Iter.java:575)
+        at org.apache.jena.atlas.iterator.Iter.sendToSink(Iter.java:582)
+        at org.apache.jena.sparql.modify.UpdateProcessorBase.execute(UpdateProcessorBase.java:59)
+        at org.apache.jena.update.UpdateAction.execute$(UpdateAction.java:228)
+        at org.apache.jena.update.UpdateAction.execute(UpdateAction.java:194)
+        at org.apache.jena.fuseki.servlets.SPARQL_Update.execute(SPARQL_Update.java:235)
+        at org.apache.jena.fuseki.servlets.SPARQL_Update.executeBody(SPARQL_Update.java:188)
+        at org.apache.jena.fuseki.servlets.SPARQL_Update.perform(SPARQL_Update.java:105)
+        at org.apache.jena.fuseki.servlets.ActionService.executeLifecycle(ActionService.java:266)
+        at org.apache.jena.fuseki.servlets.ActionService.execCommonWorker(ActionService.java:155)
+        at org.apache.jena.fuseki.servlets.ActionBase.doCommon(ActionBase.java:74)
+        at org.apache.jena.fuseki.servlets.FusekiFilter.doFilter(FusekiFilter.java:73)
+        at org.eclipse.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1642)
+        at org.apache.shiro.web.servlet.ProxiedFilterChain.doFilter(ProxiedFilterChain.java:61)
+        at org.apache.shiro.web.servlet.AdviceFilter.executeChain(AdviceFilter.java:108)
+        at org.apache.shiro.web.servlet.AdviceFilter.doFilterInternal(AdviceFilter.java:137)
+        at org.apache.shiro.web.servlet.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:125)
+        at org.apache.shiro.web.servlet.ProxiedFilterChain.doFilter(ProxiedFilterChain.java:66)
+        at org.apache.shiro.web.servlet.AbstractShiroFilter.executeChain(AbstractShiroFilter.java:449)
+        at org.apache.shiro.web.servlet.AbstractShiroFilter$1.call(AbstractShiroFilter.java:365)
+        at org.apache.shiro.subject.support.SubjectCallable.doCall(SubjectCallable.java:90)
+        at org.apache.shiro.subject.support.SubjectCallable.call(SubjectCallable.java:83)
+        at org.apache.shiro.subject.support.DelegatingSubject.execute(DelegatingSubject.java:383)
+        at org.apache.shiro.web.servlet.AbstractShiroFilter.doFilterInternal(AbstractShiroFilter.java:362)
+        at org.apache.shiro.web.servlet.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:125)
+        at org.eclipse.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1642)
+        at org.apache.jena.fuseki.servlets.CrossOriginFilter.handle(CrossOriginFilter.java:285)
+        at org.apache.jena.fuseki.servlets.CrossOriginFilter.doFilter(CrossOriginFilter.java:248)
+        at org.eclipse.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1634)
+        at org.eclipse.jetty.servlet.ServletHandler.doHandle(ServletHandler.java:533)
+        at org.eclipse.jetty.server.handler.ScopedHandler.handle(ScopedHandler.java:146)
+        at org.eclipse.jetty.security.SecurityHandler.handle(SecurityHandler.java:548)
+        at org.eclipse.jetty.server.handler.HandlerWrapper.handle(HandlerWrapper.java:132)
+        at org.eclipse.jetty.server.handler.ScopedHandler.nextHandle(ScopedHandler.java:257)
+        at org.eclipse.jetty.server.session.SessionHandler.doHandle(SessionHandler.java:1595)
+        at org.eclipse.jetty.server.handler.ScopedHandler.nextHandle(ScopedHandler.java:255)
+        at org.eclipse.jetty.server.handler.ContextHandler.doHandle(ContextHandler.java:1340)
+        at org.eclipse.jetty.server.handler.ScopedHandler.nextScope(ScopedHandler.java:203)
+        at org.eclipse.jetty.servlet.ServletHandler.doScope(ServletHandler.java:473)
+        at org.eclipse.jetty.server.session.SessionHandler.doScope(SessionHandler.java:1564)
+        at org.eclipse.jetty.server.handler.ScopedHandler.nextScope(ScopedHandler.java:201)
+        at org.eclipse.jetty.server.handler.ContextHandler.doScope(ContextHandler.java:1242)
+        at org.eclipse.jetty.server.handler.ScopedHandler.handle(ScopedHandler.java:144)
+        at org.eclipse.jetty.server.handler.gzip.GzipHandler.handle(GzipHandler.java:690)
+        at org.eclipse.jetty.server.handler.HandlerWrapper.handle(HandlerWrapper.java:132)
+        at org.eclipse.jetty.server.Server.handle(Server.java:503)
+        at org.eclipse.jetty.server.HttpChannel.handle(HttpChannel.java:364)
+        at org.eclipse.jetty.server.HttpConnection.onFillable(HttpConnection.java:260)
+        at org.eclipse.jetty.io.AbstractConnection$ReadCallback.succeeded(AbstractConnection.java:305)
+        at org.eclipse.jetty.io.FillInterest.fillable(FillInterest.java:103)
+        at org.eclipse.jetty.io.ChannelEndPoint$2.run(ChannelEndPoint.java:118)
+        at org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.runTask(EatWhatYouKill.java:333)
+        at org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.doProduce(EatWhatYouKill.java:310)
+        at org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.tryProduce(EatWhatYouKill.java:168)
+        at org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.produce(EatWhatYouKill.java:132)
+        at org.eclipse.jetty.util.thread.QueuedThreadPool.runJob(QueuedThreadPool.java:765)
+        at org.eclipse.jetty.util.thread.QueuedThreadPool$2.run(QueuedThreadPool.java:683)
+        at java.base/java.lang.Thread.run(Thread.java:834)
+[2019-05-10 18:17:36] Fuseki     INFO  [2] 500 Iterator used inside a different transaction (74 ms)
+```
+
+# Notes about IDE (Eclipse, NetBeans, IntelliJ)
+
+* To reset IntelliJ Ultimate Edition trial use
+    https://gist.github.com/denis111/c3e08bd7c60febc1de8219930a97c2f6 .
+    Actually I'm student, therefore no need… But in the Future.
+
+* Actually, IntelliJ community doesn't support Spring boot. Anyway, probably
+    could work, as a simple Java Application (as in a Terminal) but no tested.
+
+* IntelliJ and Eclipse does not use `mvn` goals. When you click `build`
+
+* NetBeans is not a very cool IDE. In folder view, folders are fold by default,
+    and fold again at each startup. We must unfold each folder of a package
+    (e.g fr, then uga, then julioju, then sempic). Even with Vim and NerdTree
+    we have not this problem! NetBeans is terrible.
+
+* See my section « The solution » above.
 
 # Eclipse problems
 
@@ -702,7 +943,97 @@ it is ready, I've added a delay between `FusekiServer.stop()` and
 
 * Do not forget to install the `Spring Tool Suite` plugin !!!
 
-# Notes about Spring and Java EE
+* When I run with Eclipse, the Console launch lot of errors problems
+    with Spring dependencies. Don't know why.
+    I've had lot of problems with Eclipse.
+
+* If target is deleted we could have:
+    ```
+    Error: Could not find or load main class fr.uga.julioju.jhipster.ScholarProjectWebSemanticApp
+    Caused by: java.lang.ClassNotFoundException: fr.uga.julioju.jhipster.ScholarProjectWebSemanticApp
+    ```
+    In this case, run again `./mvn -P \!webpack`
+
+* I've the following stack trace
+
+```
+2019-05-10 17:52:45.335 DEBUG 1146 --- [on(1)-127.0.0.1] javax.management.mbeanserver             : Exception calling isInstanceOf
+
+java.lang.ClassNotFoundException: org/springframework/boot/actuate/endpoint/jmx/DataEndpointMBean
+	at java.base/java.lang.Class.forName0(Native Method)
+	at java.base/java.lang.Class.forName(Class.java:398)
+	at java.management/com.sun.jmx.interceptor.DefaultMBeanServerInterceptor.isInstanceOf(DefaultMBeanServerInterceptor.java:1394)
+	at java.management/com.sun.jmx.mbeanserver.JmxMBeanServer.isInstanceOf(JmxMBeanServer.java:1091)
+	at java.management/javax.management.InstanceOfQueryExp.apply(InstanceOfQueryExp.java:107)
+	at java.management/javax.management.OrQueryExp.apply(OrQueryExp.java:97)
+	at java.management/javax.management.OrQueryExp.apply(OrQueryExp.java:97)
+	at java.management/com.sun.jmx.interceptor.DefaultMBeanServerInterceptor.objectNamesFromFilteredNamedObjects(DefaultMBeanServerInterceptor.java:1496)
+	at java.management/com.sun.jmx.interceptor.DefaultMBeanServerInterceptor.queryNamesImpl(DefaultMBeanServerInterceptor.java:560)
+	at java.management/com.sun.jmx.interceptor.DefaultMBeanServerInterceptor.queryNames(DefaultMBeanServerInterceptor.java:550)
+	at java.management/com.sun.jmx.mbeanserver.JmxMBeanServer.queryNames(JmxMBeanServer.java:619)
+	at java.management.rmi/javax.management.remote.rmi.RMIConnectionImpl.doOperation(RMIConnectionImpl.java:1485)
+	at java.management.rmi/javax.management.remote.rmi.RMIConnectionImpl$PrivilegedOperation.run(RMIConnectionImpl.java:1307)
+	at java.management.rmi/javax.management.remote.rmi.RMIConnectionImpl.doPrivilegedOperation(RMIConnectionImpl.java:1399)
+	at java.management.rmi/javax.management.remote.rmi.RMIConnectionImpl.queryNames(RMIConnectionImpl.java:570)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:566)
+	at java.rmi/sun.rmi.server.UnicastServerRef.dispatch(UnicastServerRef.java:359)
+	at java.rmi/sun.rmi.transport.Transport$1.run(Transport.java:200)
+	at java.rmi/sun.rmi.transport.Transport$1.run(Transport.java:197)
+	at java.base/java.security.AccessController.doPrivileged(Native Method)
+	at java.rmi/sun.rmi.transport.Transport.serviceCall(Transport.java:196)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport.handleMessages(TCPTransport.java:562)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.run0(TCPTransport.java:796)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.lambda$run$0(TCPTransport.java:677)
+	at java.base/java.security.AccessController.doPrivileged(Native Method)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.run(TCPTransport.java:676)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+	at java.base/java.lang.Thread.run(Thread.java:834)
+
+2019-05-10 17:52:45.335 DEBUG 1146 --- [on(1)-127.0.0.1] javax.management.mbeanserver             : Exception calling isInstanceOf
+
+java.lang.ClassNotFoundException: org/springframework/context/support/LiveBeansView
+	at java.base/java.lang.Class.forName0(Native Method)
+	at java.base/java.lang.Class.forName(Class.java:398)
+	at java.management/com.sun.jmx.interceptor.DefaultMBeanServerInterceptor.isInstanceOf(DefaultMBeanServerInterceptor.java:1394)
+	at java.management/com.sun.jmx.mbeanserver.JmxMBeanServer.isInstanceOf(JmxMBeanServer.java:1091)
+	at java.management/javax.management.InstanceOfQueryExp.apply(InstanceOfQueryExp.java:107)
+	at java.management/javax.management.OrQueryExp.apply(OrQueryExp.java:97)
+	at java.management/com.sun.jmx.interceptor.DefaultMBeanServerInterceptor.objectNamesFromFilteredNamedObjects(DefaultMBeanServerInterceptor.java:1496)
+	at java.management/com.sun.jmx.interceptor.DefaultMBeanServerInterceptor.queryNamesImpl(DefaultMBeanServerInterceptor.java:560)
+	at java.management/com.sun.jmx.interceptor.DefaultMBeanServerInterceptor.queryNames(DefaultMBeanServerInterceptor.java:550)
+	at java.management/com.sun.jmx.mbeanserver.JmxMBeanServer.queryNames(JmxMBeanServer.java:619)
+	at java.management.rmi/javax.management.remote.rmi.RMIConnectionImpl.doOperation(RMIConnectionImpl.java:1485)
+	at java.management.rmi/javax.management.remote.rmi.RMIConnectionImpl$PrivilegedOperation.run(RMIConnectionImpl.java:1307)
+	at java.management.rmi/javax.management.remote.rmi.RMIConnectionImpl.doPrivilegedOperation(RMIConnectionImpl.java:1399)
+	at java.management.rmi/javax.management.remote.rmi.RMIConnectionImpl.queryNames(RMIConnectionImpl.java:570)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:566)
+	at java.rmi/sun.rmi.server.UnicastServerRef.dispatch(UnicastServerRef.java:359)
+	at java.rmi/sun.rmi.transport.Transport$1.run(Transport.java:200)
+	at java.rmi/sun.rmi.transport.Transport$1.run(Transport.java:197)
+	at java.base/java.security.AccessController.doPrivileged(Native Method)
+	at java.rmi/sun.rmi.transport.Transport.serviceCall(Transport.java:196)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport.handleMessages(TCPTransport.java:562)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.run0(TCPTransport.java:796)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.lambda$run$0(TCPTransport.java:677)
+	at java.base/java.security.AccessController.doPrivileged(Native Method)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.run(TCPTransport.java:676)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+	at java.base/java.lang.Thread.run(Thread.java:834)
+```
+
+
+# Others bugs and TODO
+
+* I've noticed a time than my code stop to work, even if I `kill -9` all java
+then restart server. Only restart the computer solve my issue.
 
 * `@ApplicationScoped` component are note instantiated at the startup of the
     application. They are instatiated the first time one of its method is
@@ -716,13 +1047,6 @@ it is ready, I've added a delay between `FusekiServer.stop()` and
 * `@ApplicationScoped` is not very useful. Use simply `static` class properties
     and method.
 
-## Others bugs with Fuseki
-
-* I've noticed a time than my code stop to work, even if I `kill -9` all java
-then restart server. Only restart the computer solve my issue.
-
-# Others bugs and TODO
-
 * Factorize
     ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/sempic/RDFStore.java ,
     (creation of Query could be factorize), but actually I not factorize to
@@ -731,19 +1055,14 @@ then restart server. Only restart the computer solve my issue.
 
 * Actually use JHipster is not very useful. I use it only to manage authetifications
     because I know well how JHipster works. JHIpster should be removed and
-    authentification used in an other maneer.
-
-* Actually there are lot of stack trace bugs, especially when we run into
-    Eclipse. Not know why, but probably note du to my code.
-
-* Test if in an Normal application, without spring-boot, therefore
-    without spring-boot devtools, with Eclipse
-    when code is automatically rebuild on change, the FusekiServer thread stay.
+    authentification used in an other maneer
+    (see section « Why JHipster » above).
 
 * Maybe RDFConnect could become global to all application as the teacher as done
     in its example, but contrary to the tutorials (see above, I've added
     explanations into parenthesis)
 
+* See all TODO
 
 # Credits
 

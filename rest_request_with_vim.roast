@@ -45,6 +45,8 @@ GET {root}/api/rdfquery_listsubclassof/jioejiewijweiojfeji
 
 # GET
 # ———————————————
+GET {root}/api/userRDF/4
+
 GET {root}/api/photoRDF/1
 
 # GET
@@ -53,6 +55,8 @@ GET {root}/api/createUserRDFLogged
 
 # Delete
 # ———————————————
+
+DELETE {root}/api/userRDF/4
 
 DELETE {root}/api/photoRDF/1
 

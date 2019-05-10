@@ -2,7 +2,6 @@ package fr.uga.julioju.jhipster.SempicRest;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,11 +26,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import fr.uga.julioju.jhipster.service.UserService;
 import fr.uga.julioju.sempic.CreateResource;
-import fr.uga.julioju.sempic.FusekiServerConn;
 import fr.uga.julioju.sempic.Namespaces;
 import fr.uga.julioju.sempic.RDFConn;
 import fr.uga.julioju.sempic.RDFStore;
-import fr.uga.julioju.sempic.ResponseQuery;
 import fr.uga.julioju.sempic.Exceptions.FusekiUriNotAClass;
 import fr.uga.julioju.sempic.entities.PhotoDepictionAnonRDF;
 import fr.uga.julioju.sempic.entities.PhotoRDF;
@@ -50,30 +47,6 @@ public class PhotoRDFResource {
 
     public PhotoRDFResource(UserService userService) {
         this.userService = userService;
-    }
-
-    /**
-     * GET  //rdfquery_listsubclassof/:classQuery : get subclasses of classQuery
-     *      (ontology SempicOnto)
-     *
-     * @return the response with status 200 (OK) and the result of rdfquery in body
-     *  or response with status 404 if ":classQuery" doesn't exist
-     */
-    @GetMapping("/rdfquery_listsubclassof/{classQuery}")
-    public ResponseEntity<ResponseQuery>
-    getRdfQuery(@PathVariable String classQuery) {
-
-        log.debug("REST request to get subclass of:", classQuery);
-
-        ArrayList<String> results = new ArrayList<String>();
-
-        List<Resource> classes =
-            RDFStore.listSubClassesOf(SempicOnto.NS + classQuery);
-        classes.forEach(c -> { results.add(c.toString()); });
-        log.debug("Subclasses: ", classes.toString());
-
-        return ResponseEntity.ok()
-            .body(new ResponseQuery(results));
     }
 
     /**
@@ -100,8 +73,6 @@ public class PhotoRDFResource {
                 photoRDF,
                 this.userService
                 );
-
-        FusekiServerConn.serverRestart();
 
         // Delete photos before update, otherwise it appends
         RDFStore.deleteClassUri(photoResource.getURI());
@@ -209,9 +180,11 @@ public class PhotoRDFResource {
      *
      * @param id the id of the photoRDF to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
+     * @throws InterruptedException
      */
     @DeleteMapping("/photoRDF/{id}")
-    public ResponseEntity<Void> deletePhoto(@PathVariable Long id) {
+    public ResponseEntity<Void> deletePhoto(@PathVariable Long id)
+        throws InterruptedException {
         log.debug("REST request to delete photoRDF : {}", id);
 
         String photoUri = Namespaces.getPhotoUri(id);

@@ -854,11 +854,11 @@
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-starter-undertow</artifactId>
                 </dependency>
-                <dependency>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-devtools</artifactId>
-                    <optional>true</optional>
-                </dependency>
+                <!-- <dependency> -->
+                <!--     <groupId>org.springframework.boot</groupId> -->
+                <!--     <artifactId>spring&#45;boot&#45;devtools</artifactId> -->
+                <!--     <optional>true</optional> -->
+                <!-- </dependency> -->
                 <dependency>
                     <groupId>com.h2database</groupId>
                     <artifactId>h2</artifactId>
@@ -916,11 +916,11 @@
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-starter-undertow</artifactId>
                 </dependency>
-                <dependency>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-devtools</artifactId>
-                    <optional>true</optional>
-                </dependency>
+                <!-- <dependency> -->
+                <!--     <groupId>org.springframework.boot</groupId> -->
+                <!--     <artifactId>spring&#45;boot&#45;devtools</artifactId> -->
+                <!--     <optional>true</optional> -->
+                <!-- </dependency> -->
                 <dependency>
                     <groupId>com.h2database</groupId>
                     <artifactId>h2</artifactId>
