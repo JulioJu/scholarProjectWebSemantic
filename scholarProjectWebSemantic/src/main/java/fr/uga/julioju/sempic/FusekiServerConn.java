@@ -1,6 +1,8 @@
 package fr.uga.julioju.sempic;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.nio.file.FileSystems;
 import java.util.concurrent.TimeUnit;
@@ -16,7 +18,11 @@ public class FusekiServerConn  {
 
     private static FusekiServer fusekiServer;
 
-    private static boolean isEmbeddedFuseki = true;
+    public static boolean isEmbeddedFuseki = true;
+
+    private static Process fusekiProcess;
+
+    private static Thread threadPrintFuseki;
 
     // private DatasetGraph datasetGraph;
 
@@ -24,22 +30,17 @@ public class FusekiServerConn  {
 
     private static final int port = 3030;
 
-    public static void serverStart(boolean isEmbeddedFuseki) {
-        if (!isEmbeddedFuseki) {
-            FusekiServerConn.isEmbeddedFuseki = false;
-            return;
+    private static void waitBeforeFusekiStartOrStop() {
+        try {
+            TimeUnit.SECONDS.sleep(2);
+        } catch (InterruptedException e) {
+            log.error(e.toString());
         }
+    }
+
+    private static void serverStartEmbeddedFuseki() {
 
         // FusekiServerConn.killThreadOnPort3030();
-
-        // https://stackoverflow.com/questions/434718/sockets-discover-port-availability-using-java
-        try (ServerSocket ss = new ServerSocket(port)) {
-        } catch (IOException e) {
-            log.error("FATAL: Port " + port + " already in used. " +
-                    "Note: can't use hot swapping with Spring devtools" +
-                    " See my solutions in README.md. ");
-            System.exit(30);
-        }
 
         // Done nothing
         // FusekiLogging.setLogging(FileSystems.getDefault().getPath("/tmp/fusekiLogs.log"));
@@ -55,11 +56,85 @@ public class FusekiServerConn  {
                     + "/scholarProjectWebSemanticFusekiDatabase/run/configuration/sempic.ttl"
                     )
             // To enable logging, change value to true
+            // I don't know if he does something
             .verbose(false)
             .build();
         log.debug("Server Fuseki succesfully instanciated."
                 + " Its port is " + FusekiServerConn.port);
         FusekiServerConn.fusekiServer.start();
+    }
+
+    public static void serverStart() {
+        // https://stackoverflow.com/questions/434718/sockets-discover-port-availability-using-java
+        try (ServerSocket ss = new ServerSocket(port)) {
+        } catch (IOException e) {
+            if (FusekiServerConn.isEmbeddedFuseki) {
+                log.error("FATAL: Port " + port + " already in use.");
+                    System.exit(31);
+            } else {
+
+                // Thread.getAllStackTraces().keySet().forEach(System.out::println);
+
+                log.warn("Port " + port + " already in use."
+                        + "Trying to release it thanks ../FusekiStop.sh. ");
+                try {
+                    Process process =
+                        Runtime.getRuntime().exec("bash ../FusekiStop.sh");
+                    process.waitFor();
+                    if (process.exitValue() != 0) {
+
+                        log.error("FATAL: Port " + port + " already in use"
+                                + "by an other process than a "
+                                + "standalone Fuseki");
+                        System.exit(32);
+                    } else {
+                        log.info("Port " + port + " released.");
+                    }
+                } catch (IOException | InterruptedException e1) {
+                    log.error("FATAL:\n" + e1.toString());
+                    System.exit(33);
+                }
+            }
+
+        }
+
+        if (isEmbeddedFuseki) {
+            FusekiServerConn.serverStartEmbeddedFuseki();
+        } else {
+            Runtime runtime = Runtime.getRuntime();
+            try {
+
+                FusekiServerConn.fusekiProcess = runtime.exec(
+                    "bash ../FusekiStart.sh");
+                FusekiServerConn.threadPrintFuseki = new Thread (() -> {
+                    try {
+                        // (see https://stackoverflow.com/questions/792024/how-to-execute-system-commands-linux-bsd-using-java)
+                        BufferedReader b = new BufferedReader(new InputStreamReader(
+                                    FusekiServerConn.fusekiProcess.getInputStream()));
+                        String line = "";
+                        while ((line = b.readLine()) != null) {
+                            System.out.println(line);
+                        }
+                        b.close();
+                    } catch (IOException e) {
+                        log.error("FATAL:\n" + e.toString());
+                        System.exit(34);
+                    }
+                });
+                threadPrintFuseki.start();
+                log.debug("THE THREAD CREATED TO PRINT FUSEKI SERVER TRACE IS: "
+                        + threadPrintFuseki.getName()
+                        + "To see if still exists, you could use `$ jtrace -l "
+                        + ProcessHandle.current().pid()
+                        + "'(check only the thread number).");
+                // task.run();
+            } catch (IOException e) {
+                log.error("FATAL:\n" + e.toString());
+                System.exit(35);
+            }
+        }
+
+        FusekiServerConn.waitBeforeFusekiStartOrStop();
     }
 
     // private static void killThreadOnPort3030() {
@@ -88,18 +163,23 @@ public class FusekiServerConn  {
     // }
 
     private static void serverStop() {
-        log.debug("Server Fuseki succesfully destroyed."
-                + " Its port " + FusekiServerConn.port + " is released.");
-        fusekiServer.stop();
+        if (FusekiServerConn.isEmbeddedFuseki) {
+            fusekiServer.stop();
+        } else {
+            // if (FusekiServerConn.FusekiProcess.isAlive()) {
+            // If not alive, no action
+                threadPrintFuseki.interrupt();
+                FusekiServerConn.fusekiProcess.destroy();
+            // }
+        }
+        FusekiServerConn.waitBeforeFusekiStartOrStop();
+        log.debug(" The part " + FusekiServerConn.port
+                + " should be released (not tested).");
     }
 
-    public static void serverRestart() throws InterruptedException {
-        if (!FusekiServerConn.isEmbeddedFuseki) {
-            return;
-        }
+    public static void serverRestart() {
         FusekiServerConn.serverStop();
-        TimeUnit.SECONDS.sleep(10);
-        FusekiServerConn.serverStart(FusekiServerConn.isEmbeddedFuseki);
+        FusekiServerConn.serverStart();
     }
 
 }

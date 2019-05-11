@@ -50,9 +50,8 @@ public class RDFStore {
     /**
      * Delete all the statements where the URI appears as subject or object
      * @param class the URI clas to be deleted (the class cannot be annonymous)
-     * @throws InterruptedException
      */
-    public static void deleteClassUri(String uriClass) throws InterruptedException {
+    public static void deleteClassUri(String uriClass) {
 
             // SPARQL syntax
             // —————————————
@@ -79,8 +78,6 @@ public class RDFStore {
             Update u2 = new UpdateDeleteWhere(acc2);
             UpdateRequest updateRequest = new UpdateRequest(u1).add(u2);
             log.debug("deleteClassUri\n" + updateRequest.toString());
-
-            FusekiServerConn.serverRestart();
 
             RDFConn.cnxUpdateRequest(updateRequest);
     }

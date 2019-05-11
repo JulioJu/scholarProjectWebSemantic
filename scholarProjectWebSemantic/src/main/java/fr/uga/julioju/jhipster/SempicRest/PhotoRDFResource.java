@@ -57,13 +57,12 @@ public class PhotoRDFResource {
      * or with status {@code 400 (Bad Request)} if the photoRDF is not valid,
      * or with status {@code 500 (Internal Server Error)} if the photoRDF couldn't be updated.
      * @throws UnsupportedEncodingException
-     * @throws InterruptedException
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/photoRDF")
     public ResponseEntity<PhotoRDF> updatePhotoRDF(
             @Valid @RequestBody PhotoRDF photoRDF)
-            throws UnsupportedEncodingException, InterruptedException {
+            throws UnsupportedEncodingException {
         log.debug("REST request to update PhotoRDF : {}", photoRDF);
 
         Model model = ModelFactory.createDefaultModel();
@@ -125,7 +124,7 @@ public class PhotoRDFResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the photoRDF, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/photoRDF/{id}")
-    public ResponseEntity<PhotoRDF> getAlbum(@PathVariable Long id) {
+    public ResponseEntity<PhotoRDF> getPhoto(@PathVariable Long id) {
         log.debug("REST request to get photoRDF : {}", id);
         if (!RDFStore.isUriIsSubject(Namespaces.getPhotoUri(id))) {
             log.error("PhotoRDF with uri '"
@@ -180,11 +179,9 @@ public class PhotoRDFResource {
      *
      * @param id the id of the photoRDF to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
-     * @throws InterruptedException
      */
     @DeleteMapping("/photoRDF/{id}")
-    public ResponseEntity<Void> deletePhoto(@PathVariable Long id)
-        throws InterruptedException {
+    public ResponseEntity<Void> deletePhoto(@PathVariable Long id) {
         log.debug("REST request to delete photoRDF : {}", id);
 
         String photoUri = Namespaces.getPhotoUri(id);

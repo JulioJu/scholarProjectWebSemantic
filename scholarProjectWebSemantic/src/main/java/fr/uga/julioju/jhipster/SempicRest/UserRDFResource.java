@@ -97,11 +97,9 @@ public class UserRDFResource  {
      *
      * @param id the id of the userRDF to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
-     * @throws InterruptedException
      */
     @DeleteMapping("/userRDF/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id)
-        throws InterruptedException {
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         log.debug("REST request to delete userRDF : {}", id);
 
         String userUri = Namespaces.getUserUri(id);

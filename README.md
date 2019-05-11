@@ -5,9 +5,9 @@
     * [Teacher example](#teacher-example)
     * [scholarProjectWebSemantic](#scholarprojectwebsemantic)
         * [Fuseki embedded](#fuseki-embedded)
-            * [Wireshark](#wireshark)
         * [Fuseki non embedded](#fuseki-non-embedded)
         * [How to develop](#how-to-develop)
+                * [Wireshark](#wireshark)
     * [Jena doc](#jena-doc)
 * [Teacher's instructions](#teachers-instructions)
 * [scholarProjectWebSemantic details](#scholarprojectwebsemantic-details)
@@ -24,8 +24,10 @@
                     * [DCEVM](#dcevm)
                 * [kill the thread using port](#kill-the-thread-using-port)
                 * [Use loop to restart mvn](#use-loop-to-restart-mvn)
-                * [The solution](#the-solution)
-            * [FusekiServerConn for every request](#fusekiserverconn-for-every-request)
+                * [Use Fuseki embedded + ../MAKEFILE.sh](#use-fuseki-embedded--makefilesh)
+                    * [Bugs](#bugs)
+                * [Reflexion about FusekiServer embedded for each request (never used)](#reflexion-about-fusekiserver-embedded-for-each-request-never-used)
+            * [The solution](#the-solution)
     * [Construct a Jena Query](#construct-a-jena-query)
         * [Sparql syntax](#sparql-syntax)
         * [Java API 1) syntax form of the query](#java-api-1-syntax-form-of-the-query)
@@ -38,8 +40,9 @@
     * [Limitations](#limitations)
     * [StackTrace « Iterator used inside a different transaction »](#stacktrace-iterator-used-inside-a-different-transaction)
 * [Notes about IDE (Eclipse, NetBeans, IntelliJ)](#notes-about-ide-eclipse-netbeans-intellij)
-* [Eclipse problems](#eclipse-problems)
+    * [Eclipse problems](#eclipse-problems)
 * [Others bugs and TODO](#others-bugs-and-todo)
+    * [Threads and devtools](#threads-and-devtools)
 * [Credits](#credits)
 
 <!-- vim-markdown-toc -->
@@ -81,26 +84,16 @@ see https://github.com/protegeproject/protege/issues/822 .
 ## scholarProjectWebSemantic
 
 ### Fuseki embedded
+***Section outdated, use Fuseki non embedded. See why in a section below.***
+
+**Note that it's still implemented. But do not use it.**.
 
 `$ mvn -P \!webpack -Dspring-boot.run.arguments="fusekiServerEmbedded"`
 
-####  Wireshark
-
-To trace call, use Wireshark.
-
-Start Wireshark with `gksudo wireshark & ; disown %1`
-
-1.  ...using this filter `tcp port 3030`
-
-2. Use interface `Loopback:lo`
-
-3. `menu -> capture -> start`
-
-4. In « Apply a display filter », type `http`
-
-Note: verify the tcpdump is ordered by `N°`.
-
 ### Fuseki non embedded
+
+***Section outdated. Actually Fuseki is managed completly by my App, but
+launch in an independant process.***
 
 Start the Fuseki server ***at path ./scholarProjectWebSemanticFusekiDatabase/***.
 
@@ -131,10 +124,19 @@ $ pushd ../scholarProjectWebSemanticFusekiDatabase && fuseki-server > /dev/null 
 
 ### How to develop
 
-* Se section « The solution » below.
+#####  Wireshark
 
-    ***DO NOT USE `mvn`*** (only for the first compilation).
-    Because it is very very very slow!!!!
+To trace call, use Wireshark.
+
+Start Wireshark with `gksudo wireshark & ; disown %1`
+
+1.  ...using this filter `tcp port 3030`
+
+2. Use interface `Loopback:lo`
+
+3. `menu -> capture -> start`
+
+4. In « Apply a display filter », type `http`
 
 ## Jena doc
 
@@ -153,6 +155,7 @@ $ pushd ../scholarProjectWebSemanticFusekiDatabase && fuseki-server > /dev/null 
 > area of the full server.
 https://jena.apache.org/documentation/tdb2/tdb2_fuseki.html
 
+Note: verify the tcpdump is ordered by `N°`.
 # Teacher's instructions
 
 See ./TeachersInstruction1.pdf
@@ -356,7 +359,7 @@ is not loaded. Don't know why. TODO why??
 ##### Use loop to restart mvn
 
 * Actually, when port 3030 is not free, the app is killed with error code.
-In ./MAKEFILE.sh is use an infinite loop to restart automatically
+I've tested to use use an infinite loop to restart automatically
 `mvn \!webpack` .
 
 I've also tested with `inotify` to trigger automatically `$ kill $(pgrep -P $$)`
@@ -365,15 +368,16 @@ watched only `src/main/java/sempic` `src/main/java/jhipster/SempicRest` folders,
 but it complains inotify is very slow when Maven start. Don't know why, no
 search further. Maybe there are others watchers, with Node for instance, but
 not tested further and no investigated. It's not interesting.
-See the solution below.
 
 In any case, restart totally `mvn`
 take a long time. Therefore solutions discussed in this section are not good.
 
 A major problem with Spring devtools it's that it restarts the app often
-even if nothing is saved.
+even if nothing is saved (see my TODO at the end of this doc).
 
-##### The solution
+##### Use Fuseki embedded + ../MAKEFILE.sh
+
+***Section outdated (see sub-section bug below)***
 
 * Disable devtools (comment or remove it in pom.xml)
 
@@ -388,22 +392,71 @@ even if nothing is saved.
 
 * This MAKEFILE.sh is very more quick than `mvn`. Take around 8 secondes.
     A `mvn -P \-webpack` takes near 30 secondes!!!!!
-
-* On Neovim, I use the following macro
+    And `rm -Rf target && mvn` takes near 1 minute! So so so so long !
 
 * Warning, with this solution, mvn goals are not used, therefore
     ./scholarProjectWebSemantic/target/generated-sources/java/fr/uga/miashs/sempic/model/rdf/SempicOnto.java is not generated.
 
 * ***With NeoVim** use the following macro***:
     ```vim
-    nmap <F3> 1gt<C-w>j:bd!<CR>:sp enew<CR>:call termopen("bash ../MAKEFILE.sh")<CR>:sleep 4000ms<CR>a<C-\><C-n><C-w>ka
+nmap <F3> 1gt<C-w>j:bd!<CR>:sp enew<CR>:call termopen("bash ../MAKEFILE.sh")<CR>:sleep 4000ms<CR>a<C-\><C-n><C-w>ka | tnoremap <F3> <C-\><C-n>1gt<C-w>j:bd!<CR>:sp enew<CR>:call termopen("bash ../MAKEFILE.sh")<CR>:sleep 4000ms<CR>a<C-\><C-n><C-w>ka
     ```
 * As explained below (in section Eclipse), do not delete
     `./scholarProjectWebSemantic/target`
     even only `./scholarProjectWebSemantic/target/classes` .
     In this case, run again `./mvn -P \!webpack`
 
-#### FusekiServerConn for every request
+###### Bugs
+
+In ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/sempic/FusekiServerConn.java in the method `serverRestart()`, as FusekiServer has no callback to say when
+it is ready, I've added a delay between `FusekiServer.stop()` and
+`FusekiServer.start()`. Actually it is of 10 secondes, probably too much.
+
+* ***I've also noticed than the command line taken in IntelliJ***
+    and past in MAKEFILE.sh restart the app when we save, but without compile
+    again. So strange. Not investigated further.
+    Probably because spring-devtools was append in the classpath by IntelliJ
+    See also https://docs.spring.io/spring-boot/docs/current/api/org/springframework/boot/devtools/restart/Restarter.html
+
+* ***I've also noticed than in context of JHipster, the embedded server
+    Fuseki print lot of error stack trace about it's own server Jetty***
+    In this case, nothing could work and we must restart the server.
+
+The stack trace is:
+```
+java.nio.channels.CancelledKeyException: null
+        at java.base/sun.nio.ch.SelectionKeyImpl.ensureValid(SelectionKeyImpl.java:71)
+        at java.base/sun.nio.ch.SelectionKeyImpl.readyOps(SelectionKeyImpl.java:130)
+        at org.eclipse.jetty.io.ManagedSelector.safeReadyOps(ManagedSelector.java:294)
+        at org.eclipse.jetty.io.ChannelEndPoint.toEndPointString(ChannelEndPoint.java:433)
+        at org.eclipse.jetty.io.AbstractEndPoint.toString(AbstractEndPoint.java:447)
+        at java.base/java.util.Formatter$FormatSpecifier.printString(Formatter.java:3031)
+        at java.base/java.util.Formatter$FormatSpecifier.print(Formatter.java:2908)
+        at java.base/java.util.Formatter.format(Formatter.java:2673)
+        at java.base/java.util.Formatter.format(Formatter.java:2609)
+        at java.base/java.lang.String.format(String.java:2897)
+        at org.eclipse.jetty.io.AbstractConnection.toString(AbstractConnection.java:290)
+        at org.slf4j.helpers.MessageFormatter.safeObjectAppend(MessageFormatter.java:299)
+        at org.slf4j.helpers.MessageFormatter.deeplyAppendParameter(MessageFormatter.java:271)
+        at org.slf4j.helpers.MessageFormatter.arrayFormat(MessageFormatter.java:233)
+        at org.slf4j.helpers.MessageFormatter.arrayFormat(MessageFormatter.java:173)
+        at org.eclipse.jetty.util.log.JettyAwareLogger.log(JettyAwareLogger.java:680)
+        at org.eclipse.jetty.util.log.JettyAwareLogger.debug(JettyAwareLogger.java:224)
+        at org.eclipse.jetty.util.log.Slf4jLog.debug(Slf4jLog.java:97)
+        at org.eclipse.jetty.io.AbstractConnection.onClose(AbstractConnection.java:221)
+        at org.eclipse.jetty.server.HttpConnection.onClose(HttpConnection.java:520)
+        at org.eclipse.jetty.io.SelectorManager.connectionClosed(SelectorManager.java:345)
+        at org.eclipse.jetty.io.ManagedSelector$DestroyEndPoint.run(ManagedSelector.java:958)
+        at org.eclipse.jetty.util.thread.QueuedThreadPool.runJob(QueuedThreadPool.java:765)
+        at org.eclipse.jetty.util.thread.QueuedThreadPool$2.run(QueuedThreadPool.java:683)
+        at java.base/java.lang.Thread.run(Thread.java:834)
+```
+
+* **Furthermore** it doesn't support too much `FusekiServer.start()` and
+    `FusekiSer.stop()`. Finish by doesn't work without
+    stack trace. Doesn't investigated more.
+
+##### Reflexion about FusekiServer embedded for each request (never used)
 
 Any solution is to change scope of `FusekiServerConn`. Change it to have a life
 not more than a request, and add a `@PreDestroy` hook to stop Fusek or
@@ -421,6 +474,15 @@ solution.
 
 But in other hand, it could be cool because as it we reduce problems of
 `InterruptedException` if two incompatibles SPARQL query are sent.
+
+#### The solution
+
+Manage an independent process into the app. See
+./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/sempic/FusekiServerConn.java
+with option `FusekiServerConn.isEmbeddedFuseki == false`.
+
+Don't forget than the trace of the independant Fuseki is printed
+by my app, in a independent Thread.
 
 ## Construct a Jena Query
 
@@ -700,6 +762,45 @@ DELETE WHERE
 }
 ```
 
+The error come also with the thwo following succession of GET:
+
+```
+EnW¯@@ãØÞlÖª ôrÎèÿb
+¦VÓ¦VÒGET /sempic/?query=ASK%0AWHERE%0A++%7B+%3Chttp%3A%2F%2Ffr.uga.julioju.sempic%2FResourcesCreated%2Fuser%2F4%3E%0A++++++++++++++%3Fp++%3Fo%0A++%7D%0A HTTP/1.1
+Accept: application/sparql-results+json
+User-Agent: Apache-Jena-ARQ/3.11.0
+Host: localhost:3030
+Connection: Keep-Alive
+Accept-Encoding: gzip,deflate
+
+```
+
+```
+EoW²@@ãÔÞlÖª õ¬Î5ÿc
+¦bç¦WdGET /sempic/?query=ASK%0AWHERE%0A++%7B+%3Chttp%3A%2F%2Ffr.uga.julioju.sempic%2FResourcesCreated%2Fphoto%2F1%3E%0A++++++++++++++%3Fp++%3Fo%0A++%7D%0A HTTP/1.1
+Accept: application/sparql-results+json
+User-Agent: Apache-Jena-ARQ/3.11.0
+Host: localhost:3030
+Connection: Keep-Alive
+Accept-Encoding: gzip,deflate
+
+```
+
+We see that the problem is after the method GET in some precises contextes,
+when we have first `ASK WHERE` for `sempic-data`.
+When we ask into `sempic-onto`, no problems
+(TODO confirm it).
+Maybe the problem could occurs in in an
+other context, not tested. As I say, POST following by GET doesn't cause error.
+
+~~My workaround is simply restart the embedded Fuseki Server before the bug appears.
+See
+./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/sempic/FusekiServerConn.java
+at the end of the method  `cnxQueryAsk (Query q)`
+(after the HTTP request GET was done).
+I call the method `FusekiServerConn.serverRestart()`~~
+It bugs, don't know why. On the second GET, nothing is found.
+
 My workaround is simply restart the embedded Fuseki Server before the bug appears.
 See
 ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/sempic/RDFStore.java
@@ -757,44 +858,6 @@ when `FusekiServer` is during a boot.
 Before create a new `RDFConnection` in  RDFConn.java, we could test is the
 port is taken or free. But don't know if it's cool, because maybe the port
 could be taken by Fuseki but in a middle of a reboot process.
-
-In ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/sempic/FusekiServerConn.java in the method `serverRestart()`, as FusekiServer has no callback to say when
-it is ready, I've added a delay between `FusekiServer.stop()` and
-`FusekiServer.start()`. Actually it is of 10 secondes, probably too much.
-
-* ***I've also noticed than in context of JHipster, the embedded server
-    Fuseki print lot of error stack trace about it's own server Jetty***
-    In this case, nothing could work and we must restart the server.
-
-    The stack trace is:
-```
-java.nio.channels.CancelledKeyException: null
-        at java.base/sun.nio.ch.SelectionKeyImpl.ensureValid(SelectionKeyImpl.java:71)
-        at java.base/sun.nio.ch.SelectionKeyImpl.readyOps(SelectionKeyImpl.java:130)
-        at org.eclipse.jetty.io.ManagedSelector.safeReadyOps(ManagedSelector.java:294)
-        at org.eclipse.jetty.io.ChannelEndPoint.toEndPointString(ChannelEndPoint.java:433)
-        at org.eclipse.jetty.io.AbstractEndPoint.toString(AbstractEndPoint.java:447)
-        at java.base/java.util.Formatter$FormatSpecifier.printString(Formatter.java:3031)
-        at java.base/java.util.Formatter$FormatSpecifier.print(Formatter.java:2908)
-        at java.base/java.util.Formatter.format(Formatter.java:2673)
-        at java.base/java.util.Formatter.format(Formatter.java:2609)
-        at java.base/java.lang.String.format(String.java:2897)
-        at org.eclipse.jetty.io.AbstractConnection.toString(AbstractConnection.java:290)
-        at org.slf4j.helpers.MessageFormatter.safeObjectAppend(MessageFormatter.java:299)
-        at org.slf4j.helpers.MessageFormatter.deeplyAppendParameter(MessageFormatter.java:271)
-        at org.slf4j.helpers.MessageFormatter.arrayFormat(MessageFormatter.java:233)
-        at org.slf4j.helpers.MessageFormatter.arrayFormat(MessageFormatter.java:173)
-        at org.eclipse.jetty.util.log.JettyAwareLogger.log(JettyAwareLogger.java:680)
-        at org.eclipse.jetty.util.log.JettyAwareLogger.debug(JettyAwareLogger.java:224)
-        at org.eclipse.jetty.util.log.Slf4jLog.debug(Slf4jLog.java:97)
-        at org.eclipse.jetty.io.AbstractConnection.onClose(AbstractConnection.java:221)
-        at org.eclipse.jetty.server.HttpConnection.onClose(HttpConnection.java:520)
-        at org.eclipse.jetty.io.SelectorManager.connectionClosed(SelectorManager.java:345)
-        at org.eclipse.jetty.io.ManagedSelector$DestroyEndPoint.run(ManagedSelector.java:958)
-        at org.eclipse.jetty.util.thread.QueuedThreadPool.runJob(QueuedThreadPool.java:765)
-        at org.eclipse.jetty.util.thread.QueuedThreadPool$2.run(QueuedThreadPool.java:683)
-        at java.base/java.lang.Thread.run(Thread.java:834)
-```
 
 ## StackTrace « Iterator used inside a different transaction »
 ```
@@ -933,9 +996,9 @@ org.apache.jena.dboe.transaction.txn.TransactionException: Iterator used inside 
     (e.g fr, then uga, then julioju, then sempic). Even with Vim and NerdTree
     we have not this problem! NetBeans is terrible.
 
-* See my section « The solution » above.
+* See my section « Use Fuseki embedded + ../MAKEFILE.sh » above.
 
-# Eclipse problems
+## Eclipse problems
 
 * Problem with `exec-maven-plugin` on startup?
     See https://www.eclipse.org/m2e/documentation/m2e-execution-not-covered.html
@@ -1063,6 +1126,20 @@ then restart server. Only restart the computer solve my issue.
     explanations into parenthesis)
 
 * See all TODO
+
+## Threads and devtools
+
+* Actually when we generate a new Thread, it is not destroyed when
+    spring devtools restart the app.
+    See my thread created in ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/sempic/FusekiServerConn.java
+    (I print the name of the thread when it is created)
+    TODO test with a minimal Spring boot with https://start.spring.io/
+    and test if there is this issue. No answer found of StackOverflow .
+    Investigate and maybe report to JHipster.
+
+* « SpringBoot applications keeps rebooting all the time (restart loop) - spring.devtools »
+    https://stackoverflow.com/questions/45812812/springboot-applications-keeps-rebooting-all-the-time-restart-loop-spring-dev
+    TODO post a PR to JHipster
 
 # Credits
 

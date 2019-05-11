@@ -45,8 +45,10 @@ GET {root}/api/rdfquery_listsubclassof/jioejiewijweiojfeji
 
 # GET
 # ———————————————
+# Actually only ASK WHERE
 GET {root}/api/userRDF/4
 
+# First a ASK WHERE, then CONSCTRUCT
 GET {root}/api/photoRDF/1
 
 # GET
@@ -68,7 +70,7 @@ PUT {root}/api/albumRDF << END
 {{
     "id": 1,
     "ownerId": 4
-}}
+} }
 END
 
 # USER HAS ID 4

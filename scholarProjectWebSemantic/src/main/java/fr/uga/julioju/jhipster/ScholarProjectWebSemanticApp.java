@@ -65,16 +65,20 @@ public class ScholarProjectWebSemanticApp implements InitializingBean {
         }
         switch (args[0]) {
             case "fusekiServerEmbedded":
-                FusekiServerConn.serverStart(true);
+                log.info("fusekiServerEmbedded");
+                FusekiServerConn.isEmbeddedFuseki = true;
             break;
             case "fusekiServerNoEmbedded":
-                FusekiServerConn.serverStart(false);
+                log.info("fusekiServerNotEmbedded");
+                log.info("fusekiServerNotEmbedded");
+                FusekiServerConn.isEmbeddedFuseki = false;
             break;
             default:
                 ScholarProjectWebSemanticApp.mvnArgumentError();
             break;
 
         }
+        FusekiServerConn.serverStart();
     }
 
     private static void mvnArgumentError() {

@@ -32,8 +32,7 @@ public class RDFConn {
         }
     }
 
-    protected static Model cnxQueryConstruct (
-            /*FusekiServerConn fusekiServerConn, */ Query q) {
+    protected static Model cnxQueryConstruct (Query q) {
         // return Txn.calculateRead(fusekiServerConn.getDataset(), ()-> {
         //     try(QueryExecution qExec =
         //             QueryExecutionFactory.create(q,
@@ -56,9 +55,7 @@ public class RDFConn {
         }
     }
 
-    public static boolean cnxQueryAsk (
-            /* FusekiServerConn fusekiServerConn, */
-            Query q) {
+    public static boolean cnxQueryAsk (Query q) {
         // return Txn.calculateRead(fusekiServerConn.getDataset(), ()-> {
         //     try(QueryExecution qExec =
         //             QueryExecutionFactory.create(q,
@@ -72,6 +69,7 @@ public class RDFConn {
             try {
                 result = conn.queryAsk(q);
                 conn.end();
+                FusekiServerConn.serverRestart();
                 return result;
             } catch (QueryExceptionHTTP e) {
                 throw new FusekiDownException(conn, e.toString());
