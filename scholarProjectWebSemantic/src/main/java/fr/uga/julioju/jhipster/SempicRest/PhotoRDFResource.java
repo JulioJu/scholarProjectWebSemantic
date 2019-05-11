@@ -74,8 +74,6 @@ public class PhotoRDFResource {
                 this.userService
                 );
 
-        FusekiServerConn.serverRestart();
-
         // Delete photos before update, otherwise it appends
         RDFStore.deleteClassUri(photoResource.getURI());
 

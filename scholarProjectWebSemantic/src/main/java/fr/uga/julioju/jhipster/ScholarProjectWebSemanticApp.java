@@ -84,7 +84,7 @@ public class ScholarProjectWebSemanticApp implements InitializingBean {
     private static void mvnArgumentError() {
         log.error("FATAL: The first argument should not be null.\n"
                 + "Call `$ mvn' either like:\n"
-                + "\t`$ mvn -Dspring-boot.run.arguments=\"fusekiServerEmbedded\"\n'"
+                + "\t`$ mvn -Dspring-boot.run.arguments=\"fusekiServerEmbedded (deprecated)\"\n'"
                 + "\t`$ mvn -Dspring-boot.run.arguments=\"fusekiServerNoEmbedded\"\n'"
                 );
         System.exit(29);

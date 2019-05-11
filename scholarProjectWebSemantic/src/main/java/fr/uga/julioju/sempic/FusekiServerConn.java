@@ -160,7 +160,7 @@ public class FusekiServerConn  {
     //     }
     // }
 
-    private static void serverStop() {
+    public static void serverStop() {
         if (FusekiServerConn.isEmbeddedFuseki) {
             fusekiServer.stop();
         } else {

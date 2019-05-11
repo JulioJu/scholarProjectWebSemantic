@@ -51,6 +51,30 @@ public class RDFResource  {
     }
 
     /**
+     * GET  /startFusekiProcess : start Fuseki Server
+     *
+     * @return status 200 (OK). If the start fail, server is existed with
+     *      an exist code > 0
+     */
+    @GetMapping("/startFusekiProcess")
+    public ResponseEntity<Void> startFuseki() {
+        FusekiServerConn.serverStart();
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * GET  /stopFusekiProcess : stop Fuseki Server
+     *
+     * @return status 200 (OK). If the stop fail, server is existed with
+     *      an exist code > 0
+     */
+    @GetMapping("/stopFusekiProcess")
+    public ResponseEntity<Void> stopFuseki() {
+        FusekiServerConn.serverStop();
+        return ResponseEntity.ok().build();
+    }
+
+    /**
      * GET  /restartFusekiProcess : restart Fuseki Server
      *
      * @return status 200 (OK). If the restart fail, server is existed with

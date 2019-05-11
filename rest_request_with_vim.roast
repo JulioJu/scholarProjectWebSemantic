@@ -49,9 +49,8 @@ GET {root}/api/rdfquery_listsubclassof/jioejiewijweiojfeji
 GET {root}/api/userRDF/4
 
 # Fail when we trigger
-# 1) {root}/api/photoRDF/1
-# 2) {root}/api/userRDF/4
-# 3) {root}/api/photoRDF/1
+# 1) {root}/api/userRDF/4
+# 2) {root}/api/photoRDF/1
 
 # First a ASK WHERE, then CONSCTRUCT
 GET {root}/api/photoRDF/1
@@ -61,6 +60,15 @@ GET {root}/api/photoRDF/1
 
 # Create a userRDF of the user currently logged
 GET {root}/api/createUserRDFLogged
+
+# Fuseki Administration
+# —————————————————————
+
+# Start Fuseki (restart if there already a Fuseki Server Standalone).
+GET {root}/api/startFusekiProcess
+
+# Stop Fuseki
+GET {root}/api/stopFusekiProcess
 
 # Restart Fuseki
 GET {root}/api/restartFusekiProcess
