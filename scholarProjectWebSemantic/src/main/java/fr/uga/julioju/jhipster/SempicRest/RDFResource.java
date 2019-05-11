@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import fr.uga.julioju.sempic.FusekiServerConn;
 import fr.uga.julioju.sempic.RDFStore;
 import fr.uga.julioju.sempic.ResponseQuery;
 import fr.uga.miashs.sempic.model.rdf.SempicOnto;
@@ -47,6 +48,18 @@ public class RDFResource  {
 
         return ResponseEntity.ok()
             .body(new ResponseQuery(results));
+    }
+
+    /**
+     * GET  /restartFusekiProcess : restart Fuseki Server
+     *
+     * @return status 200 (OK). If the restart fail, server is existed with
+     *      an exist code > 0
+     */
+    @GetMapping("/restartFusekiProcess")
+    public ResponseEntity<Void> restartFuseki() {
+        FusekiServerConn.serverRestart();
+        return ResponseEntity.ok().build();
     }
 
 }

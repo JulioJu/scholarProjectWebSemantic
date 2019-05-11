@@ -69,7 +69,6 @@ public class RDFConn {
             try {
                 result = conn.queryAsk(q);
                 conn.end();
-                FusekiServerConn.serverRestart();
                 return result;
             } catch (QueryExceptionHTTP e) {
                 throw new FusekiDownException(conn, e.toString());

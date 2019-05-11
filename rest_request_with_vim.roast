@@ -43,17 +43,28 @@ GET {root}/api/rdfquery_listsubclassof/Person
 
 GET {root}/api/rdfquery_listsubclassof/jioejiewijweiojfeji
 
-# GET
+# GET Entities
 # ———————————————
 # Actually only ASK WHERE
 GET {root}/api/userRDF/4
 
+# Fail when we trigger
+# 1) {root}/api/photoRDF/1
+# 2) {root}/api/userRDF/4
+# 3) {root}/api/photoRDF/1
+
 # First a ASK WHERE, then CONSCTRUCT
 GET {root}/api/photoRDF/1
 
-# GET
+# Others GET
 # ———————————————
+
+# Create a userRDF of the user currently logged
 GET {root}/api/createUserRDFLogged
+
+# Restart Fuseki
+GET {root}/api/restartFusekiProcess
+
 
 # Delete
 # ———————————————

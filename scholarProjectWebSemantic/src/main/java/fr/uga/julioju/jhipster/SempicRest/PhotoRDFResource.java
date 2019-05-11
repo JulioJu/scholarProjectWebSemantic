@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import fr.uga.julioju.jhipster.service.UserService;
 import fr.uga.julioju.sempic.CreateResource;
+import fr.uga.julioju.sempic.FusekiServerConn;
 import fr.uga.julioju.sempic.Namespaces;
 import fr.uga.julioju.sempic.RDFConn;
 import fr.uga.julioju.sempic.RDFStore;
@@ -72,6 +73,8 @@ public class PhotoRDFResource {
                 photoRDF,
                 this.userService
                 );
+
+        FusekiServerConn.serverRestart();
 
         // Delete photos before update, otherwise it appends
         RDFStore.deleteClassUri(photoResource.getURI());

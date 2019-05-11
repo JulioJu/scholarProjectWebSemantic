@@ -762,8 +762,13 @@ DELETE WHERE
 }
 ```
 
-The error come also with the thwo following succession of GET:
+The error come also with the succession of get:
 
+1) {root}/api/photoRDF/1
+2) {root}/api/userRDF/4
+3) {root}/api/photoRDF/1
+
+Following: {root}/api/userRDF/4
 ```
 EnW¯@@ãØÞlÖª ôrÎèÿb
 ¦VÓ¦VÒGET /sempic/?query=ASK%0AWHERE%0A++%7B+%3Chttp%3A%2F%2Ffr.uga.julioju.sempic%2FResourcesCreated%2Fuser%2F4%3E%0A++++++++++++++%3Fp++%3Fo%0A++%7D%0A HTTP/1.1
@@ -775,6 +780,7 @@ Accept-Encoding: gzip,deflate
 
 ```
 
+Following: {root}/api/photoRDF/1
 ```
 EoW²@@ãÔÞlÖª õ¬Î5ÿc
 ¦bç¦WdGET /sempic/?query=ASK%0AWHERE%0A++%7B+%3Chttp%3A%2F%2Ffr.uga.julioju.sempic%2FResourcesCreated%2Fphoto%2F1%3E%0A++++++++++++++%3Fp++%3Fo%0A++%7D%0A HTTP/1.1

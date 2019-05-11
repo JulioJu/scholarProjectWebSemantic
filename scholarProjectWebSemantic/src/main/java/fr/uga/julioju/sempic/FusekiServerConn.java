@@ -30,14 +30,6 @@ public class FusekiServerConn  {
 
     private static final int port = 3030;
 
-    private static void waitBeforeFusekiStartOrStop() {
-        try {
-            TimeUnit.SECONDS.sleep(2);
-        } catch (InterruptedException e) {
-            log.error(e.toString());
-        }
-    }
-
     private static void serverStartEmbeddedFuseki() {
 
         // FusekiServerConn.killThreadOnPort3030();
@@ -113,7 +105,9 @@ public class FusekiServerConn  {
                                     FusekiServerConn.fusekiProcess.getInputStream()));
                         String line = "";
                         while ((line = b.readLine()) != null) {
-                            System.out.println(line);
+                            System.out.println(
+                                    "\033[4;34mFUSEKI SERVER MESSAGE:\033[0m"
+                                    + line);
                         }
                         b.close();
                     } catch (IOException e) {
@@ -134,7 +128,11 @@ public class FusekiServerConn  {
             }
         }
 
-        FusekiServerConn.waitBeforeFusekiStartOrStop();
+        try {
+            TimeUnit.SECONDS.sleep(3);
+        } catch (InterruptedException e) {
+            log.error(e.toString());
+        }
     }
 
     // private static void killThreadOnPort3030() {
@@ -172,7 +170,11 @@ public class FusekiServerConn  {
                 FusekiServerConn.fusekiProcess.destroy();
             // }
         }
-        FusekiServerConn.waitBeforeFusekiStartOrStop();
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+            log.error(e.toString());
+        }
         log.debug(" The part " + FusekiServerConn.port
                 + " should be released (not tested).");
     }
