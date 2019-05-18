@@ -10,25 +10,29 @@ public final class ErrorConstantsSempic {
     // ERRORS from server
     // —————————————————
 
-    public static final URI FUSEKI_DOWN = URI.create(PROBLEM_BASE_URL_SEMPIC +
+    protected static final URI FUSEKI_DOWN = URI.create(PROBLEM_BASE_URL_SEMPIC +
             "/fuseki-down");
 
-    public static final URI FUSEKI_JENA_QUERY_EXCEPTION =
+    protected static final URI FUSEKI_JENA_QUERY_EXCEPTION =
         URI.create(PROBLEM_BASE_URL_SEMPIC +
             "/fuseki-jena-query-exception");
 
     // ERROR from client
     // ——————————————————
 
-    public static final URI FUSEKI_SUBJECT_NOT_FOUND =
+    protected static final URI FUSEKI_SUBJECT_NOT_FOUND =
         URI.create(PROBLEM_BASE_URL_SEMPIC +
             "/fuseki-subject-not-found");
 
-    public static final URI FUSEKI_UNAUTHORIZED =
+    protected static final URI FUSEKI_UNAUTHORIZED =
         URI.create(PROBLEM_BASE_URL_SEMPIC +
             "/fuseki-unauthorized");
 
-    public static final URI FUSEKI_URI_NOT_A_CLASS =
+    protected static final URI FUSEKI_URI_NOT_A_CLASS =
         URI.create(PROBLEM_BASE_URL_SEMPIC +
             "/fuseki-uri-not-a-class");
+
+    protected static final URI SPRING_SECURITY_TOKEN_EXCEPTION =
+        URI.create(PROBLEM_BASE_URL_SEMPIC +
+            "/SPRING-SECURITY-TOKEN-EXCEPTION");
 }

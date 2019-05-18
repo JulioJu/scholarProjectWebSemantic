@@ -55,6 +55,15 @@
     
 
 
+    <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#usersPassword -->
+
+    <owl:ObjectProperty rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#usersPassword">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label xml:lang="en">user&apos;s password</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
     <!-- 
     ///////////////////////////////////////////////////////////////////////////////////////
     //
@@ -97,12 +106,28 @@
     
 
 
+    <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#AdminGroup -->
+
+    <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#AdminGroup">
+        <rdfs:subClassOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#User"/>
+        <rdfs:comment xml:lang="en">Could manage all albums</rdfs:comment>
+        <rdfs:label xml:lang="en">Administrator Group</rdfs:label>
+    </owl:Class>
+    
+
+
     <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Album -->
 
     <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Album">
-        <rdfs:subClassOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#ResourcesCreated"/>
+        <rdfs:subClassOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#AlbumPhoto"/>
         <rdfs:label xml:lang="en">Album</rdfs:label>
     </owl:Class>
+    
+
+
+    <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#AlbumPhoto -->
+
+    <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#AlbumPhoto"/>
     
 
 
@@ -123,11 +148,11 @@
     
 
 
-    <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Owner -->
+    <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#NormalUserGroup -->
 
-    <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Owner">
-        <rdfs:subClassOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#ResourcesCreated"/>
-        <rdfs:label xml:lang="en">Owner</rdfs:label>
+    <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#NormalUserGroup">
+        <rdfs:subClassOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#User"/>
+        <rdfs:label xml:lang="en">Normal user group</rdfs:label>
     </owl:Class>
     
 
@@ -144,7 +169,7 @@
     <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Photo -->
 
     <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Photo">
-        <rdfs:subClassOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#ResourcesCreated"/>
+        <rdfs:subClassOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#AlbumPhoto"/>
         <rdfs:label>Photo</rdfs:label>
     </owl:Class>
     
@@ -159,12 +184,34 @@
     
 
 
-    <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#ResourcesCreated -->
+    <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#User -->
 
-    <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#ResourcesCreated">
-        <rdfs:comment xml:lang="en">All subclasses are types of named esources created by the program</rdfs:comment>
-        <rdfs:label xml:lang="en">Resources created</rdfs:label>
+    <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#User">
+        <owl:disjointUnionOf rdf:parseType="Collection">
+            <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#AdminGroup"/>
+            <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#NormalUserGroup"/>
+        </owl:disjointUnionOf>
+        <rdfs:label xml:lang="en">User</rdfs:label>
     </owl:Class>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // General axioms
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <rdf:Description>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#AlbumPhoto"/>
+            <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Depiction"/>
+            <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#User"/>
+        </owl:members>
+    </rdf:Description>
 </rdf:RDF>
 
 

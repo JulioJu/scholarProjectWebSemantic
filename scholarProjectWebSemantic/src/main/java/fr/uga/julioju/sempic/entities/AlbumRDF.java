@@ -15,7 +15,7 @@ public class AlbumRDF extends AbstractRDF {
         this.ownerId = ownerId;
     }
 
-    public long getOwnerId() {
+    public long getUserId() {
         return ownerId;
     }
 

@@ -10,19 +10,20 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import fr.uga.julioju.jhipster.domain.Authority;
-import fr.uga.julioju.jhipster.domain.User;
-import fr.uga.julioju.jhipster.security.AuthoritiesConstants;
-import fr.uga.julioju.jhipster.service.UserService;
-import fr.uga.julioju.sempic.CreateResource;
+import fr.uga.julioju.sempic.Namespaces;
 import fr.uga.julioju.sempic.RDFConn;
+import fr.uga.julioju.sempic.ReadAlbum;
+import fr.uga.julioju.sempic.ReadUser;
 import fr.uga.julioju.sempic.Exceptions.FusekiUnauthorized;
 import fr.uga.julioju.sempic.entities.AlbumRDF;
+import fr.uga.julioju.sempic.entities.UserRDF;
 
 /**
  * REST controller for managing AlbumRDFResource.
@@ -33,10 +34,21 @@ public class AlbumRDFResource  {
 
     private final Logger log = LoggerFactory.getLogger(AlbumRDFResource.class);
 
-    private UserService userService;
-
-    public AlbumRDFResource(UserService userService) {
-        this.userService = userService;
+    /** Test if user logged has permissions to manage album */
+    private boolean isCurrentUserHasWritePermissions(AlbumRDF album) {
+        UserRDF userLogged = ReadUser.getUserLogged();
+        if (ReadUser.isUserLoggedAdmin(userLogged)) {
+            return true;
+        } else {
+            // TODO create error
+            throw new FusekiUnauthorized(
+                    "The current user is '"
+                    + userLogged.getLogin()
+                    + "'. He is not the owner of the album with the id '"
+                    + album.getId()
+                    + "'. Furthermore he is not an administrator."
+                );
+        }
     }
 
     /**
@@ -57,25 +69,34 @@ public class AlbumRDFResource  {
 
         Model model = ModelFactory.createDefaultModel();
 
-        User userLogged = this.userService.getUserWithAuthorities().get();
-        Authority adminRole = new Authority();
-        adminRole.setName(AuthoritiesConstants.ADMIN);
-        if (
-                userLogged.getAuthorities().contains(adminRole)
-                || albumRDF.getOwnerId() ==
-                    CreateResource.getUserIdLogged(userService)
-        ) {
+        if (this.isCurrentUserHasWritePermissions(albumRDF)) {
             RDFConn.saveModel(model);
-        } else {
-            // TODO create error
-            throw new FusekiUnauthorized(
-                    "User is not " + AuthoritiesConstants.ADMIN + " and "
-                    + albumRDF.getOwnerId() + " is not the id of the user"
-                    + " currently logged (currently logged : "
-                    + CreateResource.getUserIdLogged(userService) + ").");
         }
-
         return ResponseEntity.ok().body(albumRDF);
     }
+
+    /**
+     * {@code GET  /albumRDF/:id} : get the "id" albumRDF.
+     *
+     * @param id the id of the albumRDF to retrieve.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the albumRDF, or with status {@code 404 (Not Found)}.
+     */
+    @GetMapping("/albumRDF/{id}")
+    public ResponseEntity<AlbumRDF> getAlbum(@PathVariable Long id) {
+        log.debug("REST request to get albumRDF : {}", id);
+        Model model = ReadAlbum.read(id);
+        log.debug("BELOW: PRINT MODEL RETRIEVED\n—————————————");
+        model.write(System.out, "turtle");
+        if (model.isEmpty()) {
+            log.error("AlbumRDF with uri '"
+                    + Namespaces.getAlbumUri(id)
+                    + "' doesn't exist in Fuseki Database"
+                    + " (at least not a RDF subject).");
+            return ResponseEntity.notFound().build();
+        }
+        AlbumRDF albumRDF = new AlbumRDF(id, 1);
+        return ResponseEntity.ok().body(albumRDF);
+    }
+
 
 }

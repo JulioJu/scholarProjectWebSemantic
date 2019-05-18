@@ -1,7 +1,5 @@
 package fr.uga.julioju.jhipster.config;
 
-import io.github.jhipster.config.JHipsterConstants;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.core.env.Environment;
 
@@ -31,7 +29,7 @@ public final class DefaultProfileUtil {
         * This cannot be set in the application.yml file.
         * See https://github.com/spring-projects/spring-boot/issues/1219
         */
-        defProperties.put(SPRING_PROFILE_DEFAULT, JHipsterConstants.SPRING_PROFILE_DEVELOPMENT);
+        defProperties.put(SPRING_PROFILE_DEFAULT, "dev");
         app.setDefaultProperties(defProperties);
     }
 

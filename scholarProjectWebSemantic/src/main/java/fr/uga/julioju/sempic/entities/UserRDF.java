@@ -1,9 +1,37 @@
 package fr.uga.julioju.sempic.entities;
 
-public class UserRDF extends AbstractRDF {
+public class UserRDF {
 
-    public UserRDF(long id) {
-        super(id);
+    public enum UserGroup {
+        NORMAL_USER_GROUP,
+        ADMIN_GROUP
+    }
+
+    private String login;
+
+    private String password;
+
+    private UserGroup userGroup;
+
+    public UserRDF(
+            String login,
+            String password,
+            UserGroup userGroup) {
+        this.login = login;
+        this.password = password;
+        this.userGroup = userGroup;
+    }
+
+    public String getLogin() {
+        return login;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public UserGroup getUserGroup() {
+        return userGroup;
     }
 
 }

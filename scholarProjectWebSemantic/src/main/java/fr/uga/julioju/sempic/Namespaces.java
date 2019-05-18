@@ -22,8 +22,8 @@ public class Namespaces {
         return albumNS+albumId;
     }
 
-    public static String getUserUri(long ownerId) {
-        return userNS+ownerId;
+    public static String getUserUri(String login) {
+        return userNS+login;
     }
 
 }

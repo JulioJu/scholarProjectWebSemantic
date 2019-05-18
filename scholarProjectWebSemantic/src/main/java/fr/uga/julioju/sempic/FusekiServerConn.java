@@ -160,14 +160,23 @@ public class FusekiServerConn  {
     //     }
     // }
 
-    public static void serverStop() {
+    /**
+      * For Standalone Fuseki return true if the server is toped
+      * otherwise false.
+      * For embedded Fuseki server, can't test if it is already alive,
+      * (at least test if port is free) return always true.
+      */
+    public static boolean serverStop() {
         if (FusekiServerConn.isEmbeddedFuseki) {
             fusekiServer.stop();
         } else {
             // if (FusekiServerConn.FusekiProcess.isAlive()) {
             // If not alive, no action
                 threadPrintFuseki.interrupt();
-                FusekiServerConn.fusekiProcess.destroy();
+                // We chould destrop the child, not parents, otherwise fail
+                // FusekiServerConn.fusekiProcess.destroy();
+                FusekiServerConn.fusekiProcess.descendants()
+                    .forEach(ProcessHandle::destroy);
             // }
         }
         try {
@@ -175,8 +184,14 @@ public class FusekiServerConn  {
         } catch (InterruptedException e) {
             log.error(e.toString());
         }
+        if (!FusekiServerConn.isEmbeddedFuseki) {
+            if (FusekiServerConn.fusekiProcess.isAlive()) {
+                return false;
+            }
+        }
         log.debug(" The part " + FusekiServerConn.port
                 + " should be released (not tested).");
+        return true;
     }
 
     public static void serverRestart() {

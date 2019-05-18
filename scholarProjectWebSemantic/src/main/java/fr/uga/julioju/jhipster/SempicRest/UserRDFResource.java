@@ -1,7 +1,7 @@
 package fr.uga.julioju.jhipster.SempicRest;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URISyntaxException;
+import java.util.Optional;
 
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -15,13 +15,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import fr.uga.julioju.jhipster.service.UserService;
 import fr.uga.julioju.sempic.CreateResource;
 import fr.uga.julioju.sempic.Namespaces;
 import fr.uga.julioju.sempic.RDFConn;
 import fr.uga.julioju.sempic.RDFStore;
+import fr.uga.julioju.sempic.ReadUser;
 import fr.uga.julioju.sempic.Exceptions.FusekiUriNotAClass;
 import fr.uga.julioju.sempic.entities.UserRDF;
+import fr.uga.julioju.sempic.entities.UserRDF.UserGroup;
 
 /**
  * REST controller for managing UserRDFREsource.
@@ -32,44 +33,50 @@ public class UserRDFResource  {
 
     private final Logger log = LoggerFactory.getLogger(UserRDFResource.class);
 
-    private UserService userService;
-
-    public UserRDFResource(UserService userService) {
-        this.userService = userService;
-    }
-
     /**
-     * {@code PUT  /userRDF} : Creates or Updates a userRDF
+     * {@code PUT  /instantiateInitialUsers} : Creates admin and normal user
      *
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated userRDF,
-     * or with status {@code 500 (Internal Server Error)} if the userRDF couldn't be updated.
-     * @throws UnsupportedEncodingException
-     * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @GetMapping("/createUserRDFLogged")
-    public ResponseEntity<UserRDF> updateUserRDF()
+    @GetMapping("/instantiateInitialUsers")
+    public ResponseEntity<UserRDF[]> updateUserRDF()
             throws UnsupportedEncodingException {
-        log.debug("REST request to update UserRDF logged");
+        log.debug("REST request to instantiate initial users");
 
         Model model = ModelFactory.createDefaultModel();
+        UserRDF normalUserRDF = new UserRDF(
+                "user",
+                "user",
+                UserGroup.NORMAL_USER_GROUP
+            );;
+        Resource normalUserResource = CreateResource
+            .createUserLogged(model, normalUserRDF);
+        UserRDF adminUserRDF = new UserRDF(
+                "admin",
+                "admin",
+                UserGroup.ADMIN_GROUP
+            );;
+        Resource adminUserResource = CreateResource
+            .createUserLogged(model, adminUserRDF);
 
-        Resource resource = CreateResource
-            .createUserLogged(model, this.userService);
 
 
-        if (!RDFStore.isUriIsSubject(resource.getURI())) {
-            log.debug("User " + resource.getURI() + " not already created");
+        if (!RDFStore.isUriIsSubject(normalUserResource.getURI())
+                || !RDFStore.isUriIsSubject(adminUserResource.getURI())) {
+            log.debug("User " + normalUserResource.getURI()
+                    + " not already created. They will be created.");
+            log.debug("User " + adminUserResource.getURI()
+                    + " not already created. They will be created");
             RDFConn.saveModel(model);
         } else {
-            log.warn("User " + resource.getURI() + " already created");
+            log.warn("User " + normalUserResource.getURI() + " or "
+                    + adminUserResource.getURI() + " already created");
+            // TODO
+            throw new UnsupportedOperationException("Can\'t update user "
+                    + "with id 3 and 4.");
         }
 
         return ResponseEntity.ok()
-            .body(
-                new UserRDF(
-                    this.userService.getUserWithAuthorities().get().getId()
-                )
-            );
+            .body(new UserRDF[] { normalUserRDF, adminUserRDF});
     }
 
     /**
@@ -79,17 +86,14 @@ public class UserRDFResource  {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the userRDF, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/userRDF/{id}")
-    public ResponseEntity<UserRDF> getUser(@PathVariable Long id) {
-        log.debug("REST request to get userRDF : {}", id);
-        if (!RDFStore.isUriIsSubject(Namespaces.getUserUri(id))) {
-            log.error("UserRDF with uri '"
-                    + Namespaces.getUserUri(id)
-                    + "' doesn't exist in Fuseki Database"
-                    + " (at least not a RDF subject).");
+    public ResponseEntity<UserRDF> getUser(@PathVariable String login) {
+        log.debug("REST request to get userRDF : {}", login);
+        Optional<UserRDF> userRDF = ReadUser.getUserByLogin(login);
+        if (userRDF.isEmpty()) {
             return ResponseEntity.notFound().build();
+        } else {
+        return ResponseEntity.ok().body(userRDF.get());
         }
-        UserRDF userRDF = new UserRDF(id);
-        return ResponseEntity.ok().body(userRDF);
     }
 
     /**
@@ -99,10 +103,10 @@ public class UserRDFResource  {
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
     @DeleteMapping("/userRDF/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        log.debug("REST request to delete userRDF : {}", id);
+    public ResponseEntity<Void> deleteUser(@PathVariable String login) {
+        log.debug("REST request to delete userRDF : {}", login);
 
-        String userUri = Namespaces.getUserUri(id);
+        String userUri = Namespaces.getUserUri(login);
 
         if (!RDFStore.isUriIsSubject(userUri)) {
             log.error("User with uri '" + userUri + "' doesn't exist"

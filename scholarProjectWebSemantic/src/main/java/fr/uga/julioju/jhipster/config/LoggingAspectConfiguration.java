@@ -2,8 +2,6 @@ package fr.uga.julioju.jhipster.config;
 
 import fr.uga.julioju.jhipster.aop.logging.LoggingAspect;
 
-import io.github.jhipster.config.JHipsterConstants;
-
 import org.springframework.context.annotation.*;
 import org.springframework.core.env.Environment;
 
@@ -12,7 +10,7 @@ import org.springframework.core.env.Environment;
 public class LoggingAspectConfiguration {
 
     @Bean
-    @Profile(JHipsterConstants.SPRING_PROFILE_DEVELOPMENT)
+    @Profile("dev")
     public LoggingAspect loggingAspect(Environment env) {
         return new LoggingAspect(env);
     }

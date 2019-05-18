@@ -1,6 +1,5 @@
 package fr.uga.julioju.jhipster.security.jwt;
 
-import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -14,9 +13,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
-import io.github.jhipster.config.JHipsterProperties;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -30,34 +27,25 @@ public class TokenProvider implements InitializingBean {
 
     private Key key;
 
+    private long tokenValidityInSeconds = 1800; // 0.5 hour
+    private long tokenValidityInSecondsForRememberMe = 2592000; // 30 hours;
+
     private long tokenValidityInMilliseconds;
 
     private long tokenValidityInMillisecondsForRememberMe;
 
-    private final JHipsterProperties jHipsterProperties;
-
-    public TokenProvider(JHipsterProperties jHipsterProperties) {
-        this.jHipsterProperties = jHipsterProperties;
-    }
-
     @Override
     public void afterPropertiesSet() throws Exception {
         byte[] keyBytes;
-        String secret = jHipsterProperties.getSecurity().getAuthentication().getJwt().getSecret();
-        if (!StringUtils.isEmpty(secret)) {
-            log.warn("Warning: the JWT key used is not Base64-encoded. " +
-                "We recommend using the `jhipster.security.authentication.jwt.base64-secret` key for optimum security.");
-            keyBytes = secret.getBytes(StandardCharsets.UTF_8);
-        } else {
-            log.debug("Using a Base64-encoded JWT secret key");
-            keyBytes = Decoders.BASE64.decode(jHipsterProperties.getSecurity().getAuthentication().getJwt().getBase64Secret());
-        }
+        // TODO
+        // This token must be encoded using Base64 and be at least 256 bits long (you can type `openssl rand -base64 64` on your command line to generate a 512 bits one)
+        String base64Secret = "NzBhODk5MGY0OWY1NzYxMmQ3OWZkMDBkNGY5ODdjYzkzOWJiYjdiOTM5MmFhOGQxMmQ4MjRhZjViN2Y2OTRhOTRhNTZiZTk2OGU3NTUxNWQzYTY5Y2VhYTQ4ZWJkYWRjNWMwMGNjOTBlZDM3Zjg0NDZhOTQxZjNmODBmNTM1NmE=";
+        keyBytes = Decoders.BASE64.decode(base64Secret);
         this.key = Keys.hmacShaKeyFor(keyBytes);
         this.tokenValidityInMilliseconds =
-            1000 * jHipsterProperties.getSecurity().getAuthentication().getJwt().getTokenValidityInSeconds();
+            1000 * tokenValidityInSeconds;
         this.tokenValidityInMillisecondsForRememberMe =
-            1000 * jHipsterProperties.getSecurity().getAuthentication().getJwt()
-                .getTokenValidityInSecondsForRememberMe();
+            1000 * tokenValidityInSecondsForRememberMe;
     }
 
     public String createToken(Authentication authentication, boolean rememberMe) {

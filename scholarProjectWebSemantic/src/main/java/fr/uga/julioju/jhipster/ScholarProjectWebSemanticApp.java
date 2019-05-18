@@ -2,8 +2,6 @@ package fr.uga.julioju.jhipster;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Arrays;
-import java.util.Collection;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -18,7 +16,6 @@ import org.springframework.core.env.Environment;
 import fr.uga.julioju.jhipster.config.ApplicationProperties;
 import fr.uga.julioju.jhipster.config.DefaultProfileUtil;
 import fr.uga.julioju.sempic.FusekiServerConn;
-import io.github.jhipster.config.JHipsterConstants;
 
 @SpringBootApplication
 @EnableConfigurationProperties({LiquibaseProperties.class, ApplicationProperties.class})
@@ -26,26 +23,14 @@ public class ScholarProjectWebSemanticApp implements InitializingBean {
 
     private static final Logger log = LoggerFactory.getLogger(ScholarProjectWebSemanticApp.class);
 
-    private final Environment env;
-
-    public ScholarProjectWebSemanticApp(Environment env) {
-        this.env = env;
-    }
-
     /**
      * Initializes scholarProjectWebSemantic.
      * <p>
      * Spring profiles can be configured with a program argument --spring.profiles.active=your-active-profile
      * <p>
-     * You can find more information on how profiles work with JHipster on <a href="https://www.jhipster.tech/profiles/">https://www.jhipster.tech/profiles/</a>.
      */
     @Override
     public void afterPropertiesSet() throws Exception {
-        Collection<String> activeProfiles = Arrays.asList(env.getActiveProfiles());
-        if (activeProfiles.contains(JHipsterConstants.SPRING_PROFILE_DEVELOPMENT) && activeProfiles.contains(JHipsterConstants.SPRING_PROFILE_PRODUCTION)) {
-            log.error("You have misconfigured your application! It should not run " +
-                "with both the 'dev' and 'prod' profiles at the same time.");
-        }
     }
 
     /**

@@ -24,12 +24,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import fr.uga.julioju.jhipster.service.UserService;
 import fr.uga.julioju.sempic.CreateResource;
-import fr.uga.julioju.sempic.FusekiServerConn;
 import fr.uga.julioju.sempic.Namespaces;
 import fr.uga.julioju.sempic.RDFConn;
 import fr.uga.julioju.sempic.RDFStore;
+import fr.uga.julioju.sempic.ReadPhoto;
 import fr.uga.julioju.sempic.Exceptions.FusekiUriNotAClass;
 import fr.uga.julioju.sempic.entities.PhotoDepictionAnonRDF;
 import fr.uga.julioju.sempic.entities.PhotoRDF;
@@ -43,12 +42,6 @@ import fr.uga.miashs.sempic.model.rdf.SempicOnto;
 public class PhotoRDFResource {
 
     private final Logger log = LoggerFactory.getLogger(PhotoRDFResource.class);
-
-    private UserService userService;
-
-    public PhotoRDFResource(UserService userService) {
-        this.userService = userService;
-    }
 
     /**
      * {@code PUT  /photoRDF} : Creates or Updates a photoRDF
@@ -70,8 +63,7 @@ public class PhotoRDFResource {
 
         Resource photoResource = CreateResource.create(
                 model,
-                photoRDF,
-                this.userService
+                photoRDF
                 );
 
         // Delete photos before update, otherwise it appends
@@ -112,7 +104,7 @@ public class PhotoRDFResource {
 
         RDFConn.saveModel(model);
         log.debug("BELOW: PRINT MODEL SAVED\n—————————————");
-        RDFStore.readPhoto(photoRDF.getId(), true)
+        ReadPhoto.read(photoRDF.getId(), true)
             .write(System.out, "turtle");
 
         return ResponseEntity.ok().body(photoRDF);
@@ -127,14 +119,16 @@ public class PhotoRDFResource {
     @GetMapping("/photoRDF/{id}")
     public ResponseEntity<PhotoRDF> getPhoto(@PathVariable Long id) {
         log.debug("REST request to get photoRDF : {}", id);
-        if (!RDFStore.isUriIsSubject(Namespaces.getPhotoUri(id))) {
+        Model model = ReadPhoto.read(id, true);
+        log.debug("BELOW: PRINT MODEL RETRIEVED\n—————————————");
+        model.write(System.out, "turtle");
+        if (model.isEmpty()) {
             log.error("PhotoRDF with uri '"
                     + Namespaces.getPhotoUri(id)
                     + "' doesn't exist in Fuseki Database"
                     + " (at least not a RDF subject).");
             return ResponseEntity.notFound().build();
         }
-        Model model = RDFStore.readPhoto(id, true);
         String albumIdWithDatatype =
                 model.listObjectsOfProperty(SempicOnto.albumId)
                 .toList().get(0).toString();
@@ -169,9 +163,6 @@ public class PhotoRDFResource {
                 albumId,
                 photoDepictionRDF
                 );
-        log.debug("BELOW: PRINT MODEL RETRIEVED\n—————————————");
-        RDFStore.readPhoto(photoRDF.getId(), true)
-            .write(System.out, "turtle");
         return ResponseEntity.ok().body(photoRDF);
     }
 

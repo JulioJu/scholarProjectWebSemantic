@@ -1,6 +1,5 @@
 package fr.uga.julioju.jhipster.config;
 
-import fr.uga.julioju.jhipster.security.*;
 import fr.uga.julioju.jhipster.security.jwt.*;
 
 import org.springframework.beans.factory.BeanInitializationException;
@@ -71,12 +70,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter implemen
     public void configure(WebSecurity web) throws Exception {
         web.ignoring()
             .antMatchers(HttpMethod.OPTIONS, "/**")
-            .antMatchers("/app/**/*.{js,html}")
-            .antMatchers("/i18n/**")
-            .antMatchers("/content/**")
-            .antMatchers("/h2-console/**")
-            .antMatchers("/swagger-ui/index.html")
-            .antMatchers("/test/**");
+            .antMatchers("/app/**/*.{js,html}");
+            // .antMatchers("/i18n/**")
+            // .antMatchers("/content/**")
+            // .antMatchers("/h2-console/**")
+            // .antMatchers("/swagger-ui/index.html")
+            // .antMatchers("/test/**");
     }
 
     @Override
@@ -104,10 +103,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter implemen
             .antMatchers("/api/account/reset-password/init").permitAll()
             .antMatchers("/api/account/reset-password/finish").permitAll()
             .antMatchers("/api/**").authenticated()
-            .antMatchers("/management/health").permitAll()
-            .antMatchers("/management/info").permitAll()
-            .antMatchers("/management/prometheus").permitAll()
-            .antMatchers("/management/**").hasAuthority(AuthoritiesConstants.ADMIN)
+            // .antMatchers("/management/health").permitAll()
+            // .antMatchers("/management/info").permitAll()
+            // .antMatchers("/management/prometheus").permitAll()
+            // .antMatchers("/management/**").hasAuthority(AuthoritiesConstants.ADMIN)
         .and()
             .apply(securityConfigurerAdapter());
         // @formatter:on
