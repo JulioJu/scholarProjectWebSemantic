@@ -3,6 +3,8 @@ package fr.uga.julioju.jhipster.SempicRest;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.Node_URI;
 import org.apache.jena.rdf.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,8 +43,8 @@ public class RDFResource  {
 
         ArrayList<String> results = new ArrayList<String>();
 
-        List<Resource> classes =
-            RDFStore.listSubClassesOf(SempicOnto.NS + classQuery);
+        List<Resource> classes = RDFStore.listSubClassesOf(
+                    (Node_URI) NodeFactory.createURI(SempicOnto.NS + classQuery));
         classes.forEach(c -> { results.add(c.toString()); });
         log.debug("Subclasses: ", classes.toString());
 

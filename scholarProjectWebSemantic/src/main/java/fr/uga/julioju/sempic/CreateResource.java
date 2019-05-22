@@ -1,5 +1,7 @@
 package fr.uga.julioju.sempic;
 
+import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.Node_URI;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
 
@@ -12,23 +14,31 @@ import fr.uga.miashs.sempic.model.rdf.SempicOnto;
 
 public class CreateResource  {
 
-    public static Resource createUserLogged(Model model, UserRDF userRDF) {
+    public static Resource create(Model model, UserRDF userRDF) {
         Resource userGroupRes = SempicOnto.NormalUserGroup;
         if (userRDF.getUserGroup().equals(UserGroup.ADMIN_GROUP)) {
             userGroupRes = SempicOnto.AdminGroup;
         }
 
-        return model.createResource(
+        Resource userRessource = model.createResource(
             Namespaces.getUserUri(userRDF.getLogin()),
             userGroupRes
         );
+
+        userRessource.addProperty(SempicOnto.usersPassword,
+                userRDF.getPassword());
+
+        return userRessource;
     }
 
     public static Resource create(Model model, AlbumRDF albumRDF) {
-        return model.createResource(
+        Resource albumRDFResource = model.createResource(
                 Namespaces.getAlbumUri(albumRDF.getId()),
                 SempicOnto.Album
         );
+        albumRDFResource.addProperty(SempicOnto.albumOwnerId,
+                Namespaces.getUserUri(albumRDF.getOwnerLogin()));
+        return albumRDFResource;
     }
 
     public static Resource create(
@@ -36,8 +46,9 @@ public class CreateResource  {
             PhotoRDF photoRDF
     ) {
         String albumURI = Namespaces.getAlbumUri(photoRDF.getAlbumId());
-        if (!RDFStore.isUriIsSubject(albumURI)) {
-            throw new FusekiSubjectNotFoundException(albumURI);
+        Node_URI node_URI = (Node_URI) NodeFactory.createURI(albumURI);
+        if (!RDFStore.isUriIsSubject(node_URI)) {
+            throw new FusekiSubjectNotFoundException(node_URI);
         }
         Resource photoResource = model.createResource(
                 Namespaces.getPhotoUri(photoRDF.getId()),

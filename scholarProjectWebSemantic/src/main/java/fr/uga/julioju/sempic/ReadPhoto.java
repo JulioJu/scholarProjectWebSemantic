@@ -38,7 +38,7 @@ public class ReadPhoto  {
     /**
      * Query a Photo and retrieve all the direct properties
      * of the photo and if the property are depicts, albumId and
-     * ownerId
+     * albumOwnerId
      * If the object has RDFS.label and RDF.type, retrieve the triple
      *
      * @param id
@@ -60,7 +60,7 @@ public class ReadPhoto  {
         //         + "?o <" + RDFS.label + "> ?o2 ."
         //         + "?o <" + RDF.type + "> ?o3 ."
         //         + "}"
-        //         + "FILTER (?p IN (<" + SempicOnto.depicts + "> ,<" + SempicOnto.albumId + ">,<" + SempicOnto.ownerId + "> )) "
+        //         + "FILTER (?p IN (<" + SempicOnto.depicts + "> ,<" + SempicOnto.albumId + ">,<" + SempicOnto.albumOwnerId + "> )) "
         //         + "}";
 
         // Java API
@@ -100,7 +100,7 @@ public class ReadPhoto  {
                         Arrays.asList(new Expr[] {
                             new NodeValueNode(SempicOnto.depicts.asNode()),
                             new NodeValueNode(SempicOnto.albumId.asNode()),
-                            new NodeValueNode(SempicOnto.ownerId.asNode())
+                            new NodeValueNode(SempicOnto.albumOwnerId.asNode())
                         })
                     )
             );

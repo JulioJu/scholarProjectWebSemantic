@@ -1,7 +1,10 @@
 package fr.uga.julioju.sempic.entities;
 
+import javax.validation.constraints.NotNull;
+
 public class PhotoRDF extends AbstractRDF {
 
+    @NotNull
     private long albumId;
 
     private PhotoDepictionAnonRDF[] depiction;

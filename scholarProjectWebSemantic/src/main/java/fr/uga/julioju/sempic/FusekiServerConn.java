@@ -190,7 +190,7 @@ public class FusekiServerConn  {
             }
         }
         log.debug(" The part " + FusekiServerConn.port
-                + " should be released (not tested).");
+                + " is released.");
         return true;
     }
 

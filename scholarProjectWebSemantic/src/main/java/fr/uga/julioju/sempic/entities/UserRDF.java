@@ -1,5 +1,7 @@
 package fr.uga.julioju.sempic.entities;
 
+import javax.validation.constraints.NotNull;
+
 public class UserRDF {
 
     public enum UserGroup {
@@ -7,10 +9,13 @@ public class UserRDF {
         ADMIN_GROUP
     }
 
+    @NotNull
     private String login;
 
+    @NotNull
     private String password;
 
+    @NotNull
     private UserGroup userGroup;
 
     public UserRDF(
@@ -32,6 +37,19 @@ public class UserRDF {
 
     public UserGroup getUserGroup() {
         return userGroup;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        // If the object is compared with itself then return true
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof UserRDF)) {
+            return false;
+        }
+        UserRDF userRDF = (UserRDF) o;
+        return this.login.equals(userRDF.login);
     }
 
 }

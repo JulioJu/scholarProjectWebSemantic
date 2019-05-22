@@ -2,7 +2,7 @@ package fr.uga.julioju.sempic;
 
 import java.util.List;
 
-import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.Node_URI;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdf.model.Model;
@@ -22,6 +22,7 @@ import org.apache.jena.vocabulary.RDFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fr.uga.julioju.sempic.Exceptions.FusekiSubjectNotFoundException;
 import fr.uga.julioju.sempic.Exceptions.FusekiUriNotAClass;
 
 /**
@@ -35,21 +36,20 @@ public class RDFStore {
 
     /**
      * Delete all the statements where the URI appears as subject or object
-     * @param class the URI clas to be deleted (the class cannot be annonymous)
      */
-    public static void deleteClassUri(String uriClass) {
+    public static void deleteClassUri(Node_URI node_URI) {
 
             // SPARQL syntax
             // —————————————
-            // this.cnxUpdate("DELETE WHERE { <" + uriClass + "> ?p ?o }");
-            // this.cnxUpdate("DELETE WHERE { ?uriClass ?p <" + uri + "> }");
+            // this.cnxUpdate("DELETE WHERE { <" + node_URI + "> ?p ?o }");
+            // this.cnxUpdate("DELETE WHERE { ?node_URI ?p <" + uri + "> }");
 
             // Java
             // —————————————
             QuadAcc acc = new QuadAcc();
             acc.addTriple(
                     new Triple(
-                        NodeFactory.createURI(uriClass),
+                        node_URI,
                         Var.alloc("p"),
                         Var.alloc("o"))
             );
@@ -59,19 +59,36 @@ public class RDFStore {
                     new Triple(
                         Var.alloc("s"),
                         Var.alloc("p"),
-                        NodeFactory.createURI(uriClass))
+                        node_URI)
             );
             Update u2 = new UpdateDeleteWhere(acc2);
             UpdateRequest updateRequest = new UpdateRequest(u1).add(u2);
             log.debug("deleteClassUri\n" + updateRequest.toString());
 
-            FusekiServerConn.serverRestart();
-
             RDFConn.cnxUpdateRequest(updateRequest);
     }
 
+    public static void deleteClassUriWithTests(Node_URI node_URI) {
+        String uri = node_URI.getURI();
+        if (!RDFStore.isUriIsSubject(node_URI)) {
+            throw new FusekiSubjectNotFoundException(node_URI);
+        }
+        log.debug("Uri '" + uri + "' exists"
+                + ", this RDF subject will be deleted.");
+
+        RDFStore.deleteClassUri(node_URI);
+
+        if (RDFStore.isUriIsSubject(node_URI)) {
+            throw new FusekiUriNotAClass("Uri '" + uri
+                    + "' not deleted.");
+        }
+        log.debug("Now uri '" + uri + "' doesn't exist as subject"
+                + ", therefore it was deleted (as subject).");
+    }
+
     // Reference https://users.jena.apache.narkive.com/dMOMKIO8/sparql-to-check-if-a-specific-uri-exists
-    public static void testIfUriIsClass(String uri) {
+    public static boolean isUriIsClass(Node_URI node_URI) {
+
         // String s = "ASK WHERE {"
         //     + "{ <" + uri + "> ?p ?o . }"
         //     + " UNION "
@@ -79,7 +96,7 @@ public class RDFStore {
         //     + "}";
 
         Triple tripleSubject = Triple.create(
-                    NodeFactory.createURI(uri),
+                    node_URI,
                     Var.alloc("p"),
                     Var.alloc("o"));
         BasicPattern basicPatternSubject = new BasicPattern();
@@ -89,7 +106,7 @@ public class RDFStore {
         Triple objectTriple = Triple.create(
                     Var.alloc("s"),
                     Var.alloc("p"),
-                    NodeFactory.createURI(uri)
+                    node_URI
                     );
         BasicPattern basicPatternObject = new BasicPattern();
         basicPatternObject.add(objectTriple);
@@ -102,14 +119,19 @@ public class RDFStore {
 
         log.debug("testIfUriIsClass\n" + queryAlgebraBuild);
 
-        if (!RDFConn.cnxQueryAsk(queryAlgebraBuild)) {
-            throw new FusekiUriNotAClass("'" + uri + "' is not a RDF class");
+        return !RDFConn.cnxQueryAsk(queryAlgebraBuild);
+    }
+
+    public static void testIfUriIsClass(Node_URI node_URI) {
+        if (!RDFStore.isUriIsClass(node_URI)) {
+            throw new FusekiUriNotAClass("'" + node_URI.getURI()
+                    + "' is not a RDF class");
         }
     }
 
-    public static boolean isUriIsSubject(String uri) {
+    public static boolean isUriIsSubject(Node_URI node_URI) {
         Triple triple = Triple.create(
-                    NodeFactory.createURI(uri),
+                    node_URI,
                     Var.alloc("p"),
                     Var.alloc("o"));
         BasicPattern basicPattern = new BasicPattern();
@@ -126,18 +148,16 @@ public class RDFStore {
      * Retieves all the resources that are subclasses of resource c. To be
      * selected classes must have the property rdfs:label instanciated
      *
-     * @param uriClass a named class with a complet URI
-     *  (the resource cannot be annonymous)
      * @return
      */
-    public static List<Resource> listSubClassesOf(String uriClass) {
+    public static List<Resource> listSubClassesOf(Node_URI node_URI) {
 
-        RDFStore.testIfUriIsClass(uriClass);
+        RDFStore.testIfUriIsClass(node_URI);
 
         // String s = "CONSTRUCT { "
         //     + "?s <" + RDFS.label + "> ?o "
         //     + "} WHERE {"
-        //     + "?s <" + RDFS.subClassOf + "> <" + uriClass + "> ."
+        //     + "?s <" + RDFS.subClassOf + "> <" + node_URI + "> ."
         //     + "?s <" + RDFS.label + "> ?o ."
         //     + "}";
 
@@ -149,7 +169,7 @@ public class RDFStore {
         Triple tripleSubClassOf = Triple.create(
                     Var.alloc("s"),
                     RDFS.subClassOf.asNode(),
-                    NodeFactory.createURI(uriClass)
+                    node_URI
                     );
         BasicPattern basicPattern = new BasicPattern();
         basicPattern.add(tripleSubClassOf);

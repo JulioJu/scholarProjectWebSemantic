@@ -23,7 +23,7 @@ content-type: application/json
 # ————————————————————————————————————————————
 
 POST {root}/api/authenticate << END
-{{"username":"admin","password":"toto","rememberMe":true}}
+{{"username":"admin","password":"admin","rememberMe":true}}
 END
 
 POST {root}/api/authenticate << END
@@ -44,13 +44,13 @@ END
 # one. If you want to be a normal user, do the opposite
 
 # AUTHORIZATION FOR ADMIN
-Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOLFJPTEVfVVNFUiIsImV4cCI6MTU2MDY5MDkyOH0.rI26xUSMEwpObbEo8TYR3K6aDZCu53sXnWB_cQ3Ixi9j-sqe3PhZppnC1Gs-walzw84Z3wmz_oKRWQOBmZatSg
+# Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOLFJPTEVfVVNFUiIsImV4cCI6MTU2MDY5MDkyOH0.rI26xUSMEwpObbEo8TYR3K6aDZCu53sXnWB_cQ3Ixi9j-sqe3PhZppnC1Gs-walzw84Z3wmz_oKRWQOBmZatSg
 
 # AUTHORIZATION FOR USER
-# Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiYXV0aCI6IlJPTEVfVVNFUiIsImV4cCI6MTU1OTY2ODIxM30.o-iAHZIJYskQE6yDan24MhwF9JhkJIQ5-3rp6J8OxUVyT2u_173sW7COv3390BVtA3UCAiilyJnAREPFAKuu3g
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiYXV0aCI6IlJPTEVfVVNFUiIsImV4cCI6MTU1OTY2ODIxM30.o-iAHZIJYskQE6yDan24MhwF9JhkJIQ5-3rp6J8OxUVyT2u_173sW7COv3390BVtA3UCAiilyJnAREPFAKuu3g
 
 # ———————————————
-# 404 not found ]
+# ERROR 404 not found ]
 # ———————————————
 
 GET {root}/api/jioejiewijweiojfeji
@@ -88,7 +88,7 @@ GET {root}/api/rdfquery_listsubclassof/Photo
 
 GET {root}/api/rdfquery_listsubclassof/Person
 
-# 404 not found
+# ERROR 404 not found
 GET {root}/api/rdfquery_listsubclassof/jioejiewijweiojfeji
 
 # ——————
@@ -98,21 +98,23 @@ GET {root}/api/rdfquery_listsubclassof/jioejiewijweiojfeji
 # CREATE / UPDATE
 # ———————————————
 # Create a userRDF of the user currently logged
-GET {root}/api/createUserRDFLogged
+# ACTUALLY CAN'T UPDATE WITH IT.
+GET {root}/api/createInitialUser
 
 # READ
 # —————
-# UserGroup.ADMIN_GROUP
-GET {root}/api/userRDF/3
+GET {root}/api/userRDF/admin
 
 # UserGroup.USER_GROUP
-GET {root}/api/userRDF/4
+GET {root}/api/userRDF/user
 
 
 # DELETE
 # ———————
-# TODO test it
-DELETE {root}/api/userRDF/4
+# TODO test it, if it's delete Photos and Albums too
+DELETE {root}/api/userRDF/user
+
+DELETE {root}/api/userRDF/admin
 
 # ———————
 # ALBUM |
@@ -121,29 +123,56 @@ DELETE {root}/api/userRDF/4
 # CREATE / UPDATE
 # ———————————————
 
-# Member of ADMIN_GROUP
+# TODO differenciate create and update with http codes
+
+# BIG TODO, when we update, it accumulate. Delete before update and test.
+
+# Should work if the user with login `user' or `admin' is logged
 PUT {root}/api/albumRDF << END
 {{
     "id": 1,
-    "ownerId": 4
+    "ownerLogin": "user"
 }}
 END
 
-# Member of USER_GROUP
+# ERROR 400, should not be serialized
 PUT {root}/api/albumRDF << END
 {{
-    "id": 1,
-    "ownerId": 4
+    "id": 1
 }}
 END
 
-# Therfore following should fail when user is logged
+# ERROR 404 as notexistuser doesn't exist
 PUT {root}/api/albumRDF << END
 {{
-    "id": 1,
-    "ownerId": 3
+    "id": 2,
+    "ownerLogin": "notexistuser"
 }}
 END
+
+# ERROR 403 if the user logged is `user`
+PUT {root}/api/albumRDF << END
+{{
+    "id": 2,
+    "ownerLogin": "admin"
+}}
+END
+
+# READ
+# —————
+GET {root}/api/albumRDF/1
+
+# ERROR 403 if the user logged is `user` (as the ownerLogin is admin)
+GET {root}/api/albumRDF/2
+
+# ERROR 404 not found
+GET {root}/api/albumRDF/999999
+
+# DELETE
+# ———————
+DELETE {root}/api/albumRDF/1
+
+DELETE {root}/api/albumRDF/2
 
 # ——————
 # PHOTO |

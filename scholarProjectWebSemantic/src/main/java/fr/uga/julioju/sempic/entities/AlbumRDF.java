@@ -1,8 +1,11 @@
 package fr.uga.julioju.sempic.entities;
 
+import javax.validation.constraints.NotNull;
+
 public class AlbumRDF extends AbstractRDF {
 
-    private long ownerId;
+    @NotNull
+    private String ownerLogin;
 
     private long[] sharedWith;
 
@@ -10,13 +13,13 @@ public class AlbumRDF extends AbstractRDF {
     public AlbumRDF() {
     }
 
-    public AlbumRDF(long id, long ownerId) {
+    public AlbumRDF(long id, String ownerLogin) {
         super(id);
-        this.ownerId = ownerId;
+        this.ownerLogin = ownerLogin;
     }
 
-    public long getUserId() {
-        return ownerId;
+    public String getOwnerLogin() {
+        return ownerLogin;
     }
 
     public long[] getSharedWith() {

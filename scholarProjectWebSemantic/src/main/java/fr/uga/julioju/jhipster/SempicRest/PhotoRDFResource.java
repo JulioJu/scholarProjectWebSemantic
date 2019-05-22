@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.Node_URI;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
@@ -29,7 +31,6 @@ import fr.uga.julioju.sempic.Namespaces;
 import fr.uga.julioju.sempic.RDFConn;
 import fr.uga.julioju.sempic.RDFStore;
 import fr.uga.julioju.sempic.ReadPhoto;
-import fr.uga.julioju.sempic.Exceptions.FusekiUriNotAClass;
 import fr.uga.julioju.sempic.entities.PhotoDepictionAnonRDF;
 import fr.uga.julioju.sempic.entities.PhotoRDF;
 import fr.uga.miashs.sempic.model.rdf.SempicOnto;
@@ -67,7 +68,8 @@ public class PhotoRDFResource {
                 );
 
         // Delete photos before update, otherwise it appends
-        RDFStore.deleteClassUri(photoResource.getURI());
+        log.debug("Delete photos before update, otherwise it appends");
+        RDFStore.deleteClassUri((Node_URI) photoResource.asNode());
 
         // TODO use bag
         for (int depictionIndex = 0 ;
@@ -76,7 +78,7 @@ public class PhotoRDFResource {
             String depictionURI = SempicOnto.NS
                 + photoRDF.getDepiction()[depictionIndex].getDepiction();
             Resource sempicOntoResource = model.createResource(depictionURI);
-            RDFStore.testIfUriIsClass(sempicOntoResource.getURI());
+            RDFStore.testIfUriIsClass((Node_URI) sempicOntoResource.asNode());
 
             Resource descriptionResource = model.createResource();
 
@@ -175,26 +177,9 @@ public class PhotoRDFResource {
     @DeleteMapping("/photoRDF/{id}")
     public ResponseEntity<Void> deletePhoto(@PathVariable Long id) {
         log.debug("REST request to delete photoRDF : {}", id);
-
-        String photoUri = Namespaces.getPhotoUri(id);
-
-        if (!RDFStore.isUriIsSubject(photoUri)) {
-            log.error("Photo with uri '" + photoUri + "' doesn't exist"
-                    + " in Fuseki database"
-                    + " (at least not a RDF subject)"
-                    + ", can't be deleted.");
-            return ResponseEntity.notFound().build();
-        }
-        log.debug("Photo with uri '" + photoUri + "' exists"
-                + ", this RDF subject will be deleted.");
-
-        RDFStore.deleteClassUri(photoUri);
-        if (RDFStore.isUriIsSubject(photoUri)) {
-            throw new FusekiUriNotAClass("Photo with uri " + photoUri
-                    + " not deleted.");
-        }
-        log.debug("Photo with uri '" + photoUri + "' doesn't exist"
-                + ", therefore it was deleted.");
+        String uri = Namespaces.getPhotoUri(id);
+        Node_URI node_URI = (Node_URI) NodeFactory.createURI(uri);
+        RDFStore.deleteClassUriWithTests(node_URI);
         return ResponseEntity.noContent().build();
     }
 
