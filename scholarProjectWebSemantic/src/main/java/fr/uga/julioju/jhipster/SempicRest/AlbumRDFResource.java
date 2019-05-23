@@ -1,8 +1,5 @@
 package fr.uga.julioju.jhipster.SempicRest;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URISyntaxException;
-
 import javax.validation.Valid;
 
 import org.apache.jena.graph.NodeFactory;
@@ -12,6 +9,7 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,7 +24,6 @@ import fr.uga.julioju.sempic.RDFConn;
 import fr.uga.julioju.sempic.RDFStore;
 import fr.uga.julioju.sempic.ReadAlbum;
 import fr.uga.julioju.sempic.ReadUser;
-import fr.uga.julioju.sempic.Exceptions.FusekiResourceForbidden;
 import fr.uga.julioju.sempic.Exceptions.FusekiSubjectNotFoundException;
 import fr.uga.julioju.sempic.entities.AlbumRDF;
 import fr.uga.julioju.sempic.entities.UserRDF;
@@ -45,7 +42,7 @@ public class AlbumRDFResource  {
         UserRDF userLogged = ReadUser.getUserLogged();
         if (! ReadUser.isUserLoggedAdmin(userLogged) &&
                 ! userLogged.getLogin().equals(album.getOwnerLogin())) {
-            throw new FusekiResourceForbidden(
+            throw new AccessDeniedException(
                     "The current user is '"
                     + userLogged.getLogin()
                     + "'. He is not the owner of the album with the id '"
@@ -62,13 +59,10 @@ public class AlbumRDFResource  {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated albumRDF,
      * or with status {@code 400 (Bad Request)} if the albumRDF is not valid,
      * or with status {@code 500 (Internal Server Error)} if the albumRDF couldn't be updated.
-     * @throws UnsupportedEncodingException
-     * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/albumRDF")
-    public ResponseEntity<AlbumRDF> updateUserRDF(
-            @Valid @RequestBody AlbumRDF albumRDF)
-            throws UnsupportedEncodingException {
+    public ResponseEntity<AlbumRDF> createOrUpdate (
+            @Valid @RequestBody AlbumRDF albumRDF) {
         log.debug("REST request to update AlbumRDF : {}", albumRDF);
 
         if (!RDFStore.isUriIsSubject(

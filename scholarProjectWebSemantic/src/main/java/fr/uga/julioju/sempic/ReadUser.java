@@ -1,6 +1,7 @@
 package fr.uga.julioju.sempic;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Node_URI;
@@ -8,9 +9,12 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import fr.uga.julioju.jhipster.security.SecurityUtils;
 import fr.uga.julioju.sempic.Exceptions.SpringSecurityTokenException;
+import fr.uga.julioju.sempic.Exceptions.TokenOutOfDateException;
 import fr.uga.julioju.sempic.entities.UserRDF;
 import fr.uga.julioju.sempic.entities.UserRDF.UserGroup;
 import fr.uga.miashs.sempic.model.rdf.SempicOnto;
@@ -46,7 +50,20 @@ public class ReadUser extends AbstractRead {
         if (login.isEmpty()) {
             throw new SpringSecurityTokenException();
         }
-        return ReadUser.getUserByLogin(login.get());
+        UserRDF userRDF  = ReadUser.getUserByLogin(login.get());
+        if (! SecurityUtils.isCurrentUserInRole(
+                    userRDF.getUserGroup().toString())
+        ) {
+            String springSecurityRole = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getAuthorities()
+                .stream()
+                .map(GrantedAuthority::toString)
+                .collect(Collectors.joining(" ,"));
+            throw new TokenOutOfDateException(springSecurityRole);
+        }
+        return userRDF;
     }
 
     public static boolean isUserLoggedAdmin(UserRDF userRDF) {

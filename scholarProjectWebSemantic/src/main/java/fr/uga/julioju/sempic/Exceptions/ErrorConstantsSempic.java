@@ -34,5 +34,9 @@ public final class ErrorConstantsSempic {
 
     protected static final URI SPRING_SECURITY_TOKEN_EXCEPTION =
         URI.create(PROBLEM_BASE_URL_SEMPIC +
-            "/SPRING-SECURITY-TOKEN-EXCEPTION");
+            "/spring-security-token-exception");
+
+    protected static final URI TOKEN_OUT_OF_DATE_EXCEPTION =
+        URI.create(PROBLEM_BASE_URL_SEMPIC +
+            "/token-out-of-date-exception");
 }

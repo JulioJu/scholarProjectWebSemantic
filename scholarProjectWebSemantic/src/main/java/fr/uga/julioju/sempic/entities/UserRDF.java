@@ -18,6 +18,9 @@ public class UserRDF {
     @NotNull
     private UserGroup userGroup;
 
+    public UserRDF() {
+    }
+
     public UserRDF(
             String login,
             String password,

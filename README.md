@@ -14,7 +14,7 @@
 * [scholarProjectWebSemantic details](#scholarprojectwebsemantic-details)
     * [Where is my code](#where-is-my-code)
     * [Why JHipster](#why-jhipster)
-* [Jena](#jena)
+    * [Why JWT for dev and limitations](#why-jwt-for-dev-and-limitations)
     * [Jena doc](#jena-doc)
     * [sempic.ttl](#sempicttl)
     * [How to install Jena](#how-to-install-jena)
@@ -267,8 +267,46 @@ Spring prod profil (keep dev profil)***
     and the teacher was happy with it. But make a front-end is not asked
     for the current scholar project.
 
+## Why JWT for dev and limitations
 
-# Jena
+* I continue to use JWT, even if when JHipster was deleted because
+    as it's stateless, this solution is very cool. When I delete
+    the database for each modification of the file sempic.owl, I keep
+    the credentials (as it's stateless). Very interesting to test API.
+
+* But a limitation of JWT is that it doesn't check than the user exists
+    in the database. A user deleted continue to have access to pages
+    reserved of authenticated users.
+    * Therefore for all API we must test existence in Database
+        (TODO test if JHipster
+        make always this check)
+
+* An other limitation is that it doesn\'t check the current role of the
+    user in the database.
+    If the user has a Spring Security Role
+    `UserRDF.UserGroup.ADMIN_GROUP.toString()`, then it's updated
+    to an other Spring Security Role
+    (e.g `UserRDF.UserGroup.NORMAL_USER_GROUP.toString()`),
+    filers in ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/jhipster/config/SecurityConfiguration.java
+    continue to give access to this user of pages with an audience limited
+    to `UserRDF.UserGroup.ADMIN_GROUP.toString()`.
+    * Therefore I test all permissions by retrieve Spring Security Role in Database
+    * TODO probably make a PR to JHipster to check page audience always without
+        SecurityConfiguration.java
+
+* Note: the hash is saved in
+     ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/jhipster/security/jwt/TokenProvider.java
+
+* Security management is kept fron the initial JHipster application generated thanks 6 beta 0
+    with some littles simplifications.
+
+* If the token is out of date with the Database State, send a HTTP 409 Conflict.
+    * See ./rest_request_with_vim.roast to check how to test this behaviour.
+        `UserRDF.UserGroup.ADMIN_GROUP.toString()` credentials.
+    * No need to test for
+        `UserRDF.UserGroup.NORMAL_USER_GROUP.toString()` as actually it no needs
+        any particular authorization Jena. Just check that the user exists
+        in database is suffisant.
 
 ## Jena doc
 

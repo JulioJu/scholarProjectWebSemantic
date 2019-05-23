@@ -44,10 +44,21 @@ END
 # one. If you want to be a normal user, do the opposite
 
 # AUTHORIZATION FOR ADMIN
-# Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOLFJPTEVfVVNFUiIsImV4cCI6MTU2MDY5MDkyOH0.rI26xUSMEwpObbEo8TYR3K6aDZCu53sXnWB_cQ3Ixi9j-sqe3PhZppnC1Gs-walzw84Z3wmz_oKRWQOBmZatSg
+# Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJBRE1JTl9HUk9VUCIsImV4cCI6MTU2MTE5MTgzMn0.HjNKAieaTr5b9ELyzTfIYakfDhQdvRybs-KGH7jZMw1cnyk6z2pNIrEAW8teTvL_3DMEAIbFEC7_vbX5vBMyDg
+
+# TOKEN OUT OF DATE FOR ADMIN, the Spring Security Role hash in the token is out
+# of date (this role is not in the Database);
+# (behaviour could be test with "/api/register")
+# ERROR 409 (Conflict)
+# Actually, tested only when we need
+# `UserRDF.UserGroup.ADMIN_GROUP.toString()` credentials.
+# No need to test for
+# `UserRDF.UserGroup.NORMAL_USER_GROUP.toString()` as actually it no needs
+# any particular authorization
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOLFJPTEVfVVNFUiIsImV4cCI6MTU2MDY5MDkyOH0.rI26xUSMEwpObbEo8TYR3K6aDZCu53sXnWB_cQ3Ixi9j-sqe3PhZppnC1Gs-walzw84Z3wmz_oKRWQOBmZatSg
 
 # AUTHORIZATION FOR USER
-Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiYXV0aCI6IlJPTEVfVVNFUiIsImV4cCI6MTU1OTY2ODIxM30.o-iAHZIJYskQE6yDan24MhwF9JhkJIQ5-3rp6J8OxUVyT2u_173sW7COv3390BVtA3UCAiilyJnAREPFAKuu3g
+# Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiYXV0aCI6IlJPTEVfVVNFUiIsImV4cCI6MTU1OTY2ODIxM30.o-iAHZIJYskQE6yDan24MhwF9JhkJIQ5-3rp6J8OxUVyT2u_173sW7COv3390BVtA3UCAiilyJnAREPFAKuu3g
 
 # ———————————————
 # ERROR 404 not found ]
@@ -101,6 +112,9 @@ GET {root}/api/rdfquery_listsubclassof/jioejiewijweiojfeji
 # ACTUALLY CAN'T UPDATE WITH IT.
 GET {root}/api/createInitialUser
 
+PUT {root}/api/register << END
+{{"login":"admin2","password":"admin2","userGroup":"ADMIN_GROUP"}}
+END
 # READ
 # —————
 GET {root}/api/userRDF/admin
@@ -115,6 +129,8 @@ GET {root}/api/userRDF/user
 DELETE {root}/api/userRDF/user
 
 DELETE {root}/api/userRDF/admin
+
+DELETE {root}/api/userRDF/admin2
 
 # ———————
 # ALBUM |

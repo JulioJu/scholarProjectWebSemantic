@@ -1,7 +1,5 @@
 package fr.uga.julioju.jhipster.SempicRest;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,13 +49,10 @@ public class PhotoRDFResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated photoRDF,
      * or with status {@code 400 (Bad Request)} if the photoRDF is not valid,
      * or with status {@code 500 (Internal Server Error)} if the photoRDF couldn't be updated.
-     * @throws UnsupportedEncodingException
-     * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/photoRDF")
-    public ResponseEntity<PhotoRDF> updatePhotoRDF(
-            @Valid @RequestBody PhotoRDF photoRDF)
-            throws UnsupportedEncodingException {
+    public ResponseEntity<PhotoRDF> createOrUpdate(
+            @Valid @RequestBody PhotoRDF photoRDF) {
         log.debug("REST request to update PhotoRDF : {}", photoRDF);
 
         Model model = ModelFactory.createDefaultModel();

@@ -1,6 +1,6 @@
 package fr.uga.julioju.jhipster.SempicRest;
 
-import java.io.UnsupportedEncodingException;
+import javax.validation.Valid;
 
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Node_URI;
@@ -10,10 +10,13 @@ import org.apache.jena.rdf.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -41,19 +44,18 @@ public class UserRDFResource  {
     }
 
     /**
-     * {@code PUT  /instantiateInitialUsers} : Creates admin and normal user
+     * {@code GET  /instantiateInitialUsers} : Creates admin and normal user
      *
      */
     @GetMapping("/createInitialUser")
-    public ResponseEntity<UserRDF[]> updateUserRDF()
-            throws UnsupportedEncodingException {
+    public ResponseEntity<UserRDF[]> createInitialiUser() {
         log.debug("REST request to instantiate initial users");
 
         Model model = ModelFactory.createDefaultModel();
         UserRDF normalUserRDF = new UserRDF(
                 "user",
                 passwordEncoder.encode("user"),
-                UserGroup.NORMAL_USER_GROUP
+                UserGroup.ADMIN_GROUP
             );;
         Resource normalUserResource = CreateResource
             .create(model, normalUserRDF);
@@ -71,16 +73,43 @@ public class UserRDFResource  {
             model.write(System.out, "turtle");
             RDFConn.saveModel(model);
         } else {
-            log.warn("User " + normalUserResource.getURI() + " or "
-                    + adminUserResource.getURI() + " already created");
+            log.warn("User '" + normalUserResource.getURI() + "' or '"
+                    + adminUserResource.getURI() + "' already created");
             // TODO
-            throw new UnsupportedOperationException("Can\'t update user "
-                    + "with login 'user' and 'admin'"
-                    + " (should be implemented later).");
+            throw new UnsupportedOperationException("Can\'t update user ");
         }
 
         return ResponseEntity.ok()
             .body(new UserRDF[] { normalUserRDF, adminUserRDF});
+    }
+
+    @PutMapping("/register")
+    public ResponseEntity<UserRDF> createOrUpdate(
+            @Valid @RequestBody UserRDF userRDF) {
+            ReadUser.getUserLogged();
+        if (!ReadUser.isUserLoggedAdmin(ReadUser.getUserLogged())) {
+            throw new AccessDeniedException("Only an administrator"
+                    + " could register a new user.");
+        }
+
+        UserRDF userRDFToSave = new UserRDF(
+                userRDF.getLogin(),
+                passwordEncoder.encode(userRDF.getPassword()),
+                userRDF.getUserGroup()
+        );
+        Model model = ModelFactory.createDefaultModel();
+        Resource UserRDFResource = CreateResource.create(model, userRDFToSave);
+        if (!RDFStore.isUriIsSubject((Node_URI) UserRDFResource.asNode())) {
+            log.debug("BELOW: PRINT MODEL THAT WILL BE SAVED\n—————————————");
+            model.write(System.out, "turtle");
+            RDFConn.saveModel(model);
+        } else {
+            log.warn("User '" + UserRDFResource.getURI() + "' already created");
+            // TODO
+            throw new UnsupportedOperationException("Can\'t update user ");
+        }
+        return ResponseEntity.ok()
+            .body(userRDFToSave);
     }
 
     /**

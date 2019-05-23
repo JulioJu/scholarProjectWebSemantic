@@ -1,7 +1,5 @@
 package fr.uga.julioju.jhipster.config;
 
-import fr.uga.julioju.jhipster.security.jwt.*;
-
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Bean;
@@ -21,6 +19,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.filter.CorsFilter;
 import org.zalando.problem.spring.web.advice.security.SecurityProblemSupport;
+
+import fr.uga.julioju.jhipster.security.jwt.JWTConfigurer;
+import fr.uga.julioju.jhipster.security.jwt.TokenProvider;
+import fr.uga.julioju.sempic.entities.UserRDF;
 
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
@@ -97,7 +99,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter implemen
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
             .authorizeRequests()
-            .antMatchers("/api/register").permitAll()
+            // .antMatchers("/api/register").permitAll()
+            // .antMatchers("/api/register").hasAuthority(UserRDF.UserGroup.ADMIN_GROUP.toString())
             .antMatchers("/api/activate").permitAll()
             .antMatchers("/api/authenticate").permitAll()
             .antMatchers("/api/account/reset-password/init").permitAll()
