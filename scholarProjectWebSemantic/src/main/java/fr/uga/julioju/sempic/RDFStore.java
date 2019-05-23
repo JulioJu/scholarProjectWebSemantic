@@ -68,6 +68,25 @@ public class RDFStore {
             RDFConn.cnxUpdateRequest(updateRequest);
     }
 
+    public static void deleteSubjectUri(Node_URI node_URI) {
+            // SPARQL syntax
+            // —————————————
+            // this.cnxUpdate("DELETE WHERE { <" + node_URI + "> ?p ?o }");
+            // Java
+            // —————————————
+            QuadAcc acc = new QuadAcc();
+            acc.addTriple(
+                    new Triple(
+                        node_URI,
+                        Var.alloc("p"),
+                        Var.alloc("o"))
+            );
+            UpdateRequest updateRequest =
+                new UpdateRequest(new UpdateDeleteWhere(acc));
+            log.debug("deleteClassUri\n" + updateRequest.toString());
+            RDFConn.cnxUpdateRequest(updateRequest);
+    }
+
     public static void deleteClassUriWithTests(Node_URI node_URI) {
         String uri = node_URI.getURI();
         if (!RDFStore.isUriIsSubject(node_URI)) {

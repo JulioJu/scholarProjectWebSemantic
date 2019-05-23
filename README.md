@@ -15,6 +15,7 @@
     * [Where is my code](#where-is-my-code)
     * [Why JHipster](#why-jhipster)
     * [Why JWT for dev and limitations](#why-jwt-for-dev-and-limitations)
+    * [Notes about Jackson](#notes-about-jackson)
     * [Jena doc](#jena-doc)
     * [sempic.ttl](#sempicttl)
     * [How to install Jena](#how-to-install-jena)
@@ -300,13 +301,49 @@ Spring prod profil (keep dev profil)***
 * Security management is kept fron the initial JHipster application generated thanks 6 beta 0
     with some littles simplifications.
 
-* If the token is out of date with the Database State, send a HTTP 409 Conflict.
-    * See ./rest_request_with_vim.roast to check how to test this behaviour.
-        `UserRDF.UserGroup.ADMIN_GROUP.toString()` credentials.
-    * No need to test for
-        `UserRDF.UserGroup.NORMAL_USER_GROUP.toString()` as actually it no needs
-        any particular authorization Jena. Just check that the user exists
-        in database is suffisant.
+* For the following
+    ```
+    PUT {root}/api/register << END                                                                                     |~
+    {{"login":"admin2","password":"admin2","userGroup":"ADMIN_GROUP"}}                                                 |~
+    END                                                                                                                |~
+    ```
+    For each PUT, PasswordEncoder.encode encode the field                                                            |~
+    `password` in a different way. Probably, it is stateless.                                                        |~
+
+* If the token is out of date with the Database State, send a HTTP 409 Conflict
+    (see ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/sempic/Exceptions/TokenOutOfDateException.java).
+    I test Token and Database)
+    * In case of the user logged is not saved in Database
+    * For API that needs
+       `UserRDF.UserGroup.ADMIN_GROUP.toString()`
+       if roles saved in the Token are out of date (see above in which case)
+    * Should be used for all CRUD API except
+        `GET {root}/api/userRDF/:login (in production, this API should also be protected)`
+        `GET {root}/api/createInitialUser` (In production, this API should not be available)
+
+ * Very important note: all logins are converted to lower case for
+     security reasons
+     See also https://cloud.google.com/blog/products/gcp/12-best-practices-for-user-account
+
+* TODO password should be tested to not be too weak.
+
+## Notes about Jackson
+
+* Following send error 500 and not 404. Don't know why, no investigated
+```java
+    public FusekiSubjectNotFoundException(Node_URI node_URI) {
+        super(ErrorConstantsSempic.FUSEKI_SUBJECT_NOT_FOUND,
+                "'" + node_URI.getURI() + "' not found in database"
+                + " (at least not a RDF subject)." ,
+                Status.NOT_FOUND);
+        this.node_URI = node_URI;
+    }
+```
+
+* By default Zalando doesn't manage status code. Status code seems to be managed by
+    ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/jhipster/web/rest/errors/ExceptionTranslator.java
+    * See also
+        ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/jhipster/config/JacksonConfiguration.java
 
 ## Jena doc
 

@@ -9,7 +9,6 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,7 +25,6 @@ import fr.uga.julioju.sempic.ReadAlbum;
 import fr.uga.julioju.sempic.ReadUser;
 import fr.uga.julioju.sempic.Exceptions.FusekiSubjectNotFoundException;
 import fr.uga.julioju.sempic.entities.AlbumRDF;
-import fr.uga.julioju.sempic.entities.UserRDF;
 
 /**
  * REST controller for managing AlbumRDFResource.
@@ -39,17 +37,12 @@ public class AlbumRDFResource  {
 
     /** Test if user logged has permissions to manage album */
     private void testUserLoggedPermissions(AlbumRDF album) {
-        UserRDF userLogged = ReadUser.getUserLogged();
-        if (! ReadUser.isUserLoggedAdmin(userLogged) &&
-                ! userLogged.getLogin().equals(album.getOwnerLogin())) {
-            throw new AccessDeniedException(
-                    "The current user is '"
-                    + userLogged.getLogin()
-                    + "'. He is not the owner of the album with the id '"
-                    + album.getId()
-                    + "'. Furthermore he is not an administrator."
-                );
-        }
+        ReadUser.testUserLoggedPermissions(
+                "He is not the owner of the album with the id '"
+                + album.getId()
+                + "'"
+                , album.getOwnerLogin()
+        );
     }
 
     /**
@@ -109,6 +102,8 @@ public class AlbumRDFResource  {
         log.debug("REST request to delete albumRDF : {}", id);
         String uri = Namespaces.getAlbumUri(id);
         Node_URI node_URI = (Node_URI) NodeFactory.createURI(uri);
+        AlbumRDF albumRDF = ReadAlbum.readAlbum(id);
+        this.testUserLoggedPermissions(albumRDF);
         RDFStore.deleteClassUriWithTests(node_URI);
         return ResponseEntity.noContent().build();
     }

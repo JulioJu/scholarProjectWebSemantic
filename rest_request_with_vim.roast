@@ -5,13 +5,13 @@
 # <c-j> / <c-k> to toogle between displays.
 
 # ————————————————————————
-# Roast plugin variables |
+# Roast plugin variables | {{{1
 # ————————————————————————
 
 set root http://127.0.0.1:8080
 
 # —————————————
-# HTTP HEADERS |
+# HTTP HEADERS | {{{1
 # —————————————
 
 Accept: application/json, text/plain
@@ -19,7 +19,7 @@ Accept-Encoding: identity
 content-type: application/json
 
 # ————————————————————————————————————————————
-# REQUEST TO RETRIEVE AUTHENTIFICATION TOKEN  |
+# REQUEST TO RETRIEVE AUTHENTIFICATION TOKEN  | {{{1
 # ————————————————————————————————————————————
 
 POST {root}/api/authenticate << END
@@ -30,35 +30,64 @@ POST {root}/api/authenticate << END
 {{"username":"user","password":"user","rememberMe":true}}
 END
 
+# ERROR 401 (Unauthorized)
 POST {root}/api/authenticate << END
 {{"username":"admin","password":"admine","rememberMe":false}}
+END
+
+# VERY IMPORTANT NOTE: ALL LOGIN ARE CONVERTED TO LOWER CASE FOR
+# SECURITY REASONS
+POST {root}/api/authenticate << END
+{{"username":"anOtherUser","password":"anOtherUser","rememberMe":true}}
 END
 # Update the string following "Bearer" with the authentification token
 # retrieved by the request to retrieve authentification token (see above).
 
 # ———————————————
-# TOKEN          ]
+# TOKEN          ] {{{1
 # ———————————————
 
 # NOTE: if you want to be admin, uncomment the first one and comment the second
 # one. If you want to be a normal user, do the opposite
+# READ README.MD, ESPECIALLY SECTION ABOUT JWT
+# ————————————————————————————————————————————
+
+# Authorisation with correct Spring Security role
+# ———————————————————————
 
 # AUTHORIZATION FOR ADMIN
-# Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJBRE1JTl9HUk9VUCIsImV4cCI6MTU2MTE5MTgzMn0.HjNKAieaTr5b9ELyzTfIYakfDhQdvRybs-KGH7jZMw1cnyk6z2pNIrEAW8teTvL_3DMEAIbFEC7_vbX5vBMyDg
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJBRE1JTl9HUk9VUCIsImV4cCI6MTU2MTE5MTgzMn0.HjNKAieaTr5b9ELyzTfIYakfDhQdvRybs-KGH7jZMw1cnyk6z2pNIrEAW8teTvL_3DMEAIbFEC7_vbX5vBMyDg
 
-# TOKEN OUT OF DATE FOR ADMIN, the Spring Security Role hash in the token is out
+# AUTHORIZATION FOR USER
+# Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiYXV0aCI6IkFETUlOX0dST1VQIiwiZXhwIjoxNTYxMjA2MDIwfQ.lAZkwdbt0hisbJ4XwkG1lnuAIc5NLbOM8Qojf5ZS1ZoXU0f4DxZ43Y6nWe5q1jeCG2bzKSkZB5GxtNTO9dgdDw
+
+# AUTHORIZATION FOR anOtherUser
+# Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhbm90aGVydXNlciIsImF1dGgiOiJOT1JNQUxfVVNFUl9HUk9VUCIsImV4cCI6MTU2MTIyMjYzNX0.kdd4tTOpI-xrb5oEGnpXiD8Rc2rKtPKwFpfyy07dbJP3GV8BQfW6mEr1ouhJ_0-g8TAJ_MZbOI-v6VUXr-Aidw
+
+# Authorisation with outdated Spring Security roles
+# ———————————————————————
+
+# The Spring Security Role hash in the token is out
 # of date (this role is not in the Database);
-# (behaviour could be test with "/api/register")
 # ERROR 409 (Conflict)
-# Actually, tested only when we need
-# `UserRDF.UserGroup.ADMIN_GROUP.toString()` credentials.
-# No need to test for
-# `UserRDF.UserGroup.NORMAL_USER_GROUP.toString()` as actually it no needs
-# any particular authorization
-Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOLFJPTEVfVVNFUiIsImV4cCI6MTU2MDY5MDkyOH0.rI26xUSMEwpObbEo8TYR3K6aDZCu53sXnWB_cQ3Ixi9j-sqe3PhZppnC1Gs-walzw84Z3wmz_oKRWQOBmZatSg
+# if it try to use resource that is reserved to
+# `UserRDF.UserGroup.ADMIN_GROUP.toString()`
+# (maybe all CRUD in onto-data).
+# (behaviour could be tested with "/api/register")
+
+# AUTHORIZATION FOR ADMIN
+# Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOLFJPTEVfVVNFUiIsImV4cCI6MTU2MDY5MDkyOH0.rI26xUSMEwpObbEo8TYR3K6aDZCu53sXnWB_cQ3Ixi9j-sqe3PhZppnC1Gs-walzw84Z3wmz_oKRWQOBmZatSg
 
 # AUTHORIZATION FOR USER
 # Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiYXV0aCI6IlJPTEVfVVNFUiIsImV4cCI6MTU1OTY2ODIxM30.o-iAHZIJYskQE6yDan24MhwF9JhkJIQ5-3rp6J8OxUVyT2u_173sW7COv3390BVtA3UCAiilyJnAREPFAKuu3g
+
+# Others 409 ERRORS (CONFLICT)
+# ———————————————————————————
+
+# Simply delete the current user logged in database, then try to make a CRUD.
+# Should send this error for all CRUD API except
+# `GET {root}/api/userRDF/:login (in production, this API should also be protected)`
+# `GET {root}/api/createInitialUser` (In production, this API should not be available)
 
 # ———————————————
 # ERROR 404 not found ]
@@ -67,8 +96,10 @@ Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX
 GET {root}/api/jioejiewijweiojfeji
 
 # —————————————————————
-# Fuseki Administration ]
+# Fuseki Administration ] {{{1
 # —————————————————————
+# TODO In production, this API should not be available
+# Or only availaible for localhost
 
 # Start Fuseki (restart if there already a Fuseki Server Standalone).
 # Use ./FusekiStop.sh to stop Fuseki if it exists,
@@ -88,7 +119,7 @@ GET {root}/api/stopFusekiProcess
 GET {root}/api/restartFusekiProcess
 
 # ————————————————
-# LIST SUBCLASS OF ]
+# LIST SUBCLASS OF ] {{{1
 # ————————————————
 
 GET {root}/api/rdfquery_listsubclassof
@@ -103,18 +134,44 @@ GET {root}/api/rdfquery_listsubclassof/Person
 GET {root}/api/rdfquery_listsubclassof/jioejiewijweiojfeji
 
 # ——————
-# USERS ]
+# USERS ] {{{1
 # ——————
 
 # CREATE / UPDATE
 # ———————————————
 # Create a userRDF of the user currently logged
-# ACTUALLY CAN'T UPDATE WITH IT.
+# CAN'T UPDATE WITH the following.
 GET {root}/api/createInitialUser
 
+# register
+# ——
+
+# VERY IMPORTANT NOTE: ALL LOGIN ARE CONVERTED TO LOWER CASE FOR
+# SECURITY REASONS
+
+# HTTP STATUS CODE 201 (CREATION) for creation
+# only an administrator could save a new user
+# HTTP STATUS CODE 200 (OK) for update
+# only the user that own its count or an administrator
+# could update a user
+# We could see that it's very powerful,
+# For each PUT, PasswordEncoder.encode encode the field
+# `password` in a different way. Probably, it is stateless.
+
+
+# Error 409 if the HTTP authentification header is those of `anOtherUser`,
+# but this one in not in the Database.
 PUT {root}/api/register << END
-{{"login":"admin2","password":"admin2","userGroup":"ADMIN_GROUP"}}
+{{"login":"anOtherUser","password":"anOtherUser","userGroup":"NORMAL_USER_GROUP"}}
 END
+
+# Only a member of ADMIN_GROUP could change the user group.
+# To test it, use the HTTP authentification header of `anOtherUser'
+# then test following link
+PUT {root}/api/register << END
+{{"login":"anOtherUser","password":"anOtherUser","userGroup":"ADMIN_GROUP"}}
+END
+
 # READ
 # —————
 GET {root}/api/userRDF/admin
@@ -122,18 +179,22 @@ GET {root}/api/userRDF/admin
 # UserGroup.USER_GROUP
 GET {root}/api/userRDF/user
 
+GET {root}/api/userRDF/anOtherUser
+
 
 # DELETE
 # ———————
+# HTTP STATUS CODE 204 (NO_CONTENT)
+
 # TODO test it, if it's delete Photos and Albums too
 DELETE {root}/api/userRDF/user
 
 DELETE {root}/api/userRDF/admin
 
-DELETE {root}/api/userRDF/admin2
+DELETE {root}/api/userRDF/anOtherUser
 
 # ———————
-# ALBUM |
+# ALBUM | {{{1
 # ———————
 
 # CREATE / UPDATE
@@ -174,8 +235,17 @@ PUT {root}/api/albumRDF << END
 }}
 END
 
+PUT {root}/api/albumRDF << END
+{{
+    "id": 2,
+    "ownerLogin": "anOtherUser"
+}}
+END
 # READ
 # —————
+
+# TODO only for current user or sharedWith
+
 GET {root}/api/albumRDF/1
 
 # ERROR 403 if the user logged is `user` (as the ownerLogin is admin)
@@ -191,7 +261,7 @@ DELETE {root}/api/albumRDF/1
 DELETE {root}/api/albumRDF/2
 
 # ——————
-# PHOTO |
+# PHOTO | {{{1
 # ——————
 
 # CREATE / UPDATE
@@ -243,3 +313,4 @@ GET {root}/api/photoRDF/1
 
 DELETE {root}/api/photoRDF/1
 
+# vim:foldmethod=marker:foldlevel=0

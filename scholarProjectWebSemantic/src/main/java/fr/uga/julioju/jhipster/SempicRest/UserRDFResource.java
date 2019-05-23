@@ -30,6 +30,8 @@ import fr.uga.julioju.sempic.entities.UserRDF.UserGroup;
 
 /**
  * REST controller for managing UserRDFREsource.
+ * VERY IMPORTANT NOTE: ALL LOGIN ARE CONVERTED TO LOWER CASE FOR
+ * SECURITY REASONS
  */
 @RestController
 @RequestMapping("/api")
@@ -43,6 +45,15 @@ public class UserRDFResource  {
         this.passwordEncoder = passwordEncoder;
     }
 
+    /** Test if user logged has permissions to manage user */
+    private void testUserLoggedPermissions(String login) {
+        ReadUser.testUserLoggedPermissions(
+                "He is not the user you try to change ('"
+                + login
+                + "')"
+                , login
+        );
+    }
     /**
      * {@code GET  /instantiateInitialUsers} : Creates admin and normal user
      *
@@ -73,43 +84,61 @@ public class UserRDFResource  {
             model.write(System.out, "turtle");
             RDFConn.saveModel(model);
         } else {
-            log.warn("User '" + normalUserResource.getURI() + "' or '"
-                    + adminUserResource.getURI() + "' already created");
             // TODO
-            throw new UnsupportedOperationException("Can\'t update user ");
+            throw new UnsupportedOperationException("Users 'admin' and 'user'"
+                    + " can't be updated with this API.");
         }
 
         return ResponseEntity.ok()
             .body(new UserRDF[] { normalUserRDF, adminUserRDF});
     }
 
+    /**
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated albumRDF,
+     * or with status {@code 201 (created)} and with body the created albumRDF,
+     */
     @PutMapping("/register")
     public ResponseEntity<UserRDF> createOrUpdate(
             @Valid @RequestBody UserRDF userRDF) {
-            ReadUser.getUserLogged();
-        if (!ReadUser.isUserLoggedAdmin(ReadUser.getUserLogged())) {
-            throw new AccessDeniedException("Only an administrator"
-                    + " could register a new user.");
-        }
-
         UserRDF userRDFToSave = new UserRDF(
-                userRDF.getLogin(),
+                userRDF.getLogin().toLowerCase(),
                 passwordEncoder.encode(userRDF.getPassword()),
                 userRDF.getUserGroup()
         );
+        this.testUserLoggedPermissions(userRDFToSave.getLogin());
         Model model = ModelFactory.createDefaultModel();
         Resource UserRDFResource = CreateResource.create(model, userRDFToSave);
         if (!RDFStore.isUriIsSubject((Node_URI) UserRDFResource.asNode())) {
+            if (!ReadUser.isUserLoggedAdmin(ReadUser.getUserLogged())) {
+                throw new AccessDeniedException("Only an administrator"
+                        + " could register a new user.");
+            }
             log.debug("BELOW: PRINT MODEL THAT WILL BE SAVED\n—————————————");
             model.write(System.out, "turtle");
             RDFConn.saveModel(model);
+            return ResponseEntity.status(20).body(userRDFToSave);
         } else {
-            log.warn("User '" + UserRDFResource.getURI() + "' already created");
-            // TODO
-            throw new UnsupportedOperationException("Can\'t update user ");
+            log.info("User '" + UserRDFResource.getURI() + "' already created");
+            // NOTE: ReadUser.getUserLogged() is triggered twice, in functions
+            // this.testUserLoggedPermissions() and in function below
+            UserRDF userLogged = ReadUser.getUserLogged();
+            if (!ReadUser.isUserLoggedAdmin(userLogged)) {
+                if (! userRDFToSave.getUserGroup().equals(userLogged.getUserGroup())) {
+                    throw new AccessDeniedException("Only a "
+                            + UserGroup.ADMIN_GROUP.toString()
+                            + " could change the user group."
+                            + " Current UserGroup of the user '"
+                            + userRDFToSave.getLogin()
+                            + "'" + " is '" + userLogged.getUserGroup()
+                            + "'. You tried to change it to '"
+                            + userRDFToSave.getUserGroup());
+                }
+            }
+            RDFStore.deleteClassUri((Node_URI) NodeFactory.createURI(
+                        Namespaces.getUserUri(userRDFToSave.getLogin())));
+            RDFConn.saveModel(model);
+            return ResponseEntity.ok().body(userRDFToSave);
         }
-        return ResponseEntity.ok()
-            .body(userRDFToSave);
     }
 
     /**
@@ -120,6 +149,7 @@ public class UserRDFResource  {
      */
     @GetMapping("/userRDF/{login}")
     public ResponseEntity<UserRDF> getUser(@PathVariable String login) {
+        login = login.toLowerCase();
         log.debug("REST request to get userRDF : {}", login);
         return ResponseEntity.ok().body(ReadUser.getUserByLogin(login));
     }
@@ -132,10 +162,12 @@ public class UserRDFResource  {
      */
     @DeleteMapping("/userRDF/{login}")
     public ResponseEntity<Void> deleteUser(@PathVariable String login) {
+        login = login.toLowerCase();
         log.debug("REST request to delete userRDF : {}", login);
+        this.testUserLoggedPermissions(login);
         String uri = Namespaces.getUserUri(login);
         Node_URI node_URI = (Node_URI) NodeFactory.createURI(uri);
-        RDFStore.deleteClassUriWithTests(node_URI);
+        RDFStore.deleteSubjectUri(node_URI);
         return ResponseEntity.noContent().build();
     }
 

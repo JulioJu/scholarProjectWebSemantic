@@ -9,10 +9,12 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import fr.uga.julioju.jhipster.security.SecurityUtils;
+import fr.uga.julioju.sempic.Exceptions.FusekiSubjectNotFoundException;
 import fr.uga.julioju.sempic.Exceptions.SpringSecurityTokenException;
 import fr.uga.julioju.sempic.Exceptions.TokenOutOfDateException;
 import fr.uga.julioju.sempic.entities.UserRDF;
@@ -29,8 +31,28 @@ public class ReadUser extends AbstractRead {
         return AbstractRead.read((Node_URI) NodeFactory.createURI(uri));
     }
 
+    /** Test if user logged has permissions to manage album */
+    public static void testUserLoggedPermissions(String message,
+            String loginResourceOwner) {
+        UserRDF userLogged;
+        try {
+            userLogged = ReadUser.getUserLogged();
+        } catch (FusekiSubjectNotFoundException e) {
+            throw new TokenOutOfDateException(e);
+        }
+        if (! ReadUser.isUserLoggedAdmin(userLogged) &&
+                ! userLogged.getLogin().equals(loginResourceOwner)) {
+            throw new AccessDeniedException(
+                    "The current user is '"
+                    + userLogged.getLogin()
+                    + "'. " + message
+                    + "'. Furthermore he is not an administrator."
+            );
+        }
+    }
+
     public static UserRDF getUserByLogin(String login) {
-        log.debug("REST request to get userRDF : {}", login);
+        log.debug("Get userRDF : {}", login);
         Model model = ReadUser.read(login);
         String password = model.listObjectsOfProperty(SempicOnto.usersPassword)
             .toList().get(0).toString();
