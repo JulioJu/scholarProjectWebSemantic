@@ -34,6 +34,7 @@ public class ReadUser extends AbstractRead {
     /** Test if user logged has permissions to manage album */
     public static void testUserLoggedPermissions(String message,
             String loginResourceOwner) {
+        log.debug("\n\nTest if the user logged has permissions");
         UserRDF userLogged;
         try {
             userLogged = ReadUser.getUserLogged();

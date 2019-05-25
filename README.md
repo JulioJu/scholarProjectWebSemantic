@@ -16,8 +16,13 @@
     * [Why JHipster](#why-jhipster)
     * [Why JWT for dev and limitations](#why-jwt-for-dev-and-limitations)
     * [Notes about Jackson](#notes-about-jackson)
-    * [Jena doc](#jena-doc)
-    * [sempic.ttl](#sempicttl)
+* [Documentations about Web Semantic](#documentations-about-web-semantic)
+    * [Courses and MOOC and generalities](#courses-and-mooc-and-generalities)
+    * [Ontologies](#ontologies)
+    * [Jena Documentation](#jena-documentation)
+    * [Jena TDB2 vs Jena Fuseki2 vs OpenLink Virtuoso and Linked Data Platform](#jena-tdb2-vs-jena-fuseki2-vs-openlink-virtuoso-and-linked-data-platform)
+        * [Why Fuseki is completely not a Linked Data Platform](#why-fuseki-is-completely-not-a-linked-data-platform)
+    * [Fuseki and TDB, sempic.ttl](#fuseki-and-tdb-sempicttl)
     * [How to install Jena](#how-to-install-jena)
     * [Construct a Jena Query](#construct-a-jena-query)
         * [Sparql syntax](#sparql-syntax)
@@ -25,7 +30,11 @@
         * [Java API 2) Algebra form of the query](#java-api-2-algebra-form-of-the-query)
         * [Java API, Query](#java-api-query)
         * [See also](#see-also)
-        * [Jena DELETE](#jena-delete)
+    * [Jena DELETE](#jena-delete)
+        * [Cascading delete](#cascading-delete)
+        * [Delete before update](#delete-before-update)
+    * [Limitations of Fuseki](#limitations-of-fuseki)
+        * [No informations about success](#no-informations-about-success)
 * [Fuseki serious troubleshooting](#fuseki-serious-troubleshooting)
     * [Description](#description)
         * [Succession of REQUESTs](#succession-of-requests)
@@ -37,7 +46,7 @@
         * [Manage Fuseki standalone with REST API?](#manage-fuseki-standalone-with-rest-api)
         * [The solution: Fuseki standalone managed by the App](#the-solution-fuseki-standalone-managed-by-the-app)
         * [Other solutions studied](#other-solutions-studied)
-    * [StackTrace « Iterator used inside a different transaction »](#stacktrace-iterator-used-inside-a-different-transaction)
+    * [StackTrace « Iterator used inside a different transaction » and links](#stacktrace-iterator-used-inside-a-different-transaction-and-links)
 * [Notes on Spring](#notes-on-spring)
     * [Spring boot arguments](#spring-boot-arguments)
     * [Spring Devtools / hot swapping (watch mode)](#spring-devtools--hot-swapping-watch-mode)
@@ -145,12 +154,13 @@ All API implemented are described in this file.
 
 #### The Vim Plugin roast.vim
 
+This plugin was advised in an https://tuppervim.org/ of Paris.
+
 Thanks ./rest_request_with_vim.roast we could test API without front, in Vim.
 It manages authentifications tokens automatically.
 See https://github.com/sharat87/roast.vim
 
 There are alternatives, non vimesque solutions.
-
 
 * robot.framwork (at the TupperVim they say me that it's the better)
     Generic test automation framework for acceptance testing and ATDD.
@@ -162,10 +172,54 @@ There are alternatives, non vimesque solutions.
 * postman
     https://www.getpostman.com/
 
+* Note: To copy request in Wireshark to use it see notice below
+    * On Vim Roast, add `http://` in the `HOST` request header.
+        * Then to make a request simply use something like
+        `GET /path`.
+        * If the HOST is `http://google.fr`, when you will
+            press enter to `GET /PATH` it will trigger a
+            HTTP GET request to `http://google.fr/path`
+        * TODO see https://github.com/sharat87/roast.vim/issues/14
+
+* I've posted lot of issues at
+    https://github.com/sharat87/roast.vim/issues?utf8=✓&q=author:JulioJu+
+
+* TODO I've two new ideas of issues to post:
+    1. Add type for rescue Wireshark headers in the documentation
+    2. Add a template to retrieve authentification header (as it was
+        shown at https://github.com/baverman/vial-http but this plugin was buggy
+        when it was presented)
+    3. Automate tests
+    5. Comparaison with vim-rest-console.
+
+* Note vial-http is not compatible with Python 3
+    https://github.com/baverman/vial-http/issues/13
+
+* Probably the best alternative is https://github.com/diepm/vim-rest-console/
+    * To remove header appends automatically simply use something like that:
+        `Accept:`
+    * Explications: `curl http://google.com` appends some headers automatically
+        like `Accept: */*`. To remove it simply use
+        `curl http://google.com -H 'Accept:`. In Wireshark we see that the
+        header Accept is not append.
+    * Note that the problem with this plugin is as there isn't
+        bash heredoc to limit the Post request as with the roast plugin,
+        if there are carriage return in a non JSON POST request there are
+        some troubleshootings.
+        ```
+        POST http://google.fr
+        toto
+        titi
+        ```
+        send a `tototiti` request. Add "" between both lines cause this
+        plugin to crash.
+
 #### Fuseki Administration
 
 * If you don't want use the app, you could use Fuseki administration at
     `localhost:3000`.
+
+* But it seams we could only make `QUERY`
 
 ####  Wireshark
 
@@ -184,6 +238,23 @@ Start Wireshark with `gksudo wireshark & ; disown %1`
 4. In « Apply a display filter », type `http`
 
 Note: verify the tcpdump is ordered by `N°`.
+
+* Note: To copy request in Wireshark to use it in vim roast or other tool
+    simply
+    1. double click on the row of the green pan
+    2. A new window appears with two pans
+    3. On the top pan, unfold « Hyptertext Transfer Protocol »
+    4. Select the blue link « `[Full request URI:
+       http://localhost…]` »
+       (as it we are sure
+       that we are on the second tab named « Reassembled TCP »).
+    5. On its bottom pan righ click anywhere
+    6. contextual menu appears
+    7. copy
+    8. as Printable text
+ * When we copy and past a request from Wireshark, if it's an UNICODE
+     char it is correctly copy and past even if it is symbolised
+     by « . » on Wireshark. Tested with char « ¿ ».
 
 ### Teacher's instructions
 
@@ -345,7 +416,80 @@ Spring prod profil (keep dev profil)***
     * See also
         ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/jhipster/config/JacksonConfiguration.java
 
-## Jena doc
+# Documentations about Web Semantic
+
+## Courses and MOOC and generalities
+
+* The Course of M.  Atencias: http://imss-www.upmf-grenoble.fr/~atenciam/WS/
+    * Two well understand http://imss-www.upmf-grenoble.fr/~atenciam/WS/5-owl.pdf
+        see the Protege software.
+    * What is a statement: https://stackoverflow.com/questions/21391135/what-is-the-owlnothing-class-designed-to-do/21391737
+    * Nodes in hierarchy:
+        * http://soft.vub.ac.be/svn-pub/PlatformKit/platformkit-kb-owlapi3-doc/doc/owlapi3/javadoc/org/semanticweb/owlapi/reasoner/Node.html
+        * https://stackoverflow.com/questions/21391135/what-is-the-owlnothing-class-designed-to-do/21391737
+        * https://en.wikipedia.org/wiki/Semantic_Web
+    * ***The MOOC from INRIA*** (in french)
+        * About: https://www.fun-mooc.fr/courses/course-v1:inria+41002+self-paced/about
+        1. Semaine 1 « Vers un web de données liées »
+            https://www.fun-mooc.fr/c4x/inria/41002S02/asset/C013FG-W1.pdf
+        2. Semaine 2 « Le modèle de données RDF »
+            https://www.fun-mooc.fr/c4x/inria/41002S02/asset/C013FG-W2.pdf
+        3. Semaine 3 « Le langage de requête SPARQL »
+            https://www.fun-mooc.fr/c4x/inria/41002S02/asset/C013FG-W3.pdf
+        4. Semaine 4 « Ontologies et schémas RDFS »
+            https://www.fun-mooc.fr/c4x/inria/41002S02/asset/C013FG-W4.pdf
+        5. Semaine 5 « Formalisation en OWL »
+            https://www.fun-mooc.fr/c4x/inria/41002S02/asset/C013FG-W5.pdf
+        6. Semaine 6 « Des schémas particuliers »
+            https://www.fun-mooc.fr/c4x/inria/41002S02/asset/C013FG-W6.pdf
+        7. Semaine 7 « Vers plus d’intégration de données »
+            https://www.fun-mooc.fr/c4x/inria/41002S02/asset/C013FG-W7.pdf
+
+* Why the original idea of Tim Beners-Lee is dead.
+    * https://hackernoon.com/semantic-web-is-dead-long-live-the-ai-2a5ea0cf6423
+    * https://twobithistory.org/2018/05/27/semantic-web.html
+    * https://www.forbes.com/sites/cognitiveworld/2018/08/03/the-importance-of-schema-org/
+
+* What is Linked Data
+    https://en.wikipedia.org/wiki/Linked_data
+    Datasets are: DBpedia, Wikidata, GeoNames, etc.
+    * In Wikipedia (I was a Wikipedia Contributor),
+        they use https://www.mediawiki.org/wiki/Extension:LinkedWiki
+        to trigger SPARQL queries
+    * Very cool Thesis in French about Linked Data
+        https://tel.archives-ouvertes.fr/tel-02003672/document (1 feb 2019).
+
+## Ontologies
+
+* See also
+    * https://en.wikipedia.org/wiki/Template:Semantic_Web
+    * https://www.w3.org/wiki/Good_Ontologies
+
+* Maybe a good model to make a new Ontology is
+    https://www.w3.org/Submission/vcard-rdf/
+    It's a [member submission](https://www.w3.org/wiki/Good_Ontologies),
+    therefore less than a draft!
+    But it's a very simple Ontology
+    See an example non official of an Ontology :
+    http://content.scottstreit.com/Semantic_Web/Assignments/Resources/Protege/protegeLab/original_vCard/vCard.owl
+    (should be downloaded, or view-source in Firefox).
+
+> The Semantic Web provides a common framework that allows data to be shared and
+> reused across application, enterprise, and community boundaries
+> (W3C)
+
+* Ontology
+     > Ontologies are a formal way to describe taxonomies and classification
+     > networks, essentially defining the structure of knowledge for various
+     > domains: the nouns representing classes of objects and the verbs
+     > representing relations between the objects.
+     > https://en.wikipedia.org/wiki/Web_Ontology_Language
+     * See also https://en.wikipedia.org/wiki/Web_Ontology_Language#Ontologies
+        https://en.wikipedia.org/wiki/Ontology_(information_science)#Components
+    * RDF is an Ontology language
+        https://en.wikipedia.org/wiki/Web_Ontology_Language#Ontologies
+
+## Jena Documentation
 
 * Note that Fuseki documentation has several break links. Use Google to
     search pages pointed by dead links.
@@ -355,13 +499,61 @@ Spring prod profil (keep dev profil)***
 
 * All JavaDoc for all projects are at https://jena.apache.org/documentation/javadoc/
 
-## sempic.ttl
+## Jena TDB2 vs Jena Fuseki2 vs OpenLink Virtuoso and Linked Data Platform
+
+* Jena TDB2 and OpenLink Virtuoso are databases, more precisely a « LargeTripleStores »
+    * For comparaison see
+        https://www.w3.org/wiki/LargeTripleStores#OpenLink_Virtuoso_v7.2B_.2839.8B.2B_explicit.3B_uncounted_virtual.2Finferred.29
+    * See also https://www.w3.org/wiki/RdfStoreBenchmarking
+
+* Jena Fuseki is a REST Server, it could serve a Jena TDB2 database or
+    OpenLink Virtuoso database.
+    * See https://stackoverflow.com/questions/27958212/is-it-possible-to-add-virtuoso-as-a-storage-provider-in-jena-fuseki
+
+* Linked Data Platform specification (REST specification)
+    * It's not implemented for Fuseki (see below).
+    * (originally by IBM)
+    * Virtuoso implements Linked Data Platform
+        http://vos.openlinksw.com/owiki/wiki/VOS/VirtLDP
+    * See also https://en.wikipedia.org/wiki/Linked_Data_Platform
+
+* Apache Marmotta is build on top of RDF4J (also called Sesame)
+    * RDF4J, contrary to TDB2 does not support OWL
+    * https://en.wikipedia.org/wiki/Apache_Jena
+
+* See also comparaison of triplesstores
+    https://en.wikipedia.org/wiki/Comparison_of_triplestores
+
+* The teacher cited OpenLink Virtuso
+    (a proprietary software with open sources parts) and says
+    that is more complicated to configure at startup.
+
+### Why Fuseki is completely not a Linked Data Platform
+
+* See my comments at ./rest_request_fuseki.roast
+    * Shortly:
+        POST request to update a resource seems contains non ASCII
+        characters that could not be retrieved by Wireshark
+        when we copy and past.
+        When we copy and past a request from Wireshark, if it's an UNICODE
+        char it is correctly copy and past even if it is symbolised
+        by « . » on Wireshark.
+
+
+## Fuseki and TDB, sempic.ttl
 * To understand the file `sempic.ttl` give by the teacher, read
 
+1. official doc
 > The TDB2 database can be in a configuration file, either a complete server
 > configuration (see below) or as an entry in the FUSEKI_BASE/configuration/
 > area of the full server.
 https://jena.apache.org/documentation/tdb2/tdb2_fuseki.html
+
+2.  README in the official project
+> Note that the Fuseki UI does not provide a way to create TDB2 databases; a
+> configuration file must be used. Once setup, upload, query and graph editting
+> will be routed to the TDB2 database.
+https://github.com/apache/jena/blob/master/jena-db/use-fuseki-tdb2.md
 
 ## How to install Jena
 
@@ -393,7 +585,7 @@ to not in a Java Program
 
 See also https://en.wikipedia.org/wiki/SQL_injection
 
-* But as it's not a standard, if we change of implementation it
+* But as it's a standard, if we change of implementation it
   could be a little more bit hard.
 
 ### Java API 1) syntax form of the query
@@ -513,52 +705,7 @@ You should see https://jena.apache.org/documentation/query/app_api.html
     They show the “StringBuilder style API for building query/update strings and
     parameterizing them if desired”.
 
-* The Course of M.  Atencias: http://imss-www.upmf-grenoble.fr/~atenciam/WS/
-    * Two well understand http://imss-www.upmf-grenoble.fr/~atenciam/WS/5-owl.pdf
-        see the Protege software.
-    * What is a statement: https://stackoverflow.com/questions/21391135/what-is-the-owlnothing-class-designed-to-do/21391737
-    * Nodes in hierarchy:
-        * http://soft.vub.ac.be/svn-pub/PlatformKit/platformkit-kb-owlapi3-doc/doc/owlapi3/javadoc/org/semanticweb/owlapi/reasoner/Node.html
-        * https://stackoverflow.com/questions/21391135/what-is-the-owlnothing-class-designed-to-do/21391737
-        * https://en.wikipedia.org/wiki/Semantic_Web
-    * https://www.fun-mooc.fr/c4x/inria/41002S02/asset/C013FG-W5.pdf
-    * ***The MOOC from INRIA*** (in french)
-        https://www.fun-mooc.fr/courses/inria/41002S02/session02/about
-
-* See also
-    * https://en.wikipedia.org/wiki/Template:Semantic_Web
-    * https://www.w3.org/wiki/Good_Ontologies
-
-* Maybe a good model to make a new Ontology is
-    https://www.w3.org/Submission/vcard-rdf/
-    It's a [member submission](https://www.w3.org/wiki/Good_Ontologies),
-    therefore less than a draft!
-    But it's a very simple Ontology
-    See an example non official of an Ontology :
-    http://content.scottstreit.com/Semantic_Web/Assignments/Resources/Protege/protegeLab/original_vCard/vCard.owl
-    (should be downloaded, or view-source in Firefox).
-
-> The Semantic Web provides a common framework that allows data to be shared and
-> reused across application, enterprise, and community boundaries
-> (W3C)
-
-* Ontology
-     > Ontologies are a formal way to describe taxonomies and classification
-     > networks, essentially defining the structure of knowledge for various
-     > domains: the nouns representing classes of objects and the verbs
-     > representing relations between the objects.
-     > https://en.wikipedia.org/wiki/Web_Ontology_Language
-     * See also https://en.wikipedia.org/wiki/Web_Ontology_Language#Ontologies
-        https://en.wikipedia.org/wiki/Ontology_(information_science)#Components
-    * RDF is an Ontology language
-        https://en.wikipedia.org/wiki/Web_Ontology_Language#Ontologies
-
-* Why the original idea of Tim Beners-Lee is dead.
-    * https://hackernoon.com/semantic-web-is-dead-long-live-the-ai-2a5ea0cf6423
-    * https://twobithistory.org/2018/05/27/semantic-web.html
-    * https://www.forbes.com/sites/cognitiveworld/2018/08/03/the-importance-of-schema-org/
-
-### Jena DELETE
+## Jena DELETE
 
 * For model already persisted in database,
     the method `deleteModel(Model m)` presented at
@@ -579,6 +726,44 @@ You should see https://jena.apache.org/documentation/query/app_api.html
     syntax and the Jena Java API.
     To write the method `deleteResource(Rsource r)` with Java API, I was
     inspired by the method `deleteModel(Model m)` of the teacher.
+
+
+### Cascading delete
+
+* Maybe read https://stackoverflow.com/questions/1109228/removing-individuals-properties-from-rdf?rq=1
+
+* As we could see in ./rest_request_fuseki.roast I've a problem with
+    cascading DELETE
+
+* DOCUMENTATION:
+    https://www.w3.org/TR/2013/REC-sparql11-update-20130321/#deleteWhere
+
+* My solution:
+    See the first request at ./rest_request_fuseki.roast (not implemented yet).
+
+### Delete before update
+
+* As I've explained in my code, we must delete a subject resource before update it
+    otherwise it appends (insert) news object and don't delete old one.
+
+* Therefore, Update can't be Atomic
+    (see https://en.wikipedia.org/wiki/Atomicity_(database_systems) )
+
+* FIXME maybe there is a solution of that, but I don't know.
+
+## Limitations of Fuseki
+
+### No informations about success
+
+* Like for DELETE, for a POST it seems there is no way to know if the resource added
+    already exist before.
+
+* As we could test in ./rest_request_fuseki.roast
+    there is no way to know if deletion is a success, if it deleted something.
+    * Probably when it fail is throw an exception
+    * TODO remove test after deletion at
+        ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/sempic/RDFStore.java
+        at function `RDFStore.deleteClassUriWithTests(node_URI);`
 
 # Fuseki serious troubleshooting
 
@@ -810,7 +995,12 @@ by my app, in a independent Thread.
     Fuseki 1.5 doesn't work with the current Sempic.ttl file, therefore
     can't test with it.
 
-## StackTrace « Iterator used inside a different transaction »
+## StackTrace « Iterator used inside a different transaction » and links
+
+***It's caused by
+https://github.com/apache/jena/blob/master/jena-db/jena-dboe-transaction/src/main/java/org/apache/jena/dboe/transaction/txn/IteratorTxnTracker.java***
+
+
 ```
 $ cd ../scholarProjectWebSemanticFusekiDatabase && fuseki-server
 [2019-05-10 18:15:47] Server     INFO  Apache Jena Fuseki 3.11.0

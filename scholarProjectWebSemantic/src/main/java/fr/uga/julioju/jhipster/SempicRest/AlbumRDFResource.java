@@ -73,6 +73,8 @@ public class AlbumRDFResource  {
         CreateResource.create(model, albumRDF);
         log.debug("BELOW: PRINT MODEL THAT WILL BE SAVED\n—————————————");
         model.write(System.out, "turtle");
+        RDFStore.deleteSubjectUri((Node_URI) NodeFactory.createURI(
+                    Namespaces.getAlbumUri(albumRDF.getId())));
         RDFConn.saveModel(model);
         return ResponseEntity.ok().body(albumRDF);
     }

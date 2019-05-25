@@ -1,8 +1,14 @@
 package fr.uga.julioju.sempic.entities;
 
+import javax.validation.constraints.NotNull;
+
 /** Anonyme, therefore don't extend {@link AbstractRDF} */
 public class PhotoDepictionAnonRDF  {
+
+    @NotNull
     private String depiction;
+
+    @NotNull
     private String[] literals;
 
     public PhotoDepictionAnonRDF() {

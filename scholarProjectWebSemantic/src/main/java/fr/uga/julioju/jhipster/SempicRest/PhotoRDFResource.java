@@ -1,15 +1,11 @@
 package fr.uga.julioju.jhipster.SempicRest;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import javax.validation.Valid;
 
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Node_URI;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
@@ -29,7 +25,6 @@ import fr.uga.julioju.sempic.Namespaces;
 import fr.uga.julioju.sempic.RDFConn;
 import fr.uga.julioju.sempic.RDFStore;
 import fr.uga.julioju.sempic.ReadPhoto;
-import fr.uga.julioju.sempic.entities.PhotoDepictionAnonRDF;
 import fr.uga.julioju.sempic.entities.PhotoRDF;
 import fr.uga.miashs.sempic.model.rdf.SempicOnto;
 
@@ -62,10 +57,6 @@ public class PhotoRDFResource {
                 photoRDF
                 );
 
-        // Delete photos before update, otherwise it appends
-        log.debug("Delete photos before update, otherwise it appends");
-        RDFStore.deleteClassUri((Node_URI) photoResource.asNode());
-
         // TODO use bag
         for (int depictionIndex = 0 ;
                 depictionIndex < photoRDF.getDepiction().length ;
@@ -90,14 +81,17 @@ public class PhotoRDFResource {
             }
             model.add(photoResource, SempicOnto.depicts, descriptionResource);
         }
+        //
+        // log.debug("BELOW: MODEL BEFORE IT SAVED\n—————————————");
+        // model.write(System.out, "turtle");
+        // // print the graph on the standard output
+        // log.debug("BELOW: PRINT RESOURCE BEFORE IT SAVED"
+        //         + "\n—————————————");
+        // photoResource.getModel().write(System.out, "turtle");
 
-        log.debug("BELOW: MODEL BEFORE IT SAVED\n—————————————");
-        model.write(System.out, "turtle");
-
-        // print the graph on the standard output
-        log.debug("BELOW: PRINT RESOURCE BEFORE IT SAVED"
-                + "\n—————————————");
-        photoResource.getModel().write(System.out, "turtle");
+        // Delete photos before update, otherwise it appends
+        log.debug("Delete photos before update, otherwise it appends");
+        RDFStore.deleteClassUri((Node_URI) photoResource.asNode());
 
         RDFConn.saveModel(model);
         log.debug("BELOW: PRINT MODEL SAVED\n—————————————");
@@ -116,51 +110,7 @@ public class PhotoRDFResource {
     @GetMapping("/photoRDF/{id}")
     public ResponseEntity<PhotoRDF> getPhoto(@PathVariable Long id) {
         log.debug("REST request to get photoRDF : {}", id);
-        Model model = ReadPhoto.read(id, true);
-        log.debug("BELOW: PRINT MODEL RETRIEVED\n—————————————");
-        model.write(System.out, "turtle");
-        if (model.isEmpty()) {
-            log.error("PhotoRDF with uri '"
-                    + Namespaces.getPhotoUri(id)
-                    + "' doesn't exist in Fuseki Database"
-                    + " (at least not a RDF subject).");
-            return ResponseEntity.notFound().build();
-        }
-        String albumIdWithDatatype =
-                model.listObjectsOfProperty(SempicOnto.albumId)
-                .toList().get(0).toString();
-        long albumId = Integer.parseInt(
-                albumIdWithDatatype
-                .substring(albumIdWithDatatype.lastIndexOf('/')+1)
-                );
-        List<Resource> depictObjects =
-            model.listObjectsOfProperty(SempicOnto.depicts)
-            .toList().parallelStream().map(RDFNode::asResource)
-            .collect(Collectors.toList());
-        PhotoDepictionAnonRDF[] photoDepictionRDF =
-            depictObjects.parallelStream().map(
-                r -> {
-                    String[] literalResources =
-                        model.listObjectsOfProperty(r, RDFS.label).toList()
-                        .parallelStream().map(RDFNode::toString)
-                        .toArray(String[]::new);
-                    // TODO it seams that properties are order from general to
-                    // specific
-                    // Not know if it's always that.
-                    List<RDFNode> properties =
-                        model.listObjectsOfProperty(r, RDF.type).toList();
-                    return new PhotoDepictionAnonRDF(
-                        properties.get(properties.size() - 1).toString(),
-                        literalResources
-                    );
-                }
-            ).toArray(PhotoDepictionAnonRDF[]::new);
-        PhotoRDF photoRDF = new PhotoRDF(
-                id,
-                albumId,
-                photoDepictionRDF
-                );
-        return ResponseEntity.ok().body(photoRDF);
+        return ResponseEntity.ok().body(ReadPhoto.getPhotoById(id));
     }
 
     /**

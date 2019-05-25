@@ -134,7 +134,7 @@ public class UserRDFResource  {
                             + userRDFToSave.getUserGroup());
                 }
             }
-            RDFStore.deleteClassUri((Node_URI) NodeFactory.createURI(
+            RDFStore.deleteSubjectUri((Node_URI) NodeFactory.createURI(
                         Namespaces.getUserUri(userRDFToSave.getLogin())));
             RDFConn.saveModel(model);
             return ResponseEntity.ok().body(userRDFToSave);
@@ -167,7 +167,7 @@ public class UserRDFResource  {
         this.testUserLoggedPermissions(login);
         String uri = Namespaces.getUserUri(login);
         Node_URI node_URI = (Node_URI) NodeFactory.createURI(uri);
-        RDFStore.deleteSubjectUri(node_URI);
+        RDFStore.deleteClassUriWithTests(node_URI);
         return ResponseEntity.noContent().build();
     }
 

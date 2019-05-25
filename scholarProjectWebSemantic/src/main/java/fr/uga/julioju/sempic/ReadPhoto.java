@@ -1,11 +1,16 @@
 package fr.uga.julioju.sempic;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.Node_URI;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpAsQuery;
 import org.apache.jena.sparql.algebra.op.OpBGP;
@@ -28,6 +33,9 @@ import org.apache.jena.vocabulary.RDFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fr.uga.julioju.sempic.Exceptions.FusekiSubjectNotFoundException;
+import fr.uga.julioju.sempic.entities.PhotoDepictionAnonRDF;
+import fr.uga.julioju.sempic.entities.PhotoRDF;
 import fr.uga.miashs.sempic.model.rdf.SempicOnto;
 
 public class ReadPhoto  {
@@ -100,7 +108,7 @@ public class ReadPhoto  {
                         Arrays.asList(new Expr[] {
                             new NodeValueNode(SempicOnto.depicts.asNode()),
                             new NodeValueNode(SempicOnto.albumId.asNode()),
-                            new NodeValueNode(SempicOnto.albumOwnerId.asNode())
+                            new NodeValueNode(SempicOnto.albumOwnerLogin.asNode())
                         })
                     )
             );
@@ -178,6 +186,53 @@ public class ReadPhoto  {
 
         Model m = RDFConn.cnxQueryConstruct(queryAlgebraBuild);
         return m;
+    }
+
+    public static PhotoRDF getPhotoById(Long id) {
+        Model model = ReadPhoto.read(id, true);
+        log.debug("BELOW: PRINT MODEL RETRIEVED\n—————————————");
+        model.write(System.out, "turtle");
+        if (model.isEmpty()) {
+            String uri = Namespaces.getPhotoUri(id);
+            throw new FusekiSubjectNotFoundException(
+                    (Node_URI) NodeFactory.createURI(uri)
+                    );
+        }
+        String albumIdWithDatatype =
+                model.listObjectsOfProperty(SempicOnto.albumId)
+                .toList().get(0).toString();
+        long albumId = Integer.parseInt(
+                albumIdWithDatatype
+                .substring(albumIdWithDatatype.lastIndexOf('/')+1)
+                );
+        List<Resource> depictObjects =
+            model.listObjectsOfProperty(SempicOnto.depicts)
+            .toList().parallelStream().map(RDFNode::asResource)
+            .collect(Collectors.toList());
+        PhotoDepictionAnonRDF[] photoDepictionRDF =
+            depictObjects.parallelStream().map(
+                r -> {
+                    String[] literalResources =
+                        model.listObjectsOfProperty(r, RDFS.label).toList()
+                        .parallelStream().map(RDFNode::toString)
+                        .toArray(String[]::new);
+                    // TODO it seams that properties are order from general to
+                    // specific
+                    // Not know if it's always that.
+                    List<RDFNode> properties =
+                        model.listObjectsOfProperty(r, RDF.type).toList();
+                    return new PhotoDepictionAnonRDF(
+                        properties.get(properties.size() - 1).toString(),
+                        literalResources
+                    );
+                }
+            ).toArray(PhotoDepictionAnonRDF[]::new);
+        PhotoRDF photoRDF = new PhotoRDF(
+                id,
+                albumId,
+                photoDepictionRDF
+                );
+        return photoRDF;
     }
 
 }

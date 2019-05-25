@@ -21,12 +21,14 @@
     
 
 
-    <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumOwnerId -->
+    <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumOwnerLogin -->
 
-    <owl:ObjectProperty rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumOwnerId">
+    <owl:ObjectProperty rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumOwnerLogin">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
         <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
         <rdfs:domain rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Album"/>
         <rdfs:range rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#User"/>
+        <rdfs:label xml:lang="en">album has owner</rdfs:label>
     </owl:ObjectProperty>
     
 
@@ -91,14 +93,6 @@
         <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty"/>
         <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
         <rdfs:label>in album</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumOwnerId -->
-
-    <owl:DatatypeProperty rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumOwnerId">
-        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty"/>
     </owl:DatatypeProperty>
     
 
@@ -201,20 +195,6 @@
         </owl:disjointUnionOf>
         <rdfs:label xml:lang="en">User</rdfs:label>
     </owl:Class>
-    
-
-
-    <!-- 
-    ///////////////////////////////////////////////////////////////////////////////////////
-    //
-    // Annotations
-    //
-    ///////////////////////////////////////////////////////////////////////////////////////
-     -->
-
-    <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumOwnerId">
-        <rdfs:label xml:lang="en">album has owner</rdfs:label>
-    </rdf:Description>
     
 
 

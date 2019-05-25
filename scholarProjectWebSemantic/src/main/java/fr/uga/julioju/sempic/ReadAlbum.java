@@ -33,7 +33,8 @@ public class ReadAlbum extends AbstractRead {
     public static AlbumRDF readAlbum(Long id) {
         log.debug("REST request to get albumRDF : {}", id);
         Model model = ReadAlbum.read(id);
-        String albumOwnerId = model.listObjectsOfProperty(SempicOnto.albumOwnerId)
+        String albumOwnerId =
+            model.listObjectsOfProperty(SempicOnto.albumOwnerLogin)
             .toList().get(0).toString();
         albumOwnerId = albumOwnerId.substring(albumOwnerId.lastIndexOf('/')+1);
         AlbumRDF albumRDF = new AlbumRDF(id, albumOwnerId);

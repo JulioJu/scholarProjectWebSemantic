@@ -1,0 +1,94 @@
+Accept: application/rdf+thrift
+User-Agent: Apache-Jena-ARQ/3.11.0
+Connection: Keep-Alive
+Accept-Encoding: gzip,deflate
+Host: http://localhost:3030
+
+GET /seMPIC/?QUEry=CONSTRUCT+%0A++%7B+%0A++++%3Chttp%3A%2F%2Ffr.uga.julioju.sempic%2FResourcesCreated%2Fuser%2Fanotheruser%3E+%3Fp+%3Fo+.%0A++%7D%0AWHERE%0A++%7B+%3Chttp%3A%2F%2Ffr.uga.julioju.sempic%2FResourcesCreated%2Fuser%2Fanotheruser%3E%0A++++++++++++++%3Fp++%3Fo%0A++%7D%0A
+
+content-Type: application/sparql-update
+
+# SO COOOOOOL: IT'S THE CASCADING DELETE I WANT
+# When we delete a user, it its albums, and it deletes album's photo
+POST /sempic << END
+DELETE WHERE
+{{
+  <http://fr.uga.julioju.sempic/ResourcesCreated/user/anotheruser> ?p1 ?o1 .
+  ?s2 ?p2 ?o2 .
+  ?s2 ?p3 <http://fr.uga.julioju.sempic/ResourcesCreated/user/anotheruser> .
+  ?s3 ?p4 ?s2
+}}
+END
+
+# FOLLOWING WORKS
+POST /sempic << END
+DELETE WHERE
+{{
+  <http://fr.uga.julioju.sempic/ResourcesCreated/user/anotheruser>  ?p ?o
+}}
+END
+
+# FOLLOWING DOES NOT WORK
+POST /sempic << END
+DELETE WHERE
+{{
+  ?s  ?p <http://fr.uga.julioju.sempic/ResourcesCreated/user/anotheruser> .
+}}
+END
+
+# FOLLOWING DOES NOT WORK
+POST /sempic << END
+DELETE WHERE
+{{
+  ?s   <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumOwnerId> <http://fr.uga.julioju.sempic/ResourcesCreated/user/anotheruser> .
+}}
+END
+
+# FOLLOWING DOES NOT WORK
+POST /sempic << END
+DELETE WHERE
+{{
+  ?s   <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumOwnerId> <http://fr.uga.julioju.sempic/ResourcesCreated/user/anotheruser>;
+  ?property ?value
+}}
+END
+
+# FOLLOWING DOES NOT WORK
+POST /sempic << END
+DELETE
+{{
+  ?s  ?p ?o
+}}
+WHERE {{
+  <http://fr.uga.julioju.sempic/ResourcesCreated/user/anotheruser>  ?p ?o.
+}}
+END
+
+# ——————————————————————————————————————————————————————————————————————————————
+
+User-Agent: Apache-Jena-ARQ/3.11.0
+# Commented cause of https://github.com/sharat87/roast.vim/issues/14
+# Transfer-Encoding: chunked
+Content-Type: application/rdf+thrift
+Host: http://localhost:3030
+Connection: Keep-Alive
+Accept-Encoding: gzip,deflate
+
+# Error 400: Parse error: org.apache.thrift.protocol.TProtocolException: Required
+# field 'S' was not present! Struct: RDF_Triple(S:null, P:null, O:null)
+# When we check with Wireshark we see that the POST request sent by Jena is
+# different of the following request.
+# Following is the copy and past request from Wireshark (see
+# README.md to check how to copy). But in Wireshark,
+# in the pan of the bottom, we see than there is characters symbolise by
+# « ..... » that are not on the following. Probably there are
+# non ASCII characters. Note that « .. » symbolixe the «  » character
+# and when we copy and past it is rendered correctly.
+# When we copy and past a request from Wireshark, if it's an UNICODE
+# char it is correctly copy and past even if it is symbolised
+# by « . » on Wireshark.
+
+
+POST /sempic/?default << END
+,5http://fr.uga.julioju.sempic/ResourcesCreated/album/1Jhttp://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumOwnerLogin<>http://fr.uga.julioju.sempic/ResourcesCreated/user/anotheruser,5http://fr.uga.julioju.sempic/ResourcesCreated/album/1/http://www.w3.org/1999/02/22-rdf-syntax-ns#type@http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Album
+<<END

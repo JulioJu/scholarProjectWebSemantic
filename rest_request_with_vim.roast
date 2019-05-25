@@ -169,7 +169,7 @@ END
 # To test it, use the HTTP authentification header of `anOtherUser'
 # then test following link
 PUT {root}/api/register << END
-{{"login":"anOtherUser","password":"anOtherUser","userGroup":"ADMIN_GROUP"}}
+{{"login":"anOtherUser", "password":"anOtherUser", "userGroup":"ADMIN_GROUP"}}
 END
 
 # READ
@@ -186,7 +186,12 @@ GET {root}/api/userRDF/anOtherUser
 # ———————
 # HTTP STATUS CODE 204 (NO_CONTENT)
 
-# TODO test it, if it's delete Photos and Albums too
+# Notice IMPORTANT:
+# When we delete a user, it its albums, and it deletes album's photo
+# (cascading delete)
+
+# BIG WARNING: DO NO DELETE ADMIN BEFORE USER OTHERWISE WE CAN'T DO ANYTHING
+
 DELETE {root}/api/userRDF/user
 
 DELETE {root}/api/userRDF/admin
@@ -208,7 +213,7 @@ DELETE {root}/api/userRDF/anOtherUser
 PUT {root}/api/albumRDF << END
 {{
     "id": 1,
-    "ownerLogin": "user"
+    "ownerLogin": "anotheruser"
 }}
 END
 
@@ -303,14 +308,55 @@ PUT {root}/api/photoRDF << END
 }}
 END
 
+# ERROR 404 because '
+# http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#yuoueiueuj' is not a RDF class
+PUT {root}/api/photoRDF << END
+{{
+    "id": 1,
+    "albumId": 1,
+    "depiction": [ {{"depiction": "yuoueiueuj", "literals": ["Medor"]}} ]
+}}
+
+# Ok
+# But when we retrieve it with GET, error 500 (out of bound exception)
+# FIXME
+PUT {root}/api/photoRDF << END
+{{
+    "id": 1,
+    "albumId": 1,
+    "depiction": [ {{"depiction": "Animal", "literals": []}} ]
+}}
+END
+
+# FIXME error 500 FIXME
+PUT {root}/api/photoRDF << END
+{{
+    "id": 1,
+    "albumId": 1,
+    "depiction": [ {{"depiction": "Animal"}} ]
+}}
+END
+
+# FIXME error 400
+PUT {root}/api/photoRDF << END
+{{
+    "id": 1,
+    "albumId": 1,
+    "depiction": [ {{"depiction": "yuoueiueuj", "literals": ["Médor"]}} ]
+}}
 # READ
 # —————
 
 GET {root}/api/photoRDF/1
+GET {root}/api/photoRDF/2
 
 # DELETE
 # ——————
 
 DELETE {root}/api/photoRDF/1
+
+Content-Type: application/xml
+
+GET http://localhost:8080
 
 # vim:foldmethod=marker:foldlevel=0

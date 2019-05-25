@@ -25,7 +25,7 @@ public class CreateResource  {
             userGroupRes
         );
 
-        userRessource.addProperty(SempicOnto.usersPassword,
+        userRessource.addLiteral(SempicOnto.usersPassword,
                 userRDF.getPassword());
 
         return userRessource;
@@ -36,8 +36,11 @@ public class CreateResource  {
                 Namespaces.getAlbumUri(albumRDF.getId()),
                 SempicOnto.Album
         );
-        albumRDFResource.addProperty(SempicOnto.albumOwnerId,
-                Namespaces.getUserUri(albumRDF.getOwnerLogin()));
+        albumRDFResource.addProperty(SempicOnto.albumOwnerLogin,
+                model.createResource(
+                    Namespaces.getUserUri(albumRDF.getOwnerLogin())
+                    )
+                );
         return albumRDFResource;
     }
 
