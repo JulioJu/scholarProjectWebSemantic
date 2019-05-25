@@ -66,7 +66,7 @@ public class UserRDFResource  {
         UserRDF normalUserRDF = new UserRDF(
                 "user",
                 passwordEncoder.encode("user"),
-                UserGroup.ADMIN_GROUP
+                UserGroup.NORMAL_USER_GROUP
             );;
         Resource normalUserResource = CreateResource
             .create(model, normalUserRDF);
@@ -94,8 +94,19 @@ public class UserRDFResource  {
     }
 
     /**
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated albumRDF,
+     * @param userRDF the userRDF
+     * @return the {@link ResponseEntity}
+     * with status {@code 200 (OK)} and with
+     * body the updated entity,
      * or with status {@code 201 (created)} and with body the created albumRDF,
+     * Errors:
+     * status {@code 400 (Bad Request)} if the albumRDF is not valid,
+     * status {@code 500 (Internal Server Error)} if the albumRDF couldn't be updated.
+     * status {@code 409 (Conflict)} if the authentification token is outdated with the state of the database
+     * status {@code 401 (Unauthorized)} if the user has no the authorization to read
+     * (not owner or not administrator)
+     * status {@code 404 (Not found)} if a resource used in the request
+     * in not found in the database.
      */
     @PutMapping("/register")
     public ResponseEntity<UserRDF> createOrUpdate(
@@ -145,7 +156,17 @@ public class UserRDFResource  {
      * {@code GET  /userRDF/:login} : get the "login" userRDF.
      *
      * @param login the login of the userRDF to retrieve.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the userRDF, or with status {@code 404 (Not Found)}.
+     * @return the {@link ResponseEntity}
+     * with status {@code 200 (OK)} and with
+     * body the updated entity,
+     * or with status {@code 201 (created)} and with body the created albumRDF,
+     * Errors:
+     * status {@code 500 (Internal Server Error)} if the albumRDF couldn't be updated.
+     * status {@code 409 (Conflict)} if the authentification token is outdated with the state of the database
+     * status {@code 401 (Unauthorized)} if the user has no the authorization to read
+     * (not owner or not administrator)
+     * status {@code 404 (Not found)} if a resource used in the request
+     * in not found in the database.
      */
     @GetMapping("/userRDF/{login}")
     public ResponseEntity<UserRDF> getUser(@PathVariable String login) {
@@ -159,6 +180,13 @@ public class UserRDFResource  {
      *
      * @param login the login of the userRDF to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
+     * Errors:
+     * status {@code 500 (Internal Server Error)} if the albumRDF couldn't be updated.
+     * status {@code 409 (Conflict)} if the authentification token is outdated with the state of the database
+     * status {@code 401 (Unauthorized)} if the user has no the authorization to read
+     * (not owner or not administrator)
+     * status {@code 404 (Not found)} if a resource used in the request
+     * in not found in the database.
      */
     @DeleteMapping("/userRDF/{login}")
     public ResponseEntity<Void> deleteUser(@PathVariable String login) {

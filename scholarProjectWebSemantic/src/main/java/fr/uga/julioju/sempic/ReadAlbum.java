@@ -3,7 +3,6 @@ package fr.uga.julioju.sempic;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Node_URI;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,14 +14,14 @@ public class ReadAlbum extends AbstractRead {
     private static final Logger log =
         LoggerFactory.getLogger(ReadAlbum.class);
 
-    public static boolean isAdmin(Model model) {
-        if (
-            model.listObjectsOfProperty(RDF.type)
-            .toList().contains(SempicOnto.AdminGroup)
-        ) {
-            return true;
-        }
-        return false;
+    /** Test if user logged has permissions to manage album */
+    public static void testUserLoggedPermissions(AlbumRDF album) {
+        ReadUser.testUserLoggedPermissions(
+                "He is not the owner of the album with the id '"
+                + album.getId()
+                + "'"
+                , album.getOwnerLogin()
+        );
     }
 
     private static Model read(long id) {

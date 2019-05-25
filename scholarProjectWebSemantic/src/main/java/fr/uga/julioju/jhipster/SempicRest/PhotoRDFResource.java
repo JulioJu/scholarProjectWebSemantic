@@ -24,7 +24,9 @@ import fr.uga.julioju.sempic.CreateResource;
 import fr.uga.julioju.sempic.Namespaces;
 import fr.uga.julioju.sempic.RDFConn;
 import fr.uga.julioju.sempic.RDFStore;
+import fr.uga.julioju.sempic.ReadAlbum;
 import fr.uga.julioju.sempic.ReadPhoto;
+import fr.uga.julioju.sempic.entities.AlbumRDF;
 import fr.uga.julioju.sempic.entities.PhotoRDF;
 import fr.uga.miashs.sempic.model.rdf.SempicOnto;
 
@@ -41,14 +43,27 @@ public class PhotoRDFResource {
      * {@code PUT  /photoRDF} : Creates or Updates a photoRDF
      *
      * @param photoRDF the photoRDF to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated photoRDF,
-     * or with status {@code 400 (Bad Request)} if the photoRDF is not valid,
-     * or with status {@code 500 (Internal Server Error)} if the photoRDF couldn't be updated.
+     * @return the {@link ResponseEntity}
+     * with status {@code 200 (OK)} and with
+     * body the updated entity,
+     * or with status {@code 201 (created)} and with body the created albumRDF,
+     * Errors:
+     * status {@code 400 (Bad Request)} if the albumRDF is not valid,
+     * status {@code 500 (Internal Server Error)} if the albumRDF couldn't be updated.
+     * status {@code 409 (Conflict)} if the authentification token is outdated with the state of the database
+     * status {@code 401 (Unauthorized)} if the user has no the authorization to read
+     * (not owner or not administrator)
+     * status {@code 404 (Not found)} if a resource used in the request
+     * in not found in the database.
      */
     @PutMapping("/photoRDF")
     public ResponseEntity<PhotoRDF> createOrUpdate(
             @Valid @RequestBody PhotoRDF photoRDF) {
         log.debug("REST request to update PhotoRDF : {}", photoRDF);
+
+
+        AlbumRDF albumRDF = ReadAlbum.readAlbum(photoRDF.getAlbumId());
+        ReadAlbum.testUserLoggedPermissions(albumRDF);
 
         Model model = ModelFactory.createDefaultModel();
 
@@ -56,6 +71,11 @@ public class PhotoRDFResource {
                 model,
                 photoRDF
                 );
+
+        boolean isUpdate = false;
+        if (RDFStore.isUriIsSubject((Node_URI) photoResource.asNode())) {
+            isUpdate = true;
+        }
 
         // TODO use bag
         for (int depictionIndex = 0 ;
@@ -91,26 +111,48 @@ public class PhotoRDFResource {
 
         // Delete photos before update, otherwise it appends
         log.debug("Delete photos before update, otherwise it appends");
-        RDFStore.deleteClassUri((Node_URI) photoResource.asNode());
+
+        if (isUpdate) {
+            RDFStore.deleteClassUri((Node_URI) photoResource.asNode());
+        }
 
         RDFConn.saveModel(model);
         log.debug("BELOW: PRINT MODEL SAVED\n—————————————");
         ReadPhoto.read(photoRDF.getId(), true)
             .write(System.out, "turtle");
 
-        return ResponseEntity.ok().body(photoRDF);
+        if (isUpdate) {
+            return ResponseEntity.ok().body(photoRDF);
+        } else {
+            return ResponseEntity.status(201).body(photoRDF);
+        }
     }
 
     /**
      * {@code GET  /photoRDF/:id} : get the "id" photoRDF.
      *
-     * @param id the id of the photoRDF to retrieve.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the photoRDF, or with status {@code 404 (Not Found)}.
+     * @param id the id of the photoRDF
+     * @return the {@link ResponseEntity}
+     * with status {@code 200 (OK)} and with
+     * body the updated entity,
+     * or with status {@code 201 (created)} and with body the created albumRDF,
+     * Errors:
+     * status {@code 500 (Internal Server Error)} if the albumRDF couldn't be updated.
+     * status {@code 409 (Conflict)} if the authentification token is outdated with the state of the database
+     * status {@code 401 (Unauthorized)} if the user has no the authorization to read
+     * (not owner or not administrator)
+     * status {@code 404 (Not found)} if a resource used in the request
+     * in not found in the database.
      */
     @GetMapping("/photoRDF/{id}")
     public ResponseEntity<PhotoRDF> getPhoto(@PathVariable Long id) {
         log.debug("REST request to get photoRDF : {}", id);
-        return ResponseEntity.ok().body(ReadPhoto.getPhotoById(id));
+
+        PhotoRDF photoRDF = ReadPhoto.getPhotoById(id);
+        AlbumRDF albumRDF = ReadAlbum.readAlbum(photoRDF.getAlbumId());
+        ReadAlbum.testUserLoggedPermissions(albumRDF);
+
+        return ResponseEntity.ok().body(photoRDF);
     }
 
     /**
@@ -118,11 +160,23 @@ public class PhotoRDFResource {
      *
      * @param id the id of the photoRDF to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
+     * Errors:
+     * status {@code 500 (Internal Server Error)} if the albumRDF couldn't be updated.
+     * status {@code 409 (Conflict)} if the authentification token is outdated with the state of the database
+     * status {@code 401 (Unauthorized)} if the user has no the authorization to read
+     * (not owner or not administrator)
+     * status {@code 404 (Not found)} if a resource used in the request
+     * in not found in the database.
      */
     @DeleteMapping("/photoRDF/{id}")
     public ResponseEntity<Void> deletePhoto(@PathVariable Long id) {
         log.debug("REST request to delete photoRDF : {}", id);
         String uri = Namespaces.getPhotoUri(id);
+
+        PhotoRDF photoRDF = ReadPhoto.getPhotoById(id);
+        AlbumRDF albumRDF = ReadAlbum.readAlbum(photoRDF.getAlbumId());
+        ReadAlbum.testUserLoggedPermissions(albumRDF);
+
         Node_URI node_URI = (Node_URI) NodeFactory.createURI(uri);
         RDFStore.deleteClassUriWithTests(node_URI);
         return ResponseEntity.noContent().build();

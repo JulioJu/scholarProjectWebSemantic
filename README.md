@@ -7,6 +7,7 @@
         * [Fuseki embedded](#fuseki-embedded)
         * [Fuseki non embedded](#fuseki-non-embedded)
         * [API implemented](#api-implemented)
+        * [HTTP codes returned](#http-codes-returned)
             * [The Vim Plugin roast.vim](#the-vim-plugin-roastvim)
             * [Fuseki Administration](#fuseki-administration)
             * [Wireshark](#wireshark)
@@ -66,6 +67,7 @@
     * [A solution: ../MAKEFILE.sh](#a-solution-makefilesh)
     * [But FusekiServer is totally buggy](#but-fusekiserver-is-totally-buggy)
 * [Others bugs and TODO](#others-bugs-and-todo)
+    * [TODO very important for teacher](#todo-very-important-for-teacher)
 * [Credits](#credits)
 
 <!-- vim-markdown-toc -->
@@ -151,6 +153,11 @@ Server API are tested thanks ./rest_request_with_vim.roast
 All API implemented are described in this file.
 
 ***All API are protected against SQL injection.***
+
+### HTTP codes returned
+
+* See ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/jhipster/SempicRest/
+    to check what each REST API return.
 
 #### The Vim Plugin roast.vim
 
@@ -1532,6 +1539,20 @@ then restart server. Only restart the computer solve my issue.
     explanations into parenthesis)
 
 * See all TODO
+
+## TODO very important for teacher
+
+1. Under ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/jhipster/SempicRest/PhotoRDFResource.java
+simplify in twice place
+```java
+    PhotoRDF photoRDF = ReadPhoto.getPhotoById(id);
+    AlbumRDF albumRDF = ReadAlbum.readAlbum(photoRDF.getAlbumId());
+    ReadAlbum.testUserLoggedPermissions(albumRDF);
+```
+It should be have only one SPARQL request
+
+2. For PhotoRDF use rdf:bag to `depiction`
+
 
 # Credits
 

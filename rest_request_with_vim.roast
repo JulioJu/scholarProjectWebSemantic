@@ -56,10 +56,10 @@ END
 # ———————————————————————
 
 # AUTHORIZATION FOR ADMIN
-Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJBRE1JTl9HUk9VUCIsImV4cCI6MTU2MTE5MTgzMn0.HjNKAieaTr5b9ELyzTfIYakfDhQdvRybs-KGH7jZMw1cnyk6z2pNIrEAW8teTvL_3DMEAIbFEC7_vbX5vBMyDg
+# Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJBRE1JTl9HUk9VUCIsImV4cCI6MTU2MTE5MTgzMn0.HjNKAieaTr5b9ELyzTfIYakfDhQdvRybs-KGH7jZMw1cnyk6z2pNIrEAW8teTvL_3DMEAIbFEC7_vbX5vBMyDg
 
 # AUTHORIZATION FOR USER
-# Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiYXV0aCI6IkFETUlOX0dST1VQIiwiZXhwIjoxNTYxMjA2MDIwfQ.lAZkwdbt0hisbJ4XwkG1lnuAIc5NLbOM8Qojf5ZS1ZoXU0f4DxZ43Y6nWe5q1jeCG2bzKSkZB5GxtNTO9dgdDw
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiYXV0aCI6Ik5PUk1BTF9VU0VSX0dST1VQIiwiZXhwIjoxNTYxNDAxMDQ1fQ.lt8_F-zdAPbDGH9poReXcL3r2QOMs0Hnu9tC7piJA247MOONGhWyd0c8FtFomxmcP5-d5YGfwFCHcCHOoO25tA
 
 # AUTHORIZATION FOR anOtherUser
 # Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhbm90aGVydXNlciIsImF1dGgiOiJOT1JNQUxfVVNFUl9HUk9VUCIsImV4cCI6MTU2MTIyMjYzNX0.kdd4tTOpI-xrb5oEGnpXiD8Rc2rKtPKwFpfyy07dbJP3GV8BQfW6mEr1ouhJ_0-g8TAJ_MZbOI-v6VUXr-Aidw
@@ -75,11 +75,14 @@ Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJBRE1JT
 # (maybe all CRUD in onto-data).
 # (behaviour could be tested with "/api/register")
 
-# AUTHORIZATION FOR ADMIN
+# AUTHORIZATION FOR ADMIN (JHipster role)
 # Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOLFJPTEVfVVNFUiIsImV4cCI6MTU2MDY5MDkyOH0.rI26xUSMEwpObbEo8TYR3K6aDZCu53sXnWB_cQ3Ixi9j-sqe3PhZppnC1Gs-walzw84Z3wmz_oKRWQOBmZatSg
 
-# AUTHORIZATION FOR USER
+# AUTHORIZATION FOR USER (JHipster role)
 # Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiYXV0aCI6IlJPTEVfVVNFUiIsImV4cCI6MTU1OTY2ODIxM30.o-iAHZIJYskQE6yDan24MhwF9JhkJIQ5-3rp6J8OxUVyT2u_173sW7COv3390BVtA3UCAiilyJnAREPFAKuu3g
+
+# AUTHORIZATION FOR USER (outdated as it has saved ADMIN_GROUP)
+# Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiYXV0aCI6IkFETUlOX0dST1VQIiwiZXhwIjoxNTYxMjA2MDIwfQ.lAZkwdbt0hisbJ4XwkG1lnuAIc5NLbOM8Qojf5ZS1ZoXU0f4DxZ43Y6nWe5q1jeCG2bzKSkZB5GxtNTO9dgdDw
 
 # Others 409 ERRORS (CONFLICT)
 # ———————————————————————————
@@ -205,9 +208,8 @@ DELETE {root}/api/userRDF/anOtherUser
 # CREATE / UPDATE
 # ———————————————
 
-# TODO differenciate create and update with http codes
-
-# BIG TODO, when we update, it accumulate. Delete before update and test.
+# HTTP code 201 if create
+# HTTP code 200 if update (Delete the resource before update)
 
 # Should work if the user with login `user' or `admin' is logged
 PUT {root}/api/albumRDF << END
@@ -269,13 +271,29 @@ DELETE {root}/api/albumRDF/2
 # PHOTO | {{{1
 # ——————
 
+# NOTE: ACCESS CONTROL ARE ALSO IMPLEMENTED FOR PHOTO, as for Resources above
+
 # CREATE / UPDATE
 # ———————————————
+
+# HTTP code 201 if create
+# HTTP code 200 if update (Delete the resource before update)
+
 
 PUT {root}/api/photoRDF << END
 {{
     "id": 1,
     "albumId": 1,
+    "depiction": []
+}}
+END
+
+# ERROR 404 as
+# 'http://fr.uga.julioju.sempic/ResourcesCreated/album/999999' not found in database (at least not a RDF subject).
+PUT {root}/api/photoRDF << END
+{{
+    "id": 1,
+    "albumId": 999999,
     "depiction": []
 }}
 END
