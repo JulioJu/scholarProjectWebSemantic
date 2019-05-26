@@ -1,8 +1,11 @@
 package fr.uga.julioju.sempic;
 
+import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.Node_URI;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
 
+import fr.uga.julioju.sempic.Exceptions.FusekiSubjectNotFoundException;
 import fr.uga.julioju.sempic.entities.AlbumRDF;
 import fr.uga.julioju.sempic.entities.PhotoRDF;
 import fr.uga.julioju.sempic.entities.UserRDF;
@@ -36,8 +39,19 @@ public class CreateResource  {
         albumRDFResource.addProperty(SempicOnto.albumOwnerLogin,
                 model.createResource(
                     Namespaces.getUserUri(albumRDF.getOwnerLogin())
-                    )
+                )
+        );
+        for (String user : albumRDF.getSharedWith()) {
+            String sharedWithUri = Namespaces.getUserUri(user);
+            var node_URI = (Node_URI) NodeFactory.createURI(sharedWithUri);
+            if (RDFStore.isUriIsSubject(node_URI)) {
+                albumRDFResource.addProperty(SempicOnto.albumSharedWith,
+                        model.createResource(sharedWithUri)
                 );
+            } else {
+                throw new FusekiSubjectNotFoundException(node_URI);
+            }
+        }
         return albumRDFResource;
     }
 

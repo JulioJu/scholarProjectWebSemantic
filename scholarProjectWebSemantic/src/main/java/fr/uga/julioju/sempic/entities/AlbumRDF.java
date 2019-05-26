@@ -1,5 +1,6 @@
 package fr.uga.julioju.sempic.entities;
 
+import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 
 public class AlbumRDF extends AbstractRDF {
@@ -7,7 +8,8 @@ public class AlbumRDF extends AbstractRDF {
     @NotNull
     private String ownerLogin;
 
-    private long[] sharedWith;
+    @Nullable
+    private String[] sharedWith;
 
     // Needed for Jackson if an other constructor is defined
     public AlbumRDF() {
@@ -18,11 +20,17 @@ public class AlbumRDF extends AbstractRDF {
         this.ownerLogin = ownerLogin;
     }
 
+    public AlbumRDF(long id, String ownerLogin, String[] sharedWithLogin) {
+        super(id);
+        this.ownerLogin = ownerLogin;
+        this.sharedWith = sharedWithLogin;
+    }
+
     public String getOwnerLogin() {
         return ownerLogin;
     }
 
-    public long[] getSharedWith() {
+    public String[] getSharedWith() {
         return sharedWith;
     }
 

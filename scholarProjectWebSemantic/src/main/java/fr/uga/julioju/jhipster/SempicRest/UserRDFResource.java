@@ -1,5 +1,7 @@
 package fr.uga.julioju.jhipster.SempicRest;
 
+import java.util.Optional;
+
 import javax.validation.Valid;
 
 import org.apache.jena.graph.NodeFactory;
@@ -50,8 +52,9 @@ public class UserRDFResource  {
         ReadUser.testUserLoggedPermissions(
                 "He is not the user you try to change ('"
                 + login
-                + "')"
+                + "')."
                 , login
+                , Optional.empty()
         );
     }
     /**
@@ -103,7 +106,7 @@ public class UserRDFResource  {
      * status {@code 400 (Bad Request)} if the albumRDF is not valid,
      * status {@code 500 (Internal Server Error)} if the albumRDF couldn't be updated.
      * status {@code 409 (Conflict)} if the authentification token is outdated with the state of the database
-     * status {@code 401 (Unauthorized)} if the user has no the authorization to read
+     * status {@code 403 (Forbidden)} if the user has no the authorization to read
      * (not owner or not administrator)
      * status {@code 404 (Not found)} if a resource used in the request
      * in not found in the database.
@@ -163,7 +166,7 @@ public class UserRDFResource  {
      * Errors:
      * status {@code 500 (Internal Server Error)} if the albumRDF couldn't be updated.
      * status {@code 409 (Conflict)} if the authentification token is outdated with the state of the database
-     * status {@code 401 (Unauthorized)} if the user has no the authorization to read
+     * status {@code 403 (Forbidden)} if the user has no the authorization to read
      * (not owner or not administrator)
      * status {@code 404 (Not found)} if a resource used in the request
      * in not found in the database.
@@ -183,7 +186,7 @@ public class UserRDFResource  {
      * Errors:
      * status {@code 500 (Internal Server Error)} if the albumRDF couldn't be updated.
      * status {@code 409 (Conflict)} if the authentification token is outdated with the state of the database
-     * status {@code 401 (Unauthorized)} if the user has no the authorization to read
+     * status {@code 403 (Forbidden)} if the user has no the authorization to read
      * (not owner or not administrator)
      * status {@code 404 (Not found)} if a resource used in the request
      * in not found in the database.

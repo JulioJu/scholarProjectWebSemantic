@@ -1334,8 +1334,23 @@ java.lang.ClassNotFoundException: org/springframework/context/support/LiveBeansV
 * Spring / Spring-boot is very more  famous than Java EE and its successor Jakarta EE
     See https://insights.stackoverflow.com/trends?tags=spring,spring-boot,java-ee
 
-* The current version of Java EE, Jakarto EE is not referenced by
+* The current version of Java EE, Jakarta EE is not referenced by
     StackOverflow
+
+* Oracle has deprecated Java EE.
+    It a project in End of Life (still maintained
+    some times).
+    * Java EE 8 takes too much  times to be released and
+        already when it was released it was not at "the state of the art"
+        (lack lot of new famous tech like MicroServices, etc.).
+
+* Its successor owned by Eclipse (Jakarta EE) is very new, and we
+    don't know about its future. Could success or not, and we don't know
+    actually what will be its future.
+    * See https://dzone.com/articles/a-personal-opinion-on-the-future-of-jakarta-ee
+    * https://www.eclipse.org/community/eclipse_newsletter/2018/may/noturningback.php
+    * More precisions about Jakarta vs Java EE
+        https://www.baeldung.com/java-enterprise-evolution
 
 * To much time to switch to another solution
 

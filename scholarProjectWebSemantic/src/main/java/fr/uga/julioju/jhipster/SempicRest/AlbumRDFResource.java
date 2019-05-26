@@ -68,8 +68,7 @@ public class AlbumRDFResource  {
                 + "to create.");
         }
 
-
-        ReadAlbum.testUserLoggedPermissions(albumRDF);
+        ReadAlbum.testUserLoggedPermissions(albumRDF, false);
         Model model = ModelFactory.createDefaultModel();
         Resource resource = CreateResource.create(model, albumRDF);
         boolean isUpdate = false;
@@ -102,7 +101,7 @@ public class AlbumRDFResource  {
      * Errors:
      * status {@code 500 (Internal Server Error)} if the albumRDF couldn't be updated.
      * status {@code 409 (Conflict)} if the authentification token is outdated with the state of the database
-     * status {@code 401 (Unauthorized)} if the user has no the authorization to read
+     * status {@code 403 (Forbidden)} if the user has no the authorization to read
      * (not owner or not administrator)
      * status {@code 404 (Not found)} if a resource used in the request
      * in not found in the database.
@@ -111,7 +110,7 @@ public class AlbumRDFResource  {
     public ResponseEntity<AlbumRDF> getAlbum(@PathVariable Long id) {
         log.debug("REST request to get albumRDF : {}", id);
         AlbumRDF albumRDF = ReadAlbum.readAlbum(id);
-        ReadAlbum.testUserLoggedPermissions(albumRDF);
+        ReadAlbum.testUserLoggedPermissions(albumRDF, true);
         return ResponseEntity.ok().body(albumRDF);
     }
 
@@ -123,7 +122,7 @@ public class AlbumRDFResource  {
      * Errors:
      * status {@code 500 (Internal Server Error)} if the albumRDF couldn't be updated.
      * status {@code 409 (Conflict)} if the authentification token is outdated with the state of the database
-     * status {@code 401 (Unauthorized)} if the user has no the authorization to read
+     * status {@code 403 (Forbidden)} if the user has no the authorization to read
      * (not owner or not administrator)
      * status {@code 404 (Not found)} if a resource used in the request
      * in not found in the database.
@@ -133,7 +132,7 @@ public class AlbumRDFResource  {
         log.debug("REST request to delete albumRDF : {}", id);
         String uri = Namespaces.getAlbumUri(id);
         AlbumRDF albumRDF = ReadAlbum.readAlbum(id);
-        ReadAlbum.testUserLoggedPermissions(albumRDF);
+        ReadAlbum.testUserLoggedPermissions(albumRDF, false);
         Node_URI node_URI = (Node_URI) NodeFactory.createURI(uri);
         RDFStore.deleteClassUriWithTests(node_URI);
         return ResponseEntity.noContent().build();

@@ -51,7 +51,7 @@ public class PhotoRDFResource {
      * status {@code 400 (Bad Request)} if the albumRDF is not valid,
      * status {@code 500 (Internal Server Error)} if the albumRDF couldn't be updated.
      * status {@code 409 (Conflict)} if the authentification token is outdated with the state of the database
-     * status {@code 401 (Unauthorized)} if the user has no the authorization to read
+     * status {@code 403 (Forbidden)} if the user has no the authorization to read
      * (not owner or not administrator)
      * status {@code 404 (Not found)} if a resource used in the request
      * in not found in the database.
@@ -63,7 +63,7 @@ public class PhotoRDFResource {
 
 
         AlbumRDF albumRDF = ReadAlbum.readAlbum(photoRDF.getAlbumId());
-        ReadAlbum.testUserLoggedPermissions(albumRDF);
+        ReadAlbum.testUserLoggedPermissions(albumRDF, false);
 
         Model model = ModelFactory.createDefaultModel();
 
@@ -139,7 +139,7 @@ public class PhotoRDFResource {
      * Errors:
      * status {@code 500 (Internal Server Error)} if the albumRDF couldn't be updated.
      * status {@code 409 (Conflict)} if the authentification token is outdated with the state of the database
-     * status {@code 401 (Unauthorized)} if the user has no the authorization to read
+     * status {@code 403 (Forbidden)} if the user has no the authorization to read
      * (not owner or not administrator)
      * status {@code 404 (Not found)} if a resource used in the request
      * in not found in the database.
@@ -150,7 +150,7 @@ public class PhotoRDFResource {
 
         PhotoRDF photoRDF = ReadPhoto.getPhotoById(id);
         AlbumRDF albumRDF = ReadAlbum.readAlbum(photoRDF.getAlbumId());
-        ReadAlbum.testUserLoggedPermissions(albumRDF);
+        ReadAlbum.testUserLoggedPermissions(albumRDF, true);
 
         return ResponseEntity.ok().body(photoRDF);
     }
@@ -163,7 +163,7 @@ public class PhotoRDFResource {
      * Errors:
      * status {@code 500 (Internal Server Error)} if the albumRDF couldn't be updated.
      * status {@code 409 (Conflict)} if the authentification token is outdated with the state of the database
-     * status {@code 401 (Unauthorized)} if the user has no the authorization to read
+     * status {@code 403 (Forbidden)} if the user has no the authorization to read
      * (not owner or not administrator)
      * status {@code 404 (Not found)} if a resource used in the request
      * in not found in the database.
@@ -175,7 +175,7 @@ public class PhotoRDFResource {
 
         PhotoRDF photoRDF = ReadPhoto.getPhotoById(id);
         AlbumRDF albumRDF = ReadAlbum.readAlbum(photoRDF.getAlbumId());
-        ReadAlbum.testUserLoggedPermissions(albumRDF);
+        ReadAlbum.testUserLoggedPermissions(albumRDF, false);
 
         Node_URI node_URI = (Node_URI) NodeFactory.createURI(uri);
         RDFStore.deleteClassUriWithTests(node_URI);

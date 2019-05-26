@@ -43,6 +43,10 @@ END
 # Update the string following "Bearer" with the authentification token
 # retrieved by the request to retrieve authentification token (see above).
 
+POST {root}/api/authenticate << END
+{{"username":"user1","password":"user1","rememberMe":true}}
+END
+
 # ———————————————
 # TOKEN          ] {{{1
 # ———————————————
@@ -59,10 +63,13 @@ END
 # Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJBRE1JTl9HUk9VUCIsImV4cCI6MTU2MTE5MTgzMn0.HjNKAieaTr5b9ELyzTfIYakfDhQdvRybs-KGH7jZMw1cnyk6z2pNIrEAW8teTvL_3DMEAIbFEC7_vbX5vBMyDg
 
 # AUTHORIZATION FOR USER
-Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiYXV0aCI6Ik5PUk1BTF9VU0VSX0dST1VQIiwiZXhwIjoxNTYxNDAxMDQ1fQ.lt8_F-zdAPbDGH9poReXcL3r2QOMs0Hnu9tC7piJA247MOONGhWyd0c8FtFomxmcP5-d5YGfwFCHcCHOoO25tA
+# Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiYXV0aCI6Ik5PUk1BTF9VU0VSX0dST1VQIiwiZXhwIjoxNTYxNDAxMDQ1fQ.lt8_F-zdAPbDGH9poReXcL3r2QOMs0Hnu9tC7piJA247MOONGhWyd0c8FtFomxmcP5-d5YGfwFCHcCHOoO25tA
 
-# AUTHORIZATION FOR anOtherUser
+# AUTHORIZATION FOR anOtherUser (NORMAL_USER_GROUP)
 # Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhbm90aGVydXNlciIsImF1dGgiOiJOT1JNQUxfVVNFUl9HUk9VUCIsImV4cCI6MTU2MTIyMjYzNX0.kdd4tTOpI-xrb5oEGnpXiD8Rc2rKtPKwFpfyy07dbJP3GV8BQfW6mEr1ouhJ_0-g8TAJ_MZbOI-v6VUXr-Aidw
+
+# AUTHORIZATION FOR anOtherUser (user1)
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyMSIsImF1dGgiOiJOT1JNQUxfVVNFUl9HUk9VUCIsImV4cCI6MTU2MTQ1NTk4Nn0.5jbEdcQwwo_UB7UiBWbL-LDNn8yk89Zy5qEihXmCW2YlsgXCtAw9bQhWM7993C74bvELrCPpLOC9D8NDvCqSvA
 
 # Authorisation with outdated Spring Security roles
 # ———————————————————————
@@ -175,11 +182,15 @@ PUT {root}/api/register << END
 {{"login":"anOtherUser", "password":"anOtherUser", "userGroup":"ADMIN_GROUP"}}
 END
 
+PUT {root}/api/register << END
+{{"login":"user1", "password":"user1", "userGroup":"NORMAL_USER_GROUP"}}
+END
+
 # READ
 # —————
 GET {root}/api/userRDF/admin
 
-# UserGroup.USER_GROUP
+# UserGroup.NORMAL_USER_GROUP
 GET {root}/api/userRDF/user
 
 GET {root}/api/userRDF/anOtherUser
@@ -248,11 +259,29 @@ PUT {root}/api/albumRDF << END
     "ownerLogin": "anOtherUser"
 }}
 END
+
+PUT {root}/api/albumRDF << END
+{{
+    "id": 2,
+    "ownerLogin": "anotheruser",
+    "sharedWith": ["user", "admin"]
+}}
+END
+
+// Error 404 as user 999999 not found in Database
+PUT {root}/api/albumRDF << END
+{{
+    "id": 2,
+    "ownerLogin": "anotheruser",
+    "sharedWith": ["user", "999999"]
+}}
+END
+
 # READ
 # —————
 
-# TODO only for current user or sharedWith
-
+# ERROR 403 if the user logged is `user1` (as the ownerLogin is anotheruser)
+# and has the album is not shared with the current user logged
 GET {root}/api/albumRDF/1
 
 # ERROR 403 if the user logged is `user` (as the ownerLogin is admin)
@@ -278,7 +307,6 @@ DELETE {root}/api/albumRDF/2
 
 # HTTP code 201 if create
 # HTTP code 200 if update (Delete the resource before update)
-
 
 PUT {root}/api/photoRDF << END
 {{

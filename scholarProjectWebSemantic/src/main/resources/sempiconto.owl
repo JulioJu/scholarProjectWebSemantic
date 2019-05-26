@@ -33,6 +33,17 @@
     
 
 
+    <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumSharedWith -->
+
+    <owl:ObjectProperty rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumSharedWith">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+        <rdfs:domain rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Album"/>
+        <rdfs:range rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#User"/>
+        <rdfs:label xml:lang="en">album shared with</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
     <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#depicts -->
 
     <owl:ObjectProperty rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#depicts">
@@ -129,7 +140,12 @@
 
     <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#AlbumPhoto -->
 
-    <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#AlbumPhoto"/>
+    <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#AlbumPhoto">
+        <owl:disjointUnionOf rdf:parseType="Collection">
+            <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Album"/>
+            <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Photo"/>
+        </owl:disjointUnionOf>
+    </owl:Class>
     
 
 

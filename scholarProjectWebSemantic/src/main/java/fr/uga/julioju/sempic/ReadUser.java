@@ -17,6 +17,7 @@ import fr.uga.julioju.jhipster.security.SecurityUtils;
 import fr.uga.julioju.sempic.Exceptions.FusekiSubjectNotFoundException;
 import fr.uga.julioju.sempic.Exceptions.SpringSecurityTokenException;
 import fr.uga.julioju.sempic.Exceptions.TokenOutOfDateException;
+import fr.uga.julioju.sempic.entities.AlbumRDF;
 import fr.uga.julioju.sempic.entities.UserRDF;
 import fr.uga.julioju.sempic.entities.UserRDF.UserGroup;
 import fr.uga.miashs.sempic.model.rdf.SempicOnto;
@@ -33,7 +34,8 @@ public class ReadUser extends AbstractRead {
 
     /** Test if user logged has permissions to manage album */
     public static void testUserLoggedPermissions(String message,
-            String loginResourceOwner) {
+            String loginResourceOwner,
+            Optional<AlbumRDF> albumRDFOptional) {
         log.debug("\n\nTest if the user logged has permissions");
         UserRDF userLogged;
         try {
@@ -41,13 +43,30 @@ public class ReadUser extends AbstractRead {
         } catch (FusekiSubjectNotFoundException e) {
             throw new TokenOutOfDateException(e);
         }
-        if (! ReadUser.isUserLoggedAdmin(userLogged) &&
-                ! userLogged.getLogin().equals(loginResourceOwner)) {
+        if (albumRDFOptional.isPresent()) {
+            AlbumRDF albumRDF = albumRDFOptional.get();
+            String[] sharedWithLoginArray = albumRDF.getSharedWith();
+            if (sharedWithLoginArray != null) {
+                for (String sharedWithLogin : sharedWithLoginArray) {
+                    if (userLogged.getLogin().equals(sharedWithLogin)) {
+                        log.info("The album with id '"
+                                + albumRDF.getId()
+                                + " 'is shared by the current user logged '"
+                                + userLogged.getLogin()
+                                );
+                        return;
+                    }
+                }
+            }
+        }
+        if (! ReadUser.isUserLoggedAdmin(userLogged)
+                && ! userLogged.getLogin().equals(loginResourceOwner)
+        ) {
             throw new AccessDeniedException(
                     "The current user is '"
                     + userLogged.getLogin()
                     + "'. " + message
-                    + "'. Furthermore he is not an administrator."
+                    + " Furthermore he is not an administrator."
             );
         }
     }
