@@ -79,7 +79,7 @@ public class ReadUser extends AbstractRead {
         UserGroup userGroup = UserGroup.NORMAL_USER_GROUP;
         if (
             model.listObjectsOfProperty(RDF.type)
-            .toList().contains(SempicOnto.AdminGroup)
+            .toList().contains(SempicOnto.UserGroupAdmin)
         ) {
             userGroup = UserGroup.ADMIN_GROUP;
         }

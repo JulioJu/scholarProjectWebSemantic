@@ -99,7 +99,7 @@ public class PhotoRDFResource {
                         photoRDF.getDepiction()[depictionIndex]
                         .getLiterals()[literalsIndex]);
             }
-            model.add(photoResource, SempicOnto.depicts, descriptionResource);
+            model.add(photoResource, SempicOnto.photoDepicts, descriptionResource);
         }
         //
         // log.debug("BELOW: MODEL BEFORE IT SAVED\n—————————————");

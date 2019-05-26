@@ -15,9 +15,9 @@ import fr.uga.miashs.sempic.model.rdf.SempicOnto;
 public class CreateResource  {
 
     public static Resource create(Model model, UserRDF userRDF) {
-        Resource userGroupRes = SempicOnto.NormalUserGroup;
+        Resource userGroupRes = SempicOnto.UserGroupNormal;
         if (userRDF.getUserGroup().equals(UserGroup.ADMIN_GROUP)) {
-            userGroupRes = SempicOnto.AdminGroup;
+            userGroupRes = SempicOnto.UserGroupAdmin;
         }
 
         Resource userRessource = model.createResource(
@@ -70,7 +70,7 @@ public class CreateResource  {
                 SempicOnto.Photo
         );
         photoResource.addProperty(
-            SempicOnto.albumId,
+            SempicOnto.photoInAlbum,
             model.createResource(
                     Namespaces.getAlbumUri(photoRDF.getAlbumId()),
                     SempicOnto.Album

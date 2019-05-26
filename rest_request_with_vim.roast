@@ -330,7 +330,7 @@ PUT {root}/api/photoRDF << END
 {{
     "id": 1,
     "albumId": 1,
-    "depiction": [ {{"depiction": "Animal", "literals": ["Medor"]}} ]
+    "depiction": [ {{"depiction": "DepictionAnimal", "literals": ["Medor"]}} ]
 }}
 END
 
@@ -340,7 +340,7 @@ PUT {root}/api/photoRDF << END
     "albumId": 1,
     "depiction": [
         {{"depiction":
-             "Person",
+             "DepictionPerson",
              "literals": [
                  "Theo",
                 "Alban",
@@ -348,8 +348,8 @@ PUT {root}/api/photoRDF << END
                 "Xavier"
              ]
          }},
-        {{"depiction": "Animal", "literals": ["Medor"]}},
-        {{"depiction": "Animal", "literals": ["Titi"]}}
+        {{"depiction": "DepictionAnimal", "literals": ["Medor"]}},
+        {{"depiction": "DepictionAnimal", "literals": ["Titi"]}}
     ]
 }}
 END
@@ -370,7 +370,7 @@ PUT {root}/api/photoRDF << END
 {{
     "id": 1,
     "albumId": 1,
-    "depiction": [ {{"depiction": "Animal", "literals": []}} ]
+    "depiction": [ {{"depiction": "DepictionAnimal", "literals": []}} ]
 }}
 END
 
@@ -379,7 +379,7 @@ PUT {root}/api/photoRDF << END
 {{
     "id": 1,
     "albumId": 1,
-    "depiction": [ {{"depiction": "Animal"}} ]
+    "depiction": [ {{"depiction": "DepictionAnimal"}} ]
 }}
 END
 

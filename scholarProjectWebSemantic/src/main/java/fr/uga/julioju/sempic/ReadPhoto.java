@@ -106,8 +106,8 @@ public class ReadPhoto  {
                 new ExprVar("p"),
                     new ExprList(
                         Arrays.asList(new Expr[] {
-                            new NodeValueNode(SempicOnto.depicts.asNode()),
-                            new NodeValueNode(SempicOnto.albumId.asNode()),
+                            new NodeValueNode(SempicOnto.photoDepicts.asNode()),
+                            new NodeValueNode(SempicOnto.photoInAlbum.asNode()),
                             new NodeValueNode(SempicOnto.albumOwnerLogin.asNode())
                         })
                     )
@@ -199,14 +199,14 @@ public class ReadPhoto  {
                     );
         }
         String albumIdWithDatatype =
-                model.listObjectsOfProperty(SempicOnto.albumId)
+                model.listObjectsOfProperty(SempicOnto.photoInAlbum)
                 .toList().get(0).toString();
         long albumId = Integer.parseInt(
                 albumIdWithDatatype
                 .substring(albumIdWithDatatype.lastIndexOf('/')+1)
                 );
         List<Resource> depictObjects =
-            model.listObjectsOfProperty(SempicOnto.depicts)
+            model.listObjectsOfProperty(SempicOnto.photoDepicts)
             .toList().parallelStream().map(RDFNode::asResource)
             .collect(Collectors.toList());
         PhotoDepictionAnonRDF[] photoDepictionRDF =

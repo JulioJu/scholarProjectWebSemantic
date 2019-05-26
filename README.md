@@ -20,16 +20,19 @@
 * [Documentations about Web Semantic](#documentations-about-web-semantic)
     * [Courses and MOOC and generalities](#courses-and-mooc-and-generalities)
     * [Ontologies](#ontologies)
+    * [Resource vs Individual vs Class](#resource-vs-individual-vs-class)
     * [Jena Documentation](#jena-documentation)
     * [Jena TDB2 vs Jena Fuseki2 vs OpenLink Virtuoso and Linked Data Platform](#jena-tdb2-vs-jena-fuseki2-vs-openlink-virtuoso-and-linked-data-platform)
         * [Why Fuseki is completely not a Linked Data Platform](#why-fuseki-is-completely-not-a-linked-data-platform)
     * [Fuseki and TDB, sempic.ttl](#fuseki-and-tdb-sempicttl)
+    * [Protege](#protege)
     * [How to install Jena](#how-to-install-jena)
     * [Construct a Jena Query](#construct-a-jena-query)
         * [Sparql syntax](#sparql-syntax)
         * [Java API 1) syntax form of the query](#java-api-1-syntax-form-of-the-query)
         * [Java API 2) Algebra form of the query](#java-api-2-algebra-form-of-the-query)
         * [Java API, Query](#java-api-query)
+        * [Jena Source code organization](#jena-source-code-organization)
         * [See also](#see-also)
     * [Jena DELETE](#jena-delete)
         * [Cascading delete](#cascading-delete)
@@ -496,6 +499,15 @@ Spring prod profil (keep dev profil)***
     * RDF is an Ontology language
         https://en.wikipedia.org/wiki/Web_Ontology_Language#Ontologies
 
+## Resource vs Individual vs Class
+
+* Take a time to understand difference
+
+* Read https://www.w3.org/TR/rdf-schema to understand, especially
+    1. https://www.w3.org/TR/rdf-schema/#ch_resource
+    2. https://www.w3.org/TR/rdf-schema/#ch_class
+    3. https://www.w3.org/TR/rdf-schema/#ch_literal
+
 ## Jena Documentation
 
 * Note that Fuseki documentation has several break links. Use Google to
@@ -561,6 +573,15 @@ https://jena.apache.org/documentation/tdb2/tdb2_fuseki.html
 > configuration file must be used. Once setup, upload, query and graph editting
 > will be routed to the TDB2 database.
 https://github.com/apache/jena/blob/master/jena-db/use-fuseki-tdb2.md
+
+## Protege
+
+* Currently release version of Protege is compatible with Java 8 and not Java 11
+    See https://github.com/protegeproject/protege/issues/822
+
+* `rdfs:comment` become JavaDoc into the generated file
+    ./scholarProjectWebSemantic/target/generated-sources/java/fr/uga/miashs/sempic/model/rdf/SempicOnto.java/
+
 
 ## How to install Jena
 
@@ -669,43 +690,46 @@ Even if we use directly Algebra, as:
 
 You should see https://jena.apache.org/documentation/query/app_api.html
 
-### See also
+### Jena Source code organization
 
-* As **I don't use all examples of the teacher**, you must study
-    ./teacherExample/src/main/java/fr/uga/miashs/sempic/rdf/RDFStore.java
+Jena source code open source. Available at https://github.com/apache/jena/ .
 
-* To understand how it works, don't forget that
-    1. `FrontsNode <-- RDFNode <-- Resource <-- Property` (inheritance).
-    2. `FrontsNode` has a `Node` Property (`protected`), and therefore
-        has a public method `FrontsNode.asNode()`
-    3. There are severals type of Node:
-        `Node_Blank, Node_Anon, Node_URI, Node_Variable, and Node_ANY`
-    4. An RDF model is a set of Statements.
-    5. `StatementImpl` has three `protected` attributes: `Resource subject`,
-        `Property predicate`
-        `RDFNode object`, and its three corresponding getter.
-        It has a function `createReifiedStatement()`. `ReifiedStatement`
-        extends `Resource` and `ReifiedStatementImpl` has a `protected`
-        attribute `Statement` and its public getter. `rdf:statement` is
-        an rdf uri https://www.w3.org/TR/rdf-schema/#ch_statement .
-    6. `ResourceImpl.addLiteral()` add literal to the Model
-        (`ModelCom` that implements `Model`) of the Resource
-        (if exists, otherwise raise exception).
-    7. `RDFNode` doesn't have `ModelCom`.
-    8. See also https://www.w3.org/TR/rdf-schema/#ch_class
+To understand how it works, don't forget that
 
-
-* As the official doc is a little bit poor of examples, don't forget
-    to use https://www.programcreek.com/java-api-examples/
-    Maybe use Google, in the search bar type something like:
-    `site:https://www.programcreek.com/java-api-examples/ ElementTriplesBlock`
-
+1. `FrontsNode <-- RDFNode <-- Resource <-- Property` (inheritance).
+2. `FrontsNode` has a `Node` Property (`protected`), and therefore
+    has a public method `FrontsNode.asNode()`
+3. There are severals type of Node:
+    `Node_Blank, Node_Anon, Node_URI, Node_Variable, and Node_ANY`
+4. An RDF model is a set of Statements.
+5. `StatementImpl` has three `protected` attributes: `Resource subject`,
+    `Property predicate`
+    `RDFNode object`, and its three corresponding getter.
+    It has a function `createReifiedStatement()`. `ReifiedStatement`
+    extends `Resource` and `ReifiedStatementImpl` has a `protected`
+    attribute `Statement` and its public getter. `rdf:statement` is
+    an rdf uri https://www.w3.org/TR/rdf-schema/#ch_statement .
+6. `ResourceImpl.addLiteral()` add literal to the Model
+    (`ModelCom` that implements `Model`) of the Resource
+    (if exists, otherwise raise exception).
+7. `RDFNode` doesn't have `ModelCom`.
+8. See also https://www.w3.org/TR/rdf-schema/#ch_class
 
 * During my search, I've explored how to build an `OntModel` and `OntResource`
     To understand what it is, see official API Jena and
     https://jena.apache.org/documentation/ontology/
     There is a function `OntResource.remove()`, but as the resource isn't link
     to a `RdfConnection`, if we use `OntResource.commit()` it can' work.
+
+### See also
+
+* As **I don't use all examples of the teacher**, you must study
+    ./teacherExample/src/main/java/fr/uga/miashs/sempic/rdf/RDFStore.java
+
+* As the official doc is a little bit poor of examples, don't forget
+    to use https://www.programcreek.com/java-api-examples/
+    Maybe use Google, in the search bar type something like:
+    `site:https://www.programcreek.com/java-api-examples/ ElementTriplesBlock`
 
 * See also
     https://stackoverflow.com/questions/7250189/how-to-build-sparql-queries-in-java
@@ -1554,6 +1578,8 @@ then restart server. Only restart the computer solve my issue.
     explanations into parenthesis)
 
 * See all TODO
+
+* Manage several albums photos thanks the Ressource in sempic.owl `AlbumPhoto`
 
 ## TODO very important for teacher
 
