@@ -19,6 +19,11 @@
     * [Notes about Jackson](#notes-about-jackson)
 * [Documentations about Web Semantic](#documentations-about-web-semantic)
     * [Courses and MOOC and generalities](#courses-and-mooc-and-generalities)
+    * [Linked Data](#linked-data)
+        * [LinkedGeoData.org](#linkedgeodataorg)
+        * [GeoNames](#geonames)
+    * [DBpedia](#dbpedia)
+    * [WikiData](#wikidata)
     * [Ontologies](#ontologies)
     * [Resource vs Individual vs Class](#resource-vs-individual-vs-class)
     * [Jena Documentation](#jena-documentation)
@@ -223,6 +228,17 @@ There are alternatives, non vimesque solutions.
         ```
         send a `tototiti` request. Add "" between both lines cause this
         plugin to crash.
+    * But as I said at https://github.com/sharat87/roast.vim/issues/9
+        (check quickly in the doc if there is an option to display only the
+        result, but not found)
+        > Vim doesn't manage well several filetypes in a same buffer. See for
+        > instance neovim/neovim#7866 . When tree sitter will be implemented on
+        > NeoVim, IMHO implement a custom renderer could be a solution, but not
+        > actually. Currently I believe it's better to keep the buffer
+        > __roast_headers__ independent. I don't like
+        > https://github.com/diepm/vim-rest-console because of this, all is meld
+        > in one buffer and the render is not very good.
+
 
 #### Fuseki Administration
 
@@ -460,14 +476,145 @@ Spring prod profil (keep dev profil)***
     * https://twobithistory.org/2018/05/27/semantic-web.html
     * https://www.forbes.com/sites/cognitiveworld/2018/08/03/the-importance-of-schema-org/
 
+
+## Linked Data
+
 * What is Linked Data
     https://en.wikipedia.org/wiki/Linked_data
     Datasets are: DBpedia, Wikidata, GeoNames, etc.
-    * In Wikipedia (I was a Wikipedia Contributor),
-        they use https://www.mediawiki.org/wiki/Extension:LinkedWiki
-        to trigger SPARQL queries
-    * Very cool Thesis in French about Linked Data
-        https://tel.archives-ouvertes.fr/tel-02003672/document (1 feb 2019).
+
+* In Wikipedia (I was a Wikipedia Contributor),
+    they use https://www.mediawiki.org/wiki/Extension:LinkedWiki
+    to trigger SPARQL queries
+* Very cool Thesis in French about Linked Data
+    https://tel.archives-ouvertes.fr/tel-02003672/document (1 feb 2019).
+
+### LinkedGeoData.org
+
+* For Geo there is LinkedGeoData.org, but the last update of the
+    Database (nt format) is in 2015.
+
+* There are lot of papers
+    in web about aggregate LinkedGeoData and GeoNames.
+
+### GeoNames
+
+* For GeoNames, download RDF at
+    http://www.geonames.org/export/geonames-search.html
+    Warning, about 2Go. Not found how to download part of the earth
+    (i.e. only France)
+    * I've tested to query on GeoNames but doesn't seem work
+    * API info at:
+        http://www.geonames.org/export/geonames-search.html
+    * I've tested lot of API without success. Especially,
+        `name*` seams totally broken.
+    * http://www.geonames.org/advanced-search.html?name_equals=Grenoble&country=FR
+        returns lot of results, but no Grenoble
+    * Only http://www.geonames.org/advanced-search.html?q=%22Grenoble%22&country=FR&featureClass=P&continentCode=EU&fuzzy=0.6
+        returns interesting solutions, but also out of scope
+        solutions.
+    * To query on GeoNames they say
+        > download the database dump and construct the url for the features using the pattern "http://sws.geonames.org/geonameId/"
+        > https://stackoverflow.com/questions/19393908/retrieving-data-from-geonames-using-sparql
+    * Tried to download it, but the file was too big! Furthermore
+        this one is not OWL DL compliant
+        https://stackoverflow.com/questions/21135179/owlreasonerruntimeexception-in-protégé-using-geonames-ontology
+
+* For GeoNames, with a very cool web page, with a map and all.
+    * An example at:
+        http://www.geonames.org/2985244/provence-alpes-cote-d-azur.html
+        With its corresponding rdf page
+        http://sws.geonames.org/2985244/about.rdf
+
+## DBpedia
+
+* To query on DBpedia read https://wiki.dbpedia.org/OnlineAccess
+
+* There is also DBpedia lookup
+    1. https://wiki.dbpedia.org/lookup
+    2. https://github.com/dbpedia/lookup
+    > The DBpedia Lookup Service can be used to look up DBpedia URIs by related keywords.
+
+* Found examples at https://stackoverflow.com/questions/44384005/get-all-cities-of-country-from-dbpedia-using-sparql
+    For https://dbpedia.org/sparql (online service)
+
+* To search a city that match a pattern in a Country
+    probably use http://mappings.dbpedia.org/server/ontology/classes/City
+    (we could see that the doc is with a very old design)
+
+* For REST API you could check
+    https://wiki.dbpedia.org/rest-api
+    > The BETA release of the DBpedia REST API tries to hide the complexity of
+    > SPARQL and (partially) RDF in order to allow web developers querying of data
+    > from a SPARQL endpoint.
+
+## WikiData
+
+* Made with the support of Google…
+    All is open source !!!
+
+* Check https://www.wikidata.org/wiki/Wikidata:Data_access
+
+*  https://query.wikidata.org/
+    * User manual at https://www.mediawiki.org/wiki/Wikidata_query_service/User_Manual
+    * Examples
+        could be found in the page in a modal window
+        under https://query.wikidat.org (click to the link Exemples) (so cooool)
+        or at https://www.wikidata.org/wiki/Wikidata:SPARQL_query_service/queries/examples
+    ***Test it, is so cool and so fancy,
+    result of SPARQL is displayed in a map, so cool***
+    * Under https://query.wikidat.org we could export the query into HTTP GET
+        method (LINK -> SPARQL endpoint). As it we could have the result in
+        JSON form in our program.
+
+* Furthermore I was a contributor of Wikipedia, and WikiData is the *legal* child
+    of Wikipedia therefore I prefer WikiData than DBpedia.
+    Data of Wikidata are used in Wikipedia and could be improved by
+    Wikipedia contributors. DBpedia aggregate data from Wikipedia and others data.
+
+* This article is so cool
+    to trigger SPARQL search on WikiData
+    https://blog.ash.bzh/fr/a-la-recherche-des-communes-francaises-sur-wikidata/
+
+* All tools to manipulate WikiData
+    https://www.wikidata.org/wiki/Wikidata:Tools/For_programmers
+
+* Very interesting paper
+    https://iccl.inf.tu-dresden.de/w/images/5/5a/Malyshev-et-al-Wikidata-SPARQL-ISWC-2018.pdf
+
+    > What distinguishes Wikidata from RDF, however, is that many components of
+    > theknowledge graph carry more information than plain RDF would allow a
+    > single propertyor value to carry.
+
+    > April 2018, theDBpedia Live endpoint reports 618,279,889 triples across
+    > all graphs (less than 13% of the size of Wikidata in RDF).
+    > (p 14)
+
+    > Most of the Wikidata community, including developers, had no prior contact
+    > with SPARQL. An impressive amount of SPARQL-literacy has developedvery
+    > quickly. There is extensive documentation and support now, including a
+    > community project Request a Query where experts design queries for novices
+    > (…)
+    > Slow take-up among semantic web researchers We received surprisingly
+    > little input from this community so far.
+    > (page 15)
+
+* This Paper (payed) seems to be interesting
+    « Wikidata and DBpedia: A Comparative Study »
+    https://link.springer.com/chapter/10.1007/978-3-319-74497-1_14
+    2017
+    > (…) In this paper, a comparison of these two widely-used structured data
+    > sources is presented.
+    > This comparison considers the most relevant data quality dimensions in the
+    > state of the art of the scientific research.
+    > As fundamental differences between both projects, we can highlight that
+    > Wikidata has an open centralised nature, whereas DBpedia is more popular
+    > in the Semantic Web and the Linked Open Data communities and depends on
+    > the different linguistic editions of Wikipedia.
+
+
+* For my needs, search cities, this example could help me
+    https://www.wikidata.org/wiki/Wikidata:Request_a_query/Archive/2019/02#Cities_names_ending_en_'ac'_==>_time_out
 
 ## Ontologies
 
@@ -498,6 +645,11 @@ Spring prod profil (keep dev profil)***
         https://en.wikipedia.org/wiki/Ontology_(information_science)#Components
     * RDF is an Ontology language
         https://en.wikipedia.org/wiki/Web_Ontology_Language#Ontologies
+
+* RDF Calendar
+    https://www.w3.org/TR/rdfcal/
+    But too much to answer at question « When photo was taken », user
+    simply https://www.rubydoc.info/github/ruby-rdf/rdf/RDF/Literal/Date
 
 ## Resource vs Individual vs Class
 
@@ -781,6 +933,19 @@ To understand how it works, don't forget that
     (see https://en.wikipedia.org/wiki/Atomicity_(database_systems) )
 
 * FIXME maybe there is a solution of that, but I don't know.
+    Probably the answer is at https://www.fun-mooc.fr/c4x/inria/41002S02/asset/C013FG-W3.pdf
+    page 65 with the pattern
+    ```
+    DELETE {
+
+    }
+    INSERT {
+
+    }
+    WHERE {
+
+    }
+    ```
 
 ## Limitations of Fuseki
 
