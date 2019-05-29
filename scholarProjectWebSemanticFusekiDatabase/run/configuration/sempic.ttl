@@ -67,5 +67,6 @@
 :sempiconto
 	a ja:MemoryModel ;
 ja:content [
-		ja:externalContent "../scholarProjectWebSemantic/src/main/resources/sempiconto.owl"
+		ja:externalContent "../scholarProjectWebSemantic/src/main/resources/sempiconto.owl" ;
+		ja:externalContent "../julioJuGeographicalZone.owl"
 	].

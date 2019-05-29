@@ -151,6 +151,7 @@
     <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#AlbumPhoto -->
 
     <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#AlbumPhoto">
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
         <owl:disjointUnionOf rdf:parseType="Collection">
             <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Album"/>
             <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Photo"/>
@@ -163,6 +164,7 @@
     <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Depiction -->
 
     <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Depiction">
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
         <rdfs:label>Depiction</rdfs:label>
     </owl:Class>
     
@@ -207,6 +209,7 @@
     <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#User -->
 
     <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#User">
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
         <owl:disjointUnionOf rdf:parseType="Collection">
             <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#UserGroupAdmin"/>
             <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#UserGroupNormal"/>

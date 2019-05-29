@@ -1,5 +1,5 @@
 
-<!-- vim-markdown-toc GFM -->
+r!-- vim-markdown-toc GFM -->
 
 * [How to](#how-to)
     * [Teacher example](#teacher-example)
@@ -23,7 +23,12 @@
         * [LinkedGeoData.org](#linkedgeodataorg)
         * [GeoNames](#geonames)
     * [DBpedia](#dbpedia)
-    * [WikiData](#wikidata)
+    * [REST API](#rest-api)
+    * [Why DBpedia is not so cool](#why-dbpedia-is-not-so-cool)
+        * [WikiData](#wikidata)
+                * [WikiData Sparql, my experimentations](#wikidata-sparql-my-experimentations)
+            * [How to retrieve french city from WikiData](#how-to-retrieve-french-city-from-wikidata)
+        * [Conclusion](#conclusion)
     * [Ontologies](#ontologies)
     * [Resource vs Individual vs Class](#resource-vs-individual-vs-class)
     * [Jena Documentation](#jena-documentation)
@@ -115,6 +120,30 @@ Note that the current release of Protege software should use Java 8,
 see https://github.com/protegeproject/protege/issues/822 .
 
 ## scholarProjectWebSemantic
+
+### Generate ./julioJuGeographicalZone.owl
+
+```sh
+wget \
+    --header "Accept: text/tab-separated-values" \
+    -O DepartmentsWikidata.tsv \
+    https://query.wikidata.org/sparql \
+    --post-data='query=SELECT%20DISTINCT%20?department%20?departmentLabel%20?inseedepartmentCode%20WHERE%20{%0A%20%20?department%20(wdt:P31/(wdt:P279*))%20wd:Q6465.%0A%20%20OPTIONAL%20{%20?department%20wdt:P2586%20?inseedepartmentCode.%20}%0A%20%20OPTIONAL%20{%20?department%20wdt:P576%20?dissolution.%20}%0A%20%20FILTER(NOT%20EXISTS%20{%20?department%20wdt:P576%20?dissolution.%20})%0A%20%20SERVICE%20wikibase:label%20{%20bd:serviceParam%20wikibase:language%20"fr".%20}%0A}%0AORDER%20BY%20(?inseedepartmentCode)' \
+    || exit 2
+
+wget \
+    --header "Accept: text/tab-separated-values" \
+    -O CommunesWikidata.tsv \
+    https://query.wikidata.org/sparql \
+    --post-data='query=SELECT%20DISTINCT%20?commune%20?communeLabel%20?departmentURI%20WHERE%20{%0A%20%20?commune%20p:P31%20?communeStatement.%0A%20%20?communeStatement%20ps:P31%20?classCommuneOfFrance.%0A%20%20?classCommuneOfFrance%20(wdt:P279*)%20wd:Q484170.%0A%20%20OPTIONAL%20{%0A%20%20%20%20?commune%20p:P131%20?departmentStatement.%0A%20%20%20%20?departmentStatement%20ps:P131%20?departmentURI.%0A%20%20%20%20?departmentURI%20(wdt:P31/(wdt:P279*))%20wd:Q6465.%0A%20%20%20%20FILTER(NOT%20EXISTS%20{%20?departmentStatement%20pq:P582%20?endtime.%20})%0A%20%20%20%20FILTER(NOT%20EXISTS%20{%20?departmentURI%20wdt:P576%20?dissolution.%20})%0A%20%20}%0A%20%20OPTIONAL%20{%20?communeStatement%20pq:P580%20?startTime.%20}%0A%20%20FILTER((!(BOUND(?startTime)))%20||%20(?startTime%20<%20(NOW())))%0A%20%20OPTIONAL%20{%20?communeStatement%20pq:P582%20?endTime.%20}%0A%20%20FILTER((!(BOUND(?endTime)))%20||%20(?endTime%20>=%20(NOW())))%0A%20%20OPTIONAL%20{%20?commune%20wdt:P571%20?inception.%20}%0A%20%20FILTER((!(BOUND(?inception)))%20||%20(?inception%20<%20(NOW())))%0A%20%20OPTIONAL%20{%20?commune%20wdt:P576%20?dissolved.%20}%0A%20%20FILTER((!(BOUND(?dissolved)))%20||%20(?dissolved%20>=%20(NOW())))%0A%20%20SERVICE%20wikibase:label%20{%20bd:serviceParam%20wikibase:language%20"fr".%20}%0A}%0AORDER%20BY%20(?communeLabel)%20(?commune)' \
+    || exit 2
+
+./createWikidataFrenchCommunesOwl.sh
+```
+
+* See also (not mandatory) the section « Retrieve departments and communes »
+
+* Preceding files are overwriting without warning.
 
 ### Fuseki embedded
 ***Section outdated, use Fuseki non embedded. See why in a section below.***
@@ -477,6 +506,57 @@ Spring prod profil (keep dev profil)***
     * https://www.forbes.com/sites/cognitiveworld/2018/08/03/the-importance-of-schema-org/
 
 
+## rdfs:subClassOf, rdf:type
+
+* Even if this definition is outdated I like very much because I understand
+    https://www.w3.org/TR/1998/WD-rdf-schema-19980409/
+    * Note that `rdf:instanceOf -> rdf:type`
+        https://bugzilla.mozilla.org/show_bug.cgi?id=90566
+    * Citation ***very very interesting***:
+    > From 2.3.1 RDF:instanceOf
+    > This indicates that a resource is a member of a class, and thus has all the
+    > characteristics that are to be expected of a member of that class. It is a
+    > relation between a resource and another resource which must be an instance
+    > of Class. A resource may be an instance of more than one class.
+    >
+    > 2.2.2 RDFS:subClassOf
+    > This indicates the subset/superset relation between classes. RDFS:subClassOf
+    > is transitive. If B is a sub-class of A and X is an instance of B, then X is
+    > also an instance of A. Only instances of Class can have this property type
+    > and the property value is always an instanceOf Class. A Class may be a
+    > subClassOf more than one Class.
+
+* Conclusion.
+    * If Théo is an instanceOf (type) Human, and Human an subclassOf Primate
+    Théo is an instanceOf (type) Human and Primate.
+    * But as Human is only instanceOf (type) Species, Théo is no an instanceOf
+    (type) Spacies
+
+* rdfs:domain and rdfs:range are constraints linked to rdf:type
+    of the class
+    `P rdfs:domain <http://example/Human>`
+    means that the property P should be placed in a context of
+    its subject is of type `<http://example/Human>`.
+
+* Read also https://stackoverflow.com/questions/25737584/subclassof-and-instance-of-rdf-rdfsclass
+    about rdfs:Resource and rdfs:Class
+
+## Owl vs Object Oriented programming
+
+* https://www.w3.org/TR/rdf-primer/
+    Read: (comparing with Java)
+    5.3 Interpreting RDF Schema Declarations
+
+* More complete article from W3C
+    https://www.w3.org/2001/sw/BestPractices/SE/ODSD/
+    See especially the tab under « 3.3 A Comparison of OWL/RDF and
+    Object-Oriented Languages »
+
+* https://www.researchgate.net/publication/228577024_OWL_vs_object_oriented_programming
+    (thesis)
+
+
+
 ## Linked Data
 
 * What is Linked Data
@@ -488,6 +568,10 @@ Spring prod profil (keep dev profil)***
     to trigger SPARQL queries
 * Very cool Thesis in French about Linked Data
     https://tel.archives-ouvertes.fr/tel-02003672/document (1 feb 2019).
+
+## All sparql endpoints
+
+* Check https://www.w3.org/wiki/SparqlEndpoints
 
 ### LinkedGeoData.org
 
@@ -526,7 +610,11 @@ Spring prod profil (keep dev profil)***
         With its corresponding rdf page
         http://sws.geonames.org/2985244/about.rdf
 
-## DBpedia
+* Seams to be up to date.
+
+* Use http://factforge.net/sparql to retrieve datas.
+
+### DBpedia
 
 * To query on DBpedia read https://wiki.dbpedia.org/OnlineAccess
 
@@ -538,6 +626,8 @@ Spring prod profil (keep dev profil)***
 * Found examples at https://stackoverflow.com/questions/44384005/get-all-cities-of-country-from-dbpedia-using-sparql
     For https://dbpedia.org/sparql (online service)
 
+* To have a cool REST api,
+
 * To search a city that match a pattern in a Country
     probably use http://mappings.dbpedia.org/server/ontology/classes/City
     (we could see that the doc is with a very old design)
@@ -548,18 +638,76 @@ Spring prod profil (keep dev profil)***
     > SPARQL and (partially) RDF in order to allow web developers querying of data
     > from a SPARQL endpoint.
 
-## WikiData
+#### REST API
+
+1. Use http://dbpedia.org/sparql (change options as you want)
+
+2. Write your SPARQL query like:
+
+    ```
+    select distinct ?subject where {
+    ?subject <http://dbpedia.org/ontology/inseeCode> "38185" .
+      }
+    ```
+
+    ```
+    select distinct ?subject where {
+    ?subject rdfs:label "Grenoble"@en .
+      }
+    ```
+
+3. Click « Run Query »
+
+4. Copy the URL of the result page
+
+#### Why DBpedia is not so cool
+
+* Outdated
+    * DBpedia is completly outdated. Based on very old Wikipedia articles.
+        For exemple, on http://fr.dbpedia.org/page/Bordeaux
+        or http://dbpedia.org/page/Bordeaux
+        they say that the mayor is still Alain Juppé!
+    * On http://fr.dbpedia.org/resource/Grenoble
+        We have:
+        1. <http://fr.dbpedia.org/resource/Grenoble> <http://dbpedia.org/ontology/wikiPageRevisionID> 111084543^^xsd:integer
+            ==> https://fr.wikipedia.org/w/index.php?title=Grenoble&oldid=111084543 give date of 2015 !!!
+        2. <http://dbpedia.org/resource/Grenoble> <http://dbpedia.org/ontology/wikiPageRevisionID> 744326541^^xsd:integer
+            ==> https://en.wikipedia.org/w/index.php?title=Grenoble&oldid=744326541 give date of 2016 !!!
+        * ==> Therefore for
+    * Therefore for datas that need to be very up to date (like communes)
+        this tool is not very good.
+
+* Very less accurate
+    * On DBpedia fr or en
+    * <http://fr.dbpedia.org/resource/Grenoble> rdf:type ?object .
+    * ==> We have not something like « Commune of France » (very less good than WikiData).
+    * There is interesting ` dcterms:subject:` but based on Catégorie of the
+        corresponding Wikipedia page, not cool
+
+
+* But DBpedia is not dead https://blog.dbpedia.org/
+    Actually project about Agriculture.
+
+### WikiData
 
 * Made with the support of Google…
     All is open source !!!
 
-* Check https://www.wikidata.org/wiki/Wikidata:Data_access
+* We could work on a Dump, in RDF if we want
+    https://www.wikidata.org/wiki/Wikidata:Database_download
+
+* Hot to obtaining data from Wikidata:
+    https://www.wikidata.org/wiki/Wikidata:Data_access
+
+* SPARQL tutorial https://www.wikidata.org/wiki/Wikidata:SPARQL_tutorial
+    ***It is very very interesting***
 
 *  https://query.wikidata.org/
     * User manual at https://www.mediawiki.org/wiki/Wikidata_query_service/User_Manual
+        ***Very very very interesting***
     * Examples
         could be found in the page in a modal window
-        under https://query.wikidat.org (click to the link Exemples) (so cooool)
+        under https://query.wikidata.org (click to the link Exemples) (so cooool)
         or at https://www.wikidata.org/wiki/Wikidata:SPARQL_query_service/queries/examples
     ***Test it, is so cool and so fancy,
     result of SPARQL is displayed in a map, so cool***
@@ -575,6 +723,14 @@ Spring prod profil (keep dev profil)***
 * This article is so cool
     to trigger SPARQL search on WikiData
     https://blog.ash.bzh/fr/a-la-recherche-des-communes-francaises-sur-wikidata/
+    > la date de fin n’est manifestement pas correctement indiquée de manière
+    > systématique. Il semble également y avoir quelques îles marquées comme
+    > commune alors qu’un élément séparé existe pour celle-ci.
+    * Don't know if this problem is corrected actually.
+    * Problem in its request, does not use `(wdt:P279*)` (subclass of « commune
+        of France »)
+    * See my solution below
+    * TODO contact it
 
 * All tools to manipulate WikiData
     https://www.wikidata.org/wiki/Wikidata:Tools/For_programmers
@@ -583,8 +739,23 @@ Spring prod profil (keep dev profil)***
     https://iccl.inf.tu-dresden.de/w/images/5/5a/Malyshev-et-al-Wikidata-SPARQL-ISWC-2018.pdf
 
     > What distinguishes Wikidata from RDF, however, is that many components of
-    > theknowledge graph carry more information than plain RDF would allow a
-    > single propertyor value to carry.
+    > the knowledge graph carry more information than plain RDF would allow a
+    > single property or value to carry.
+    > (p. 2)
+    > – Data values are often compound objects that do not correspond to literals
+    > of any standard RDF type. For example, the value 100 km/h has a numeric
+    > value of 100 and a unit of measurement km/h (Q180154).
+    > [check for instance how « Rio de Janeiro light rail » (Q10388586))
+    > speed limit is defined (click on "edit") ]
+    > – Statements (i.e., subject-property-object connections) may themselves be
+    > the subject of auxiliary property-value pairs, called qualifiers in
+    > Wikidata. For example, the Wikidata statement for a speed limit of Germany
+    > is actually as shown in Fig. 1, where the additional qualifier valid in
+    > place (P3005) clarifies the context of this limit ( paved road outside of
+    > settlements , Q23011975). Nesting of annotations is not possible, i.e.,
+    > qualifiers cannot be qualified further.
+    > (p.3)
+    > [***See my example below***]
 
     > April 2018, theDBpedia Live endpoint reports 618,279,889 triples across
     > all graphs (less than 13% of the size of Wikidata in RDF).
@@ -612,9 +783,437 @@ Spring prod profil (keep dev profil)***
     > in the Semantic Web and the Linked Open Data communities and depends on
     > the different linguistic editions of Wikipedia.
 
+* ***The French Government give data from Wikidata***
+    See https://www.data.gouv.fr/fr/datasets/subdivisions-administratives-francaises-issues-de-wikidata/
+    * This table is outdated.
+    * Checked with https://fr.wikipedia.org/wiki/Liste_des_communes_nouvelles_créées_en_2016,
+        seems to be correct
+    * TODO contact the producer to ask to update is datas and share
+        the URL to create its data.
 
-* For my needs, search cities, this example could help me
-    https://www.wikidata.org/wiki/Wikidata:Request_a_query/Archive/2019/02#Cities_names_ending_en_'ac'_==>_time_out
+* In Wikipedia page, to see the corresponding Wikidata article
+    check the link `Wikidata item` on the left pan of the page.
+
+##### Some experimentations WikiData Sparql
+
+* The very useful doc is ***https://en.wikibooks.org/wiki/SPARQL***
+
+* Qualifiers: explanations
+    1. explanations on Wikibook https://en.wikibooks.org/wiki/SPARQL/WIKIDATA_Qualifiers,_References_and_Ranks
+    2. definitions: https://www.wikidata.org/wiki/Help:Qualifiers
+    3. prefix explanation https://en.wikibooks.org/wiki/SPARQL/Prefixes
+    4. Official example
+        1. https://www.wikidata.org/wiki/Wikidata:SPARQL_query_service/queries#US_presidents_and_their_spouses,_in_date_order
+        2.  https://www.wikidata.org/wiki/Wikidata:SPARQL_query_service/queries#Working_with_qualifiers
+    My example for La Réunion. This department has had several names
+    Display it with their dates.
+    ```
+    SELECT DISTINCT ?departmentName ?starttime ?endtime WHERE {
+        # La Réunion (wd:Q17070#) Official name (P1448)
+        wd:Q17070 p:P1448 ?statement.
+        ?statement ps:P1448 ?departmentName.
+        # WARNING: Optional should be split, otherwise it
+        # doesn't display when only one is absente (only ?startime or only ?endtime)
+        OPTIONAL { ?statement pq:P580 ?starttime. }
+        OPTIONAL { ?statement pq:P582 ?endtime. }
+    }
+    ORDER BY ?starttime
+    ```
+
+* ***DEPRECATED*** Following is not a good idea to retrieve a city
+    `https://www.wikidata.org/wiki/Wikidata:Request_a_query/Archive/2019/02#Cities_names_ending_en_'ac'_==>_time_out`
+    ```
+    Adapted to Grenoble
+    SELECT ?item ?coord WHERE {
+        # instance of the object class (P31) or a sub-sub-*-class of this object class (P279*) (wd:P31/wdt:p279*) `human settlement` (wd:Q486972)
+        # same has if we had notions of `rdf:type` and `owl:subPropertyOf``owl:subPropertyOf` with inference (with a reasonner)
+        ?item (wdt:P31/wdt:P279*) wd:Q486972.
+        # ?item country(P17) France (wd:Q142)
+        ?item wdt:P17 wd:Q142.
+        ?item rdfs:label ?itemLabel.
+        # coordinate location
+        ?item wdt:P625 ?coord.
+        FILTER((LANG(?itemLabel)) = "fr")
+        FILTER(REGEX(?itemLabel, "^Grenoble$"))
+    }
+    ```
+    * Could be cool to retrieve Uri of the city, but
+    ==> two labels are retrieved
+    (can't use DISTINCT as there is two rows to retrieve)
+    and take long time, with a timeout reached.
+    and need internet connection.
+
+    * Note that the following reach always the timeout on my tests:
+    ```
+    SELECT ?item ?itemLabel WHERE {
+        # instance of the object class (P31) or a sub-sub-*-class of this object class (P279*)  (wd:P31/wdt:p279*) `human settlement` (wd:Q486972)
+        # same has if we had notions of `rdf:type` and `owl:subPropertyOf``owl:subPropertyOf` with inference (with a reasonner)
+        ?item (wdt:P31/wdt:P279*) wd:Q486972.
+        # ?item country(P17) France (wd:Q142)
+        ?item wdt:P17 wd:Q142.
+        SERVICE wikibase:label { bd:serviceParam wikibase:language "fr". }
+    }
+    ```
+
+* ***DEPRECATED*** Following can't work cause of cities that have homonyme
+    (See https://www.ladepeche.fr/article/2010/08/12/887653-vos-communes-ont-parfois-des-homonymes.html)
+    ```
+    SELECT DISTINCT ?item ?itemLabel ?department WHERE {
+    # instance of the object class (P31) or a sub-sub-*-class of this object class (P279*) (wd:P31/wdt:p279*) `commune of France` (wd:Q484170)
+    # same has if we had notions of `rdf:type` and `owl:subPropertyOf``owl:subPropertyOf` with inference (with a reasonner)
+    ?item (wdt:P31/(wdt:P279*)) wd:Q484170;
+        # Official name (P1448)
+        wdt:P1448 ?itemLabel.
+        wd:Q6465
+    }
+    ```
+
+* ***DEPRECATED*** The following can't work because P1448 (Official name) is a container of
+    several named (old one and the actual one). Therefore display several
+    example. The problem is especially for département « La Réunion »
+    that has had several name in the past (see following example).
+    ```
+    SELECT DISTINCT ?communeURI ?communeLabel ?departmentURI ?departmentLabel WHERE {
+    # instance of the object class (P31) or a sub-sub-*-class of this object class (P279*) (wd:P31/wdt:p279*) `commune of France` (wd:Q484170)
+    # same has if we had notions of `rdf:type` and `owl:subPropertyOf``owl:subPropertyOf` with inference (with a reasonner)
+    ?communeURI (wdt:P31/(wdt:P279*)) wd:Q484170;
+        wdt:P1448 ?communeLabel;
+        # located in the administrative territorial entity (P131)
+        wdt:P131 ?departmentURI.
+    # departments of France (Q6465)
+    ?departmentURI (wdt:P31/(wdt:P279*)) wd:Q6465;
+        wdt:P1448 ?departmentLabel.
+    }
+    ```
+
+* ***DEPRECATED*** Display all departments of France. Departments with a Dissolution or
+    that has several name in the past (i.e. « La Réunion »
+    * ***WARNING: Optional should be split, otherwise it
+        doesn't display when only one is absente (only ?startime or only
+        ?endtime or only ?dissolution)***
+    * WARNING: as lot of overseas departments (Guadeloupe, Mayotte)
+        has not « Official name » (P1448) but only « native label ».
+        It could have several « native label » for several languages.
+    * In the solution, I don't use « native label » and « official name »,
+        I use label of the page (SERVICE, etc)
+    ```
+    SELECT DISTINCT  ?departmentLabel ?nativeLabel ?nativeLabelLang ?inseedepartmentCode ?departmentURI ?dissolution ?starttime ?endtime WHERE {
+
+        # « (wdt:P31/(wdt:P279*)) » is very important to display La Réunion
+        # that is not directly an instance of Q6465 (Department of France)
+        # instance of the object class (P31) or a sub-sub-*-class of this object class (P279*) (wd:P31/wdt:p279*) `Department of France` (wd:16465)
+        # same has if we had notions of `rdf:type` and `owl:subPropertyOf``owl:subPropertyOf` with inference (with a reasonner)
+        ?departmentURI (wdt:P31/(wdt:P279*)) wd:Q6465.
+
+        # « Insee Departemenmt Code »
+        OPTIONAL { ?departmentURI wdt:P2586 ?inseedepartmentCode . }
+
+        # Some department disappears in the past.
+        # « dissolved, abolished or demolished » (wdt:P576)
+        OPTIONAL { ?departmentURI wdt:P576 ?dissolution }.
+
+        # « Native label » (p1448)
+        OPTIONAL {
+            ?departmentURI wdt:P1705 ?nativeLabel.
+            # https://en.wikibooks.org/wiki/SPARQL/WIKIDATA_Precision,_Units_and_Coordinates#Monolingual_texts
+            BIND( LANG(?nativeLabel) AS ?nativeLabelLang) .
+        }
+
+        OPTIONAL {
+            # « Official name » (p1448)
+            ?departmentURI p:P1448 ?departmentStatement.
+
+            # A department could have several officials names in history.
+            # « Official name » (p1448)
+            ?departmentStatement ps:P1448 ?departmentLabel.
+            OPTIONAL { ?departmentStatement pq:P580 ?starttime. }
+            OPTIONAL { ?departmentStatement pq:P582 ?endtime. }
+        }
+
+    }
+    ORDER BY ?inseedepartmentCode ?dissolution  ?departmentURI ?starttime
+    ```
+* ***DEPRECATED*** (Deprecated but interesting) Display department URI and department label
+    * WARNING: as lot of overseas departments (Guadeloupe, Mayotte)
+        has not « Official name » (P1448)
+    * Warning, there are two  « native name » for Gironde
+        (French and occident)
+    * WARNING: Actually Mayotte has neither « native name » nor
+        « official name ».
+    ```
+    SELECT DISTINCT ?departmentURI ?departmentLabel ?nativeLabel ?inseedepartmentCode WHERE {
+        # « (wdt:P31/(wdt:P279*)) » is very important to display La Réunion
+        # that is not directly an instance of Q6465 (Department of France)
+        # instance of the object class (P31) or a sub-sub-*-class of this object class (P279*) (wd:P31/wdt:p279*) `Department of France` (wd:16465)
+        # same has if we had notions of `rdf:type` and `owl:subPropertyOf``owl:subPropertyOf` with inference (with a reasonner)
+        ?departmentURI (wdt:P31/(wdt:P279*)) wd:Q6465 ;
+            # « Insee Departemenmt Code »
+            wdt:P2586 ?inseedepartmentCode ;
+
+        # « Native label » (p1448)
+        OPTIONAL {
+            ?departmentURI wdt:P1705 ?nativeLabel.
+            BIND( LANG(?nativeLabel) AS ?nativeLabelLang) .
+            FILTER(REGEX(?nativeLabelLang, "^fr$"))
+        }
+
+        # « Official name » (p1448)
+        OPTIONAL {
+            ?departmentURI p:P1448 ?departmentStatement.
+            ?departmentStatement ps:P1448 ?departmentLabel.
+            # A department could have several officials names in history.
+            # Take only the official name that has not «  end time »
+            # « end time » (P582)
+            FILTER(NOT EXISTS { ?departmentStatement pq:P582 ?endtime. })
+        }
+
+        # Some department disappears in the past.
+        # Take only those who hasn't a property
+        # « dissolved, abolished or demolished » (wdt:P576)
+        FILTER(NOT EXISTS { ?departmentURI wdt:P576 ?dissolution. })
+    }
+    ORDER BY ?inseedepartmentCode
+    ```
+
+* ***DEPRECATED*** (Deprecated but interesting)
+    display cities and department URI but with no filters
+    ```
+    SELECT DISTINCT ?communeURI ?communeLabel ?departmentURI WHERE {
+    # instance of the object class (P31) or a sub-sub-*-class of this object class (P279*)  (wd:P31/wdt:p279*) of `commune of France` (wd:Q484170)
+    # same has if we had notions of `rdf:type` and `owl:subPropertyOf``owl:subPropertyOf` with inference (with a reasonner)
+    ?communeURI (wdt:P31/(wdt:P279*)) wd:Q484170 ;
+      # located in the administrative territorial entity (P131)
+        wdt:P131 ?departmentURI.
+
+        # Could have duplicate for communes that has changed its name
+        # (See above resolution for Department)
+        # Lot of communes has not « Official name »
+        # « Official name » (p1448)
+     OPTIONAL { ?communeURI   wdt:P1448 ?communeLabel }.
+
+    # departments of France (Q6465)
+    ?departmentURI (wdt:P31/(wdt:P279*)) wd:Q6465.
+    }
+    ORDER BY ?communeLabel
+    ```
+
+
+* ***DEPRECATED*** (Deprecated but interesting)
+    displays communes not departments as it could have some departments
+    that has disappeared (e.g. Seine) and replaced by others.
+    If we try to display ?department we will have some duplicated
+    `?commune`
+```
+    SELECT DISTINCT ?commune ?communeLabel WHERE {
+      # instance of (P31)
+      ?commune p:P31 ?statementCommune .
+
+      # instance of (P31)
+      ?statementCommune ps:P31
+        # « subclass of » (P279) « commune of France » (wd:Q484170)
+        [ (wdt:P279*) wd:Q484170 ] .
+
+      OPTIONAL {
+        # located in the administrative territorial entity (P131)
+        ?commune  p:P131 ?departmentStatement .
+        # instance of (P31)
+        ?departmentStatement ps:P31
+            # « subclass of » (P279) « Departments of France » (Q6465)
+            [ (wdt:P279*) wd:Q6465 ] .
+        # Take only « departmentStatement » that has not «  end time »
+        # « end time » (P582)
+        FILTER(NOT EXISTS { ?departmentStatement pq:P582 ?endtime. })
+      } .
+
+      # Take only « communeStatatenement » that has not «  end time »
+      # « end time » (P582)
+      FILTER(NOT EXISTS { ?statementCommune pq:P582 ?endtime. })
+
+      SERVICE wikibase:label { bd:serviceParam wikibase:language "fr". }
+    }
+    ORDER BY ?communeLabel ?commune
+```
+
+### Retrieve departments and communes
+
+#### Retrieve Department infos
+    * Warning it retrieve also https://www.wikidata.org/wiki/Q22247953
+        that is probably not a Department.
+        Error in Wikidata done by an English user on 27 march 2019
+        TODO correct it.
+    * Simpler, we could do not add `OPTIONAL` between
+        `?department wdt:P2586 ?inseedepartmentCode`
+        As it actually (2019) no need to filter with `?dissolution`.
+    ```
+    SELECT DISTINCT  ?department ?departmentLabel ?inseedepartmentCode WHERE {
+
+        # « (wdt:P31/(wdt:P279*)) » is very important to display La Réunion
+        # that is not directly an instance of Q6465 (Department of France)
+        # instance of the object class (P31) or a sub-sub-*-class of this object class (P279*) (wd:P31/wdt:p279*) `Department of France` (wd:16465)
+        # same has if we had notions of `rdf:type` and `owl:subPropertyOf``owl:subPropertyOf` with inference (with a reasonner)
+        ?department (wdt:P31/(wdt:P279*)) wd:Q6465.
+
+        # « Insee Departemenmt Code »
+        OPTIONAL { ?department wdt:P2586 ?inseedepartmentCode . }
+
+        # Some department disappears in the past.
+        # « dissolved, abolished or demolished » (wdt:P576)
+        OPTIONAL { ?department wdt:P576 ?dissolution }.
+
+        FILTER(NOT EXISTS { ?department wdt:P576 ?dissolution. })
+
+        SERVICE wikibase:label { bd:serviceParam wikibase:language "fr". }
+    }
+    ORDER BY ?inseedepartmentCode
+    ```
+
+
+####  Retrieve communes and its Department URI
+
+* As:
+    * « commune nouvelle » (Q2989454) is « subclass of » (P279) «commune of france » (wd:Q484170)
+    *  « delagated commune » (Q21869758) is NOT a « subclass of » (P279) «commune of france » (wd:Q484170)
+    * => we has « Val-de-Virieu (Q57695189) and not « Virieu » (Q1011549)
+* 06/01/2018 (in June) we has 35 088 communes
+* Some has not label and INSEE code like https://www.wikidata.org/wiki/Q55587701
+    (i.e. label is « Q55587701 » on a SPARQL query and in the h1 tag of
+    the page we have « No label defined ») instead of a title)
+    It has no department too.
+* TODO CORRECT WITH https://www.insee.fr/fr/information/2028028
+    (34970 communes on 01/01/2019)
+    TODO help with a SPARQL query in WikiData
+* (Even if there is thee month since the last INSEE publication,
+    probably WikiData is outdated, as Government
+    wants less Communes and not more)
+* At https://fr.wikipedia.org/wiki/Nombre_de_communes_en_France#cite_note-5
+    it says « Au 1er mars 2019, la France métropolitaine et les départements
+    d’outre-mer sont découpés en 34 968 communes »
+* Actually https://www.wikidata.org/wiki/Q55587701 does not contain « inception » (P571) but not
+    wdt:P31 [ instance of ] « commune nouvelle »  with a « start time » qualifier
+* BIG WARNING
+    * Following can't work as expected. It only remove ?startTime of the result.
+    ```
+    SELECT DISTINCT ?startTime WHERE {
+        (…)
+        OPTIONAL {
+            ?communeStatement pq:P582 ?endTime.
+            FILTER(?endTime >= NOW()).
+        } .
+        (…)
+    }
+    ```
+    * As used in the example above use instead
+    ```
+    SELECT DISTINCT ?startTime WHERE {
+        (…)
+        OPTIONAL {
+            ?communeStatement pq:P582 ?endTime.
+        } .
+        FILTER(!BOUND(?endTime) || ?endTime >= NOW()) .
+        (…)
+    }
+    ```
+
+* The solution
+
+```
+SELECT DISTINCT ?commune ?communeLabel ?departmentURI WHERE {
+    # instance of (P31)
+    ?commune p:P31 ?communeStatement .
+
+    # instance of (P31)
+    ?communeStatement ps:P31 ?classCommuneOfFrance .
+
+    # « subclass of » (P279) « commune of France » (wd:Q484170)
+    ?classCommuneOfFrance (wdt:P279*) wd:Q484170 .
+
+    OPTIONAL {
+        # located in the administrative territorial entity (P131)
+        ?commune p:P131 ?departmentStatement .
+
+        ?departmentStatement ps:P131 ?departmentURI .
+
+        # instance of (P31) « departments of France » (Q6465)
+        ?departmentURI (wdt:P31/(wdt:P279*)) wd:Q6465 .
+
+        # Take only « departmentStatement » that has not «  end time »
+        # « end time » (P582)
+        FILTER(NOT EXISTS { ?departmentStatement pq:P582 ?endtime. }) .
+
+        # Some departement disappears in the past.
+        # « dissolved, abolished or demolished » (wdt:P576)
+        FILTER(NOT EXISTS { ?departmentURI wdt:P576 ?dissolution. }) .
+
+    } .
+
+    # Take only « communeStatement » that has not «  end time »
+    # « start time » (P580)
+    OPTIONAL {
+        ?communeStatement pq:P580 ?startTime .
+    } .
+    FILTER(!BOUND(?startTime) || ?startTime <  NOW()) .
+    OPTIONAL {
+        ?communeStatement pq:P582 ?endTime.
+    } .
+    FILTER(!BOUND(?endTime) || ?endTime >= NOW()) .
+    # Take only « communeStatement » that has not «  end time »
+    # « end time » (P582)
+    OPTIONAL {
+        ?commune wdt:P571 ?inception.
+    } .
+    FILTER(!BOUND(?inception) || ?inception < NOW()).
+    OPTIONAL {
+        ?commune wdt:P576 ?dissolved.
+    } .
+    FILTER(!BOUND(?dissolved) || ?dissolved >= NOW()).
+
+    SERVICE wikibase:label { bd:serviceParam wikibase:language "fr". } .
+}
+ORDER BY ?communeLabel ?commune
+```
+
+#### Create the rdf file
+
+* Note: do not remove trailer tabs on the file. The best is to not edit it.
+
+1. In the Data retrieved, on the bottom pan go to `Download -> TSV file`
+    (columns separated by tab)
+
+
+2. Execute following bash
+    ./createWikidataFrenchCommunesOwl.sh
+
+3. At the beginning of the file, add xml informations needed
+    (copy from another owl file).
+
+4. Don't forget to change `owl:Ontology`, `xmlns` and `xmlns:base`
+
+5. Append the new ontology at
+ ./scholarProjectWebSemanticFusekiDatabase/run/configuration/sempic.ttl
+ un `` ja:content []``
+
+* Note:
+    * In the file « Departments.xml »,
+        actually there is « Antilles-Guyane »
+    * In the file Communes.xml first lines has no label
+    * But not important
+
+
+### Conclusion
+
+* WikiData is the best
+
+* If you want up to date and reliable datas don't use Linked Data
+    like DBpedia or WikiData, but user other data seeder (INSEE, etc.)
+
+* Convert datas
+    * with http://openrefine.org/download.html
+        (https://github.com/fadmaa/grefine-rdf-extension/ was
+        advised by the teacher for Google Refine, not updated for OpenRefine)
+        * Google Refine. In October 2012, it was renamed OpenRefine
+            as it transitioned to a community-supported product.
+    * Or with the sed like explained above
+
 
 ## Ontologies
 
@@ -734,6 +1333,12 @@ https://github.com/apache/jena/blob/master/jena-db/use-fuseki-tdb2.md
 * `rdfs:comment` become JavaDoc into the generated file
     ./scholarProjectWebSemantic/target/generated-sources/java/fr/uga/miashs/sempic/model/rdf/SempicOnto.java/
 
+* To have `rdfs:label` in lang `fr` and not only lang `en`
+    displayed in the pan `Entities`.
+    Under its pan `Entity`, the left-pan `Classes`
+    * `Menu View -> Custom Rendering` add « fr »
+
+* Files catalog-v001.xml are generated by Protege.
 
 ## How to install Jena
 
