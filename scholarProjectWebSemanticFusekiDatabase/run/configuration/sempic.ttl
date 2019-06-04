@@ -44,6 +44,9 @@
 :infdataset a			ja:RDFDataset;
 	ja:defaultGraph		:infmodel.
 
+# :infdataset a			ja:RDFDataset;
+# 	ja:defaultGraph		:unionmodel.
+
 :ontodataset a			ja:RDFDataset;
 	ja:defaultGraph		:sempiconto.
 
@@ -51,9 +54,15 @@
 	ja:defaultGraph		:sempicdata.
 
 
+# The reasoner seems to be completly broken
+# :infmodel a 			ja:InfModel;
+# 	ja:baseModel		:unionmodel;
+#         ja:reasoner  		[ ja:reasonerURL <http://jena.hpl.hp.com/2003/OWLFBRuleReasoner>].
+
+# https://stackoverflow.com/questions/36313972/fuseki-how-to-add-pellet-reasoner
 :infmodel a 			ja:InfModel;
 	ja:baseModel		:unionmodel;
-        ja:reasoner  		[ ja:reasonerURL <http://jena.hpl.hp.com/2003/OWLFBRuleReasoner>].
+        ja:reasoner  		[ ja:reasonerClass "openllet.jena.PelletReasonerFactory"  ].
 
 :unionmodel
 	a		ja:UnionModel;

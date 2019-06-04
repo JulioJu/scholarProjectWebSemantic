@@ -14,7 +14,6 @@
         <java.version>11</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
         <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
@@ -43,6 +42,8 @@
         <jackson-version>2.9.8</jackson-version>
 
         <io-jsonwebtoken.version>0.10.6</io-jsonwebtoken.version>
+
+        <jena.version>3.12.0</jena.version>
 
     </properties>
 
@@ -130,7 +131,17 @@
             <groupId>org.apache.jena</groupId>
             <artifactId>apache-jena</artifactId>
             <type>zip</type>
-            <version> 3.11.0 </version>
+            <version>${jena.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-jdk14</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
 
@@ -138,8 +149,19 @@
         <dependency>
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-fuseki-main</artifactId>
-            <version>3.11.0</version> <!-- Set the version -->
+            <version>${jena.version}</version> <!-- Set the version -->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-jdk14</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
+
 
         <!-- https://jena.apache.org/documentation/tools/schemagen.html#using-schemagen-with-maven -->
         <!-- ———————————————— -->
@@ -148,12 +170,32 @@
             <artifactId>exec-maven-plugin</artifactId>
             <!-- Last version. Release date 2017. Checked 2019/04/09 -->
             <version>1.6.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-jdk14</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-nop</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>build-helper-maven-plugin</artifactId>
             <!-- Last version. Release date 2017. Checked 2019/04/09 -->
             <version>3.0.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-jdk14</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-nop</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- End added by JulioJu -->

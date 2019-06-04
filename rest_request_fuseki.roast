@@ -4,7 +4,11 @@ Connection: Keep-Alive
 Accept-Encoding: gzip,deflate
 Host: http://localhost:3030
 
-GET /seMPIC/?QUEry=CONSTRUCT+%0A++%7B+%0A++++%3Chttp%3A%2F%2Ffr.uga.julioju.sempic%2FResourcesCreated%2Fuser%2Fanotheruser%3E+%3Fp+%3Fo+.%0A++%7D%0AWHERE%0A++%7B+%3Chttp%3A%2F%2Ffr.uga.julioju.sempic%2FResourcesCreated%2Fuser%2Fanotheruser%3E%0A++++++++++++++%3Fp++%3Fo%0A++%7D%0A
+# We could also use a POST request, but also with a string url encoded
+# (as tirrible as below)
+GET /sempic/?query=CONSTRUCT+%0A++%7B+%0A++++%3Chttp%3A%2F%2Ffr.uga.julioju.sempic%2FResourcesCreated%2Fuser%2Fanotheruser%3E+%3Fp+%3Fo+.%0A++%7D%0AWHERE%0A++%7B+%3Chttp%3A%2F%2Ffr.uga.julioju.sempic%2FResourcesCreated%2Fuser%2Fanotheruser%3E%0A++++++++++++++%3Fp++%3Fo%0A++%7D%0A
+
+GET /sempic/?query=ASK%0AWHERE%0A++%7B+%3Chttp%3A%2F%2FwikidataJulioJuEntity%2Fentity%2FQ3083%3E%0A++++++++++++++%3Fp++%3Fo%0A++%7D%0A%0A
 
 content-Type: application/sparql-update
 

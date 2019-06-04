@@ -1,4 +1,0 @@
-Accept: application/sparql-results+json
-GET https://query.wikidata.org/sparql?query=SELECT%20?dob%20WHERE%20{{wd:Q42%20wdt:P569%20?dob.}}
-
-GET https://query.wikidata.org/query=SELECT%20?item%20?itemLabel%20WHERE%20{%0A%20?item%20(wdt:P31/wdt:P279*)%20wd:Q486972.%20?item%20wdt:P17%20wd:Q142.%20SERVICE%20wikibase:label%20{%20bd:serviceParam%20wikibase:language%20"[AUTO_LANGUAGE],en".%20}%0A}

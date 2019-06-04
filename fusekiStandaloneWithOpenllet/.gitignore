@@ -1,0 +1,11 @@
+/target
+/.idea
+/.classpath
+/.factorypath
+/.settings
+/run
+!/run/configuration/sempic.ttl
+/.project
+
+/* Needed by maven-shade-plugin */
+/dependency-reduced-pom.xml

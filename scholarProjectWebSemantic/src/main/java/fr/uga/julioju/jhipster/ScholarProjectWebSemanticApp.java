@@ -1,6 +1,8 @@
 package fr.uga.julioju.jhipster;
 
+import java.io.IOException;
 import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.net.UnknownHostException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -51,19 +53,26 @@ public class ScholarProjectWebSemanticApp implements InitializingBean {
         switch (args[0]) {
             case "fusekiServerEmbedded":
                 log.info("fusekiServerEmbedded");
+                FusekiServerConn.fusekiServerNotManaged = false;
                 FusekiServerConn.isEmbeddedFuseki = true;
             break;
             case "fusekiServerNoEmbedded":
                 log.info("fusekiServerNotEmbedded");
-                log.info("fusekiServerNotEmbedded");
+                FusekiServerConn.fusekiServerNotManaged = false;
                 FusekiServerConn.isEmbeddedFuseki = false;
+            break;
+            case "fusekiServerNotManaged":
+                log.info("Fuseki should be start outside the app.");
+                FusekiServerConn.fusekiServerNotManaged = true;
             break;
             default:
                 ScholarProjectWebSemanticApp.mvnArgumentError();
             break;
 
         }
-        FusekiServerConn.serverStart();
+        if (!FusekiServerConn.fusekiServerNotManaged) {
+            FusekiServerConn.serverStart();
+        }
     }
 
     private static void mvnArgumentError() {
@@ -71,6 +80,7 @@ public class ScholarProjectWebSemanticApp implements InitializingBean {
                 + "Call `$ mvn' either like:\n"
                 + "\t`$ mvn -Dspring-boot.run.arguments=\"fusekiServerEmbedded (deprecated)\"\n'"
                 + "\t`$ mvn -Dspring-boot.run.arguments=\"fusekiServerNoEmbedded\"\n'"
+                + "\t`$ mvn -Dspring-boot.run.arguments=\"fusekiServerNotManaged\"\n'"
                 );
         System.exit(29);
     }

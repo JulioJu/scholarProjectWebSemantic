@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>fr.julioju.fusekiEmbedded</groupId>
+    <artifactId>fuseki</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <!-- Build properties -->
+        <maven.version>3.0.0</maven.version>
+        <java.version>8</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <argLine>-Djava.security.egd=file:/dev/./urandom -Xmx256m</argLine>
+        <m2e.apt.activation>jdt_apt</m2e.apt.activation>
+        <run.addResources>false</run.addResources>
+
+        <!-- Plugin versions -->
+        <!-- ———————————————————— -->
+        <slf4j.version>1.7.26</slf4j.version>
+        <logback.version>1.2.3</logback.version>
+        <openllet.version>2.6.4</openllet.version>
+    </properties>
+
+    <dependencies>
+
+        <!-- https://www.javacodegeeks.com/2012/04/using-slf4j-with-logback-tutorial.html -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+
+        <!-- Fuseki Server (to embedded Fuseki in Server) -->
+        <!-- https://jena.apache.org/documentation/fuseki2/fuseki&#45;main -->
+        <dependency>
+            <groupId>org.apache.jena</groupId>
+            <artifactId>jena-fuseki-main</artifactId>
+            <version>3.12.0</version>
+            <!-- Excluse otherise at startup we have the following error: -->
+            <!-- ===== -->
+            <!-- SLF4J: Class path contains multiple SLF4J bindings. -->
+            <!-- SLF4J: Found binding in [jar:file:/home/julioprayer/DCISS/webSemantique/fuseki/target/libs/logback&#45;classic&#45;1.2.3.jar!/org/slf4j/impl/StaticLoggerBinder.class] -->
+            <!-- SLF4J: Found binding in [jar:file:/home/julioprayer/DCISS/webSemantique/fuseki/target/libs/slf4j&#45;log4j12&#45;1.7.26.jar!/org/slf4j/impl/StaticLoggerBinder.class] -->
+            <!-- SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation. -->
+            <!-- SLF4J: Actual binding is of type [ch.qos.logback.classic.util.ContextSelectorStaticBinder] -->
+            <!-- ============================= -->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!--  https://github.com/Galigator/openllet -->
+        <dependency>
+            <groupId>com.github.galigator.openllet</groupId>
+            <artifactId>openllet-owlapi</artifactId>
+            <version>2.6.4</version>
+            <exclusions>
+
+                <exclusion>
+                    <!-- The sheda pulgin print the following error if you remove this exclusion: -->
+                    <!-- ===== -->
+                    <!-- [WARNING] owlapi&#45;api&#45;5.1.11.jar, owlapi&#45;distribution&#45;5.1.11.jar define 917 overlapping classes: -->
+                    <!--  -->
+                    <!-- [WARNING]   &#45; org.semanticweb.owlapi.model.OWLPropertyAssertionObject -->
+                    <!-- [WARNING]   &#45; org.semanticweb.owlapi.model.OWLAnonymousClassExpression -->
+                    <!-- [WARNING]   &#45; org.semanticweb.owlapi.model.HasApplyChange -->
+                    <!-- [NOTE OF JULIOJU, I'VE NOT PAST LOT OF MESSAGES LIKE
+                            THE [WARNING] ABOVE-->
+
+                    <!-- [WARNING] maven&#45;shade&#45;plugin has detected that some class files are -->
+                    <!-- [WARNING] present in two or more JARs. When this happens, only one -->
+                    <!-- [WARNING] single version of the class is copied to the uber jar. -->
+                    <!-- [WARNING] Usually this is not harmful and you can skip these warnings, -->
+                    <!-- [WARNING] otherwise try to manually exclude artifacts based on -->
+                    <!-- [WARNING] mvn dependency:tree &#45;Ddetail=true and the above output. -->
+                    <!-- [WARNING] See http://maven.apache.org/plugins/maven&#45;shade&#45;plugin/ -->
+                    <!-- ============================= -->
+                    <groupId>net.sourceforge.owlapi</groupId>
+                    <artifactId>owlapi-distribution</artifactId>
+                </exclusion>
+
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.github.galigator.openllet</groupId>
+            <artifactId>openllet-jena</artifactId>
+            <version>2.6.4</version>
+            <exclusions>
+                <!-- FOLLOWING  SHOULD BE EXCLUDE OTHERWISE
+                THE MAVEN SHADE PLUGIN DETECT UNRESOLVABLE VERSION CONFLICT-->
+                <!-- Actually, without maven-plugin-shade but only maven-plugin-dependency -->
+                <!-- When I try to start the app if I havn't the following exclusion I have: -->
+
+                <!-- Exception in thread "main" java.lang.NoClassDefFoundError: org/apache/jena/sys/JenaSystem -->
+                <!--         at org.apache.jena.fuseki.Fuseki.init(Fuseki.java:269) -->
+                <!--         at org.apache.jena.fuseki.Fuseki.<clinit>(Fuseki.java:291) -->
+                <!--         at org.apache.jena.fuseki.servlets.ActionService.<init>(ActionService.java:51) -->
+                <!--         at org.apache.jena.fuseki.servlets.SPARQL_Protocol.<init>(SPARQL_Protocol.java:46) -->
+                <!--         at org.apache.jena.fuseki.servlets.SPARQL_Query.<init>(SPARQL_Query.java:68) -->
+                <!--         at org.apache.jena.fuseki.servlets.SPARQL_QueryDataset.<init>(SPARQL_QueryDataset.java:29) -->
+                <!--         at org.apache.jena.fuseki.servlets.ServiceDispatchRegistry.<clinit>(ServiceDispatchRegistry.java:45) -->
+                <!--         at org.apache.jena.fuseki.main.FusekiServer$Builder.<init>(FusekiServer.java:275) -->
+                <!--         at org.apache.jena.fuseki.main.FusekiServer.create(FusekiServer.java:120) -->
+                <!--         at fr.julioju.fusekiEmbedded.Main.serverStartEmbeddedFuseki(Main.java:20) -->
+                <!--         at fr.julioju.fusekiEmbedded.Main.main(Main.java:45) -->
+                <!-- Caused by: java.lang.ClassNotFoundException: org.apache.jena.sys.JenaSystem -->
+                <!--         at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:583) -->
+                <!--         at java.base/jdk.internal.loader.ClassLoaders$AppClassLoader.loadClass(ClassLoaders.java:178) -->
+                <!--         at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:521) -->
+                <!--         ... 11 more -->
+                <exclusion>
+                    <groupId>org.apache.jena</groupId>
+                    <artifactId>jena-arq</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.jena</groupId>
+                    <artifactId>jena-core</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+    </dependencies>
+
+
+    <!-- Cool resource to understand how to package a project in jar -->
+    <!--  https://www.baeldung.com/executable-jar-with-maven -->
+
+    <!-- maven-dependency-plugin doesn't detect plugins overlapping -->
+
+    <!-- But currently maven-shade-plugin fail with error -->
+    <!-- Don't know why -->
+    <!-- Probaably error in my configuration, but don't know where -->
+    <!-- Exception in thread "main" java.lang.ExceptionInInitializerError -->
+    <!--         at org.apache.jena.riot.RDFParserBuilder.buildFactoryRDF(RDFParserBuilder.java:603) -->
+    <!--         at org.apache.jena.riot.RDFParserBuilder.build(RDFParserBuilder.java:575) -->
+    <!--         at org.apache.jena.riot.RDFParserBuilder.parse(RDFParserBuilder.java:506) -->
+    <!--         at org.apache.jena.riot.RDFDataMgr.parseFromURI(RDFDataMgr.java:890) -->
+    <!--         at org.apache.jena.riot.RDFDataMgr.read(RDFDataMgr.java:221) -->
+    <!--         at org.apache.jena.riot.RDFDataMgr.read(RDFDataMgr.java:102) -->
+    <!--         at org.apache.jena.riot.RDFDataMgr.read(RDFDataMgr.java:93) -->
+    <!--         at org.apache.jena.riot.RDFDataMgr.loadModel(RDFDataMgr.java:335) -->
+    <!--         at org.apache.jena.sparql.core.assembler.AssemblerUtils.readAssemblerFile(AssemblerUtils.java:101) -->
+    <!--         at org.apache.jena.fuseki.main.FusekiServer$Builder.parseConfigFile(FusekiServer.java:478) -->
+    <!--         at fr.julioju.fusekiEmbedded.Main.serverStartEmbeddedFuseki(Main.java:23) -->
+    <!--         at fr.julioju.fusekiEmbedded.Main.main(Main.java:45) -->
+    <!-- Caused by: java.lang.NullPointerException -->
+    <!--         at org.apache.jena.query.ARQ.isTrueOrUndef(ARQ.java:652) -->
+    <!--         at org.apache.jena.riot.system.RiotLib.<clinit>(RiotLib.java:60) -->
+    <!--         ... 12 more -->
+    <build>
+        <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>
+                                target/libs
+                            </outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.1.2</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>libs/</classpathPrefix>
+                                <mainClass>fr.julioju.fusekiEmbedded.Main</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+
+    <!-- I noticed it used by fuseki ! -->
+    <!-- https://maven.apache.org/plugins/maven-shade-plugin/examples/executable-jar.html -->
+      <!-- <plugin> -->
+      <!--   <groupId>org.apache.maven.plugins</groupId> -->
+      <!--   <artifactId>maven&#45;shade&#45;plugin</artifactId> -->
+      <!--   <version>3.2.1</version> -->
+      <!--   <executions> -->
+      <!--     <execution> -->
+      <!--       <phase>package</phase> -->
+      <!--       <goals> -->
+      <!--         <goal>shade</goal> -->
+      <!--       </goals> -->
+      <!--       <configuration> -->
+      <!--         <transformers> -->
+      <!--           <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer"> -->
+      <!--             <mainClass>fr.julioju.fusekiEmbedded.Main</mainClass> -->
+      <!--           </transformer> -->
+      <!--         </transformers> -->
+      <!--       </configuration> -->
+      <!--     </execution> -->
+      <!--   </executions> -->
+      <!-- </plugin> -->
+
+        </plugins>
+    </build>
+</project>

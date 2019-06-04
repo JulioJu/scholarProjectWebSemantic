@@ -145,44 +145,71 @@ wget \
 
 * Preceding files are overwriting without warning.
 
-### Fuseki embedded
+### How to set up Fuseki and Openllet
+
+1. At ./fusekiStandaloneWithOpenllet
+    * To compile it, simply run
+        ```sh
+        $ rm -rf target && mvn package
+        ```
+
+    * Run it simpy use
+        ```sh
+        java -jar target/fuseki-1.0-SNAPSHOT.jar
+        ```
+
+2. The at ./scholarProjectWebSemantic/ run:
+    ```sh
+    $ rm -Rf target && mvn  -Dspring-boot.run.arguments="fusekiServerNoManaged"
+    ```
+
+* Note: **the database used is ./fusekiStandaloneWithOpenllet/run/***
+
+* Note: ***NO GUI at localhost:3030***. To see it, don't forget
+    to clean the Firefox cache ;-). (I've forgotten).
+    To have GUI, use solution presented
+    at section « Fuseki non embedded » below
+
+### Fuseki managed
+
+In this section fuseki could be managed (stop, start, restart)
+by API
+* http://localhost:8080/api/startFusekiProcess
+* http://localhost:8080/api/stopFusekiProcess
+* http://localhost:8080/api/restartFusekiProcess
+
+#### Fuseki embedded
 ***Section outdated, use Fuseki non embedded. See why in a section below.***
 
-**Note that it's still implemented. But do not use it.**.
+**Note that it's still implemented. But do not use it with Spring.**.
+
+***Could not work in any way actually***
+It doesn't has Openllet
 
 `$ mvn -P \!webpack -Dspring-boot.run.arguments="fusekiServerEmbedded"`
 
-### Fuseki non embedded
 
-***Section outdated. Actually Fuseki is managed completly by my App, but
-launch in an independant process.***
+* Note: **the database used is ./scholarProjectWebSemantic/run**
+    **The config file used is in another folder:
+    ./scholarProjectWebSemanticFusekiDatabase/run/configuration/sempic.ttl**
 
-Start the Fuseki server ***at path ./scholarProjectWebSemanticFusekiDatabase/***.
-
-On Arch Linux, with the official https://aur.archlinux.org/packages/apache-jena-fuseki/
-run simply:
-
-```sh
-cd ./scholarProjectWebSemanticFusekiDatabase/
-fuseki-server
-```
+#### Fuseki non embedded
 
 To run the app, run:
+
 ```sh
-cd ./scholarProjectWebSemantic/
-$ mvn -P \!webpack -Dspring-boot.run.arguments="fusekiServerNoEmbedded"
-yarn start
+$ mvn -Dspring-boot.run.arguments="fusekiServerNoEmbedded"
 ```
 
-To run server side in one line:
-```sh
-$ pushd ../scholarProjectWebSemanticFusekiDatabase && fuseki-server > /dev/null 2> /dev/null & ; popd &&  rm -Rf target && mvn -P \!webpack
-```
+fuseki-server should be available in the Linux PATH
 
-* Important notes functions of:
-    ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/sempic/FusekiServerConn.java
-    are `return;` before any action.
+It should be compiled with Openllet
 
+Wee section `jena-fuseki-fulljar`
+
+***The advantage is that we could have the GUI administration tool!***
+
+* Note: **the database used is ./scholarProjectWebSemanticFusekiDatabase/run**
 
 ### API implemented
 
@@ -316,6 +343,273 @@ Note: verify the tcpdump is ordered by `N°`.
 See ./TeachersInstruction1.pdf
 
 See ./TeachersInstruction2.pdf
+
+# How to use fuseki and Openllet Reasoner
+
+## Why simply add Openllet in classpath doesn't work:
+
+* I have the following error if I try to manually add all dependencies
+    of Openllet in the classpath (hard to understand this error)
+
+* Simply comment the exclusion under ./fusekiStandaloneWithOpenllet/pom.xml
+    and you will see the following error
+
+```
+Exception in thread "main" java.lang.NoClassDefFoundError: org/apache/jena/sys/JenaSystem
+        at org.apache.jena.fuseki.Fuseki.init(Fuseki.java:269)
+        at org.apache.jena.fuseki.Fuseki.<clinit>(Fuseki.java:291)
+        at org.apache.jena.fuseki.servlets.ActionService.<init>(ActionService.java:51)
+        at org.apache.jena.fuseki.servlets.SPARQL_Protocol.<init>(SPARQL_Protocol.java:46)
+        at org.apache.jena.fuseki.servlets.SPARQL_Query.<init>(SPARQL_Query.java:68)
+        at org.apache.jena.fuseki.servlets.SPARQL_QueryDataset.<init>(SPARQL_QueryDataset.java:29)
+        at org.apache.jena.fuseki.servlets.ServiceDispatchRegistry.<clinit>(ServiceDispatchRegistry.java:45)
+        at org.apache.jena.fuseki.main.FusekiServer$Builder.<init>(FusekiServer.java:275)
+        at org.apache.jena.fuseki.main.FusekiServer.create(FusekiServer.java:120)
+        at fr.julioju.fusekiEmbedded.Main.serverStartEmbeddedFuseki(Main.java:20)
+        at fr.julioju.fusekiEmbedded.Main.main(Main.java:45)
+Caused by: java.lang.ClassNotFoundException: org.apache.jena.sys.JenaSystem
+        at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:583)
+        at java.base/jdk.internal.loader.ClassLoaders$AppClassLoader.loadClass(ClassLoaders.java:178)
+        at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:521)
+        ... 11 more
+```
+
+TODO add an issue on https://github.com/Galigator/openllet
+
+## Introduction to the following solutions
+
+* ***Fuseki could be started in different way***
+    See https://jena.apache.org/documentation/fuseki2/
+
+* Following it tested and work for d4beb7d99d48e98c981d434c980f83784b519ebd
+
+* (version https://github.com/apache/jena/tree/d4beb7d99d48e98c981d434c980f83784b519ebd )
+
+* Tagged version 3.12.0 of Fuseki
+
+* Compile thanks the command `mvn package`
+
+## jena-fuseki-war (Fuseki as a Web Application)
+
+* Under https://github.com/apache/jena/tree/master/jena-fuseki2/jena-fuseki-war
+
+* For file https://github.com/apache/jena/blob/d4beb7d99d48e98c981d434c980f83784b519ebd/jena-fuseki2/jena-fuseki-war/pom.xml
+
+* Add following:
+    ```xml
+    <!-- Added by JulioJu -->
+    <!-- ——————————————— -->
+        <!--  https://github.com/Galigator/openllet -->
+        <dependency>
+            <groupId>com.github.galigator.openllet</groupId>
+            <artifactId>openllet-owlapi</artifactId>
+            <version>2.6.4</version>
+            <exclusions>
+                <!-- FOLLOWING  SHOULD BE EXCLUDE OTHERWISE
+                THE MAVEN SHADE PLUGIN DETECT UNRESOLVABLE VERSION CONFLICT-->
+                <!-- On « jena-fuseki-fulljar » package, no need to  exclude following -->
+                <exclusion>
+                    <!-- The shade pulgin print the following error if you remove this exclusion: -->
+                    <!-- ===== --->
+                    <!-- Dependency convergence error for com.fasterxml.jackson.core:jackson&#45;annotations:2.9.0 paths to -->
+                    <!-- ============================= -->
+                        <!-- dependency are: -->
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-annotations</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.github.galigator.openllet</groupId>
+            <artifactId>openllet-jena</artifactId>
+            <version>2.6.4</version>
+            <!-- FOLLOWING  SHOULD BE EXCLUDE OTHERWISE
+            THE MAVEN SHADE PLUGIN DETECT UNRESOLVABLE VERSION CONFLICT-->
+            <exclusions>
+                <exclusion>
+                    <!-- The shade pulgin print the following error if you remove this exclusion: -->
+                    <!-- ===== --->
+                    <!-- Dependency convergence error for org.apache.jena:jena&#45;arq:3.7.0 paths to dependency  -->
+                    <!-- ============================= -->
+                    <groupId>org.apache.jena</groupId>
+                    <artifactId>jena-arq</artifactId>
+                </exclusion>
+                <exclusion>
+                    <!-- The shade pulgin print the following error if you remove this exclusion: -->
+                    <!-- ===== --->
+                    <!-- Dependency convergence error for org.apache.jena:jena&#45;shaded&#45;guava -->
+                    <!-- ============================= -->
+                    <groupId>org.apache.jena</groupId>
+                    <artifactId>jena-core</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    <!-- End added by JulioJu -->
+    ```
+
+* I've tested with tomcat 8.0.
+
+* See also https://jena.apache.org/documentation/fuseki2/fuseki-run.html#fuseki-server
+
+* To deploy tomcat under ArchLinux:
+    1. Before deploy it, don't forget to create `/etc/fuseki`
+        with correct write permission!!
+    2. copy
+    ```sh
+    $ cp target/jena-fuseki-war-3.12.0 ~tomcat8/webapps -R
+    ```
+    3. Run tomcat
+    ```
+    $ /usr/share/tomcat8/bin/startup.sh
+    ```
+    * Note 1:
+    To stop tomcat:
+    ```sh
+    $ /usr/share/tomcat8/bin/shutdown.sh
+    ```
+    * Note 2
+    Before run tomcat don't forget to add correct write permissions to
+    `/var/log/tomcat8/` otherwise tomcat will fail to run!
+    The error is about `usr/share/tomcat8/logs` but this is only a symlink.
+    * Note 3
+        I've tested to deploy with http://localhost:8080/manager/html/
+        without success
+        I've set correct permissions under /etc/tomcat8/tomcat-users.xml
+        don't know why it fail (permission denied, even if `~tomcat8/webapp` has 777 permission), but not important
+        ```xml
+  <role rolename="tomcat"/>
+  <role rolename="manager-gui"/>
+  <user username="admin" password="admin" roles="manager-gui,tomcat"/>
+        ```
+
+
+### How to use Tomcat in a package without install it
+
+* Check https://stackoverflow.com/questions/30406479/how-can-i-package-a-tomcat-server-into-a-standalone-double-clickable-package
+
+* JHipster use Undertow to have an embedded web server
+
+## jena-fuseki-fulljar (Fuseki as a Standalone Server¶)
+
+* For https://github.com/apache/jena/tree/d4beb7d99d48e98c981d434c980f83784b519ebd/jena-fuseki2/jena-fuseki-fulljar
+
+* Under https://github.com/apache/jena/blob/d4beb7d99d48e98c981d434c980f83784b519ebd/jena-fuseki2/jena-fuseki-fulljar/pom.xml
+    Add following
+
+    ```xml
+    <!-- Added by JulioJu -->
+    <!-- ——————————————— -->
+        <!--  https://github.com/Galigator/openllet -->
+        <dependency>
+            <groupId>com.github.galigator.openllet</groupId>
+            <artifactId>openllet-owlapi</artifactId>
+            <version>2.6.4</version>
+            <exclusions>
+
+                <!-- In the ../jena-fuseki-war/pom.xml -->
+                <!-- Following is not needed -->
+                <exclusion>
+                    <!-- The shade pulgin print the following error if you remove this exclusion: -->
+                    <!-- ===== -->
+                    <!-- [WARNING] owlapi&#45;api&#45;5.1.11.jar, owlapi&#45;distribution&#45;5.1.11.jar define 917 overlapping classes: -->
+                    <!--  -->
+                    <!-- [WARNING]   &#45; org.semanticweb.owlapi.model.OWLPropertyAssertionObject -->
+                    <!-- [WARNING]   &#45; org.semanticweb.owlapi.model.OWLAnonymousClassExpression -->
+                    <!-- [WARNING]   &#45; org.semanticweb.owlapi.model.HasApplyChange -->
+                    <!-- [NOTE OF JULIOJU, I'VE NOT PAST LOT OF MESSAGES LIKE
+                            THE [WARNING] ABOVE-->
+
+                    <!-- [WARNING] maven&#45;shade&#45;plugin has detected that some class files are -->
+                    <!-- [WARNING] present in two or more JARs. When this happens, only one -->
+                    <!-- [WARNING] single version of the class is copied to the uber jar. -->
+                    <!-- [WARNING] Usually this is not harmful and you can skip these warnings, -->
+                    <!-- [WARNING] otherwise try to manually exclude artifacts based on -->
+                    <!-- [WARNING] mvn dependency:tree &#45;Ddetail=true and the above output. -->
+                    <!-- [WARNING] See http://maven.apache.org/plugins/maven&#45;shade&#45;plugin/ -->
+                    <!-- ============================= -->
+                    <groupId>net.sourceforge.owlapi</groupId>
+                    <artifactId>owlapi-distribution</artifactId>
+                </exclusion>
+
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.github.galigator.openllet</groupId>
+            <artifactId>openllet-jena</artifactId>
+            <version>2.6.4</version>
+            <!-- FOLLOWING  SHOULD BE EXCLUDE OTHERWISE
+            THE MAVEN SHADE PLUGIN DETECT UNRESOLVABLE VERSION CONFLICT-->
+            <!-- Already a dependency of fuseki-core -->
+            <exclusions>
+                <exclusion>
+                    <!-- The shade pulgin print the following error if you remove this exclusion: -->
+                    <!-- ===== --->
+                    <!-- Dependency convergence error for org.apache.jena:jena&#45;arq:3.7.0 paths to dependency  -->
+                    <!-- ============================= -->
+                    <groupId>org.apache.jena</groupId>
+                    <artifactId>jena-arq</artifactId>
+                </exclusion>
+                <exclusion>
+                    <!-- The shade pulgin print the following error if you remove this exclusion: -->
+                    <!-- ===== --->
+                    <!-- Dependency convergence error for org.apache.jena:jena&#45;shaded&#45;guava -->
+                    <!-- ============================= -->
+                    <groupId>org.apache.jena</groupId>
+                    <artifactId>jena-core</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    <!-- End added by JulioJu -->
+    ```
+
+* To deploy, use
+    1. Add the folder `webapp`
+    (retrieve it under
+    https://www-eu.apache.org/dist/jena/binaries/apache-jena-fuseki-3.12.0.tar.gz)
+        * In short you must have a folder containing two elements at the root of
+            this folder:
+        1. `jena-fuseki-server-3.12.0.jar` (eventually renamed `jena-fuseki-server.jar`)
+        2. the  `webapp` folder
+    2. Trigger `$ java -jar ./jena-fuseki-server.jar`
+
+## Fuseki embedded (Fuseki as a Standalone Server) (without GUI)
+
+* See https://jena.apache.org/documentation/fuseki2/fuseki-main.html
+
+* My code is at ./fusekiStandaloneWithOpenllet
+
+* To compile it, simply run
+    ```sh
+    $ rm -rf target && mvn package
+    ```
+
+* Run it simpy use
+    ```sh
+    java -jar target/fuseki-1.0-SNAPSHOT.jar
+    ```
+
+* The file ./fusekiStandaloneWithOpenllet/src/main/resources/logback.xml
+    is interesting
+
+* Remember than sl4j is not an implementation and that logback is
+    currently the better implem (used by Spring), and read on other pages
+    on the net.
+
+* Check ./fusekiStandaloneWithOpenllet/pom.xml
+    to know how to configure fuseki embedded.
+
+### How to build a jar
+
+* Check this pom.xml, under the tag `<build>`
+
+* Check https://www.baeldung.com/executable-jar-with-maven
+    interesting link!
+
+* I don't understand why `maven-shade-plugin` actually doesn't work with
+    fuseki-embedded
+    TODO why??
+
+
 
 # scholarProjectWebSemantic details
 This application was generated using JHipster 6.0.0-beta.0, you can find documentation and help at https://www.jhipster.tech/documentation-archive/v6.0.0-beta.0 .
@@ -470,6 +764,24 @@ Spring prod profil (keep dev profil)***
     ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/jhipster/web/rest/errors/ExceptionTranslator.java
     * See also
         ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/jhipster/config/JacksonConfiguration.java
+
+## How to include include Jena in Spring boot
+
+* See ./scholarProjectWebSemantic/pom.xml
+
+* Note: to not have the following warning before Spring is started
+    (on IntelliJ, Eclipse or in a Console)
+    We must exclude sl4j dependencies of Jena.
+    Under Jena dependencies, check my tag `<exclusions><exclusions>`
+```
+SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [jar:file:/media/data/home/m2/repository/ch/qos/logback/logback-classic/1.2.3/logback-classic-1.2.3.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/media/data/home/m2/repository/org/slf4j/slf4j-log4j12/1.7.26/slf4j-log4j12-1.7.26.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/media/data/home/m2/repository/org/slf4j/slf4j-nop/1.5.3/slf4j-nop-1.5.3.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/media/data/home/m2/repository/org/slf4j/slf4j-jdk14/1.5.6/slf4j-jdk14-1.5.6.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J: Actual binding is of type [ch.qos.logback.classic.util.ContextSelectorStaticBinder]
+```
 
 # Documentations about Web Semantic
 
@@ -1566,7 +1878,7 @@ To understand how it works, don't forget that
         ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/sempic/RDFStore.java
         at function `RDFStore.deleteClassUriWithTests(node_URI);`
 
-# Fuseki serious troubleshooting
+# Fuseki serious troubleshooting cause by reasoner
 
 ## Description
 
@@ -1711,7 +2023,20 @@ pes.fr/ontologies/sempic.owl#ownerId>) )
 
 ```
 
-## Solution: restart Fuseki Server
+### When too much classes are stored in the Database
+
+* After several minutes the following request take a very long time
+    when we load all comunes of France in the Database
+
+* Therefore the following request doesn't work for the project
+    at (2019-05-29)
+    https://github.com/JulioJu/scholarProjectWebSemantic/commit/78d736fad56b781616dc90bf37fb85ce00989c37
+
+```sh
+wget 'http://localhost:3030/sempic/?query=CONSTRUCT+%0A++%7B+%0A++++%3Chttp%3A%2F%2Ffr.uga.julioju.sempic%2FResourcesCreated%2Fuser%2Fadmin%3E+%3Fp+%3Fo+.%0A++%7D%0AWHERE%0A++%7B+%3Chttp%3A%2F%2Ffr.uga.julioju.sempic%2FResourcesCreated%2Fuser%2Fadmin%3E%0A++++++++++++++%3Fp++%3Fo%0A++%7D%0A'
+```
+
+## A solution studied: restart Fuseki Server
 
 We see that the problem is after the method GET in some precises contextes,
 when we have first `ASK WHERE`
@@ -1795,6 +2120,39 @@ by my app, in a independent Thread.
 * **I've tested from with Fuseki 3.6, 3.7, 1.9, 1.10, 1.11 without success**.
     Fuseki 1.5 doesn't work with the current Sempic.ttl file, therefore
     can't test with it.
+
+## THE SOLUTION, use another reasoner
+
+* With Fuseki, only one other reasoner than (the reasoner of Jena) is
+    available for free
+    ```
+         ja:reasoner  		[ ja:reasonerURL <http://jena.hpl.hp.com/2003/OWLFBRuleReasoner>].
+    ```
+
+* See the following doc very cool https://pdfs.semanticscholar.org/9091/e269a2cf7a44b46681b3de3ca489a36ad243.pdf
+    * International Journal of Computer Applications (0975 – 8887) Volume 57 – No.17, November 2012 33
+        A Survey on Ontology Reasoners and Comparison
+        Sunitha Abburu , PhD.
+        Professor &Director, Dept. of M.C.A Adhiyamaan College of Engineering,Tamilnadu.
+    * See tab 3 page 37
+        « Comparison of reasoners (Y represents supported feature, N represents non -
+        supported feature, Y/N represents need further explanation) »
+    * And page 38
+        « The reasoners cannot be operated by Jena API except pellet. »
+
+* For information about Pellet,
+    read https://github.com/stardog-union/pellet/wiki/FAQ#how-can-i-use-pellet-with-jena
+
+* But if you try to use Pellet there are error
+    See https://stackoverflow.com/questions/36313972/fuseki-how-to-add-pellet-reasoner
+
+* To configure Openllet, see also
+    https://stackoverflow.com/questions/51764065/how-to-use-openllet-owl2-reasoner-or-any-other-with-jena-tdb
+
+* Actually Pellet can't be used on Fuseki. Use Openllet
+    https://github.com/Galigator/openllet
+    open source (AGPL) or commercial license
+    Historically developed and commercially supported by Complexible Inc; Maybe now https://www.stardog.com/
 
 ## StackTrace « Iterator used inside a different transaction » and links
 

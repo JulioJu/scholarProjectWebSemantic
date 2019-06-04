@@ -18,6 +18,8 @@ public class FusekiServerConn  {
 
     private static FusekiServer fusekiServer;
 
+    public static boolean fusekiServerNotManaged = false;
+
     public static boolean isEmbeddedFuseki = true;
 
     private static Process fusekiProcess;
@@ -29,6 +31,14 @@ public class FusekiServerConn  {
     // private Dataset dataset;
 
     private static final int port = 3030;
+
+    private static void testIffusekiIsManaged() {
+        if (fusekiServerNotManaged) {
+            throw new UnsupportedOperationException("Fuseki is not managed "
+                    + "by the app. Could not be start, stop or restart.");
+        }
+
+    }
 
     private static void serverStartEmbeddedFuseki() {
 
@@ -42,7 +52,6 @@ public class FusekiServerConn  {
             .loopback(true)
             .parseConfigFile(
                     // Terminated by a dot
-                    // TODO change location to not be in scholarProjectWebSemanticFusekiDatabase
                     FileSystems.getDefault().getPath(".").toAbsolutePath().getParent().getParent().toString()
                     // Therefore before the first slash there is two dot
                     + "/scholarProjectWebSemanticFusekiDatabase/run/configuration/sempic.ttl"
@@ -57,6 +66,7 @@ public class FusekiServerConn  {
     }
 
     public static void serverStart() {
+        testIffusekiIsManaged();
         // https://stackoverflow.com/questions/434718/sockets-discover-port-availability-using-java
         try (ServerSocket ss = new ServerSocket(port)) {
         } catch (IOException e) {
@@ -167,6 +177,7 @@ public class FusekiServerConn  {
       * (at least test if port is free) return always true.
       */
     public static boolean serverStop() {
+        testIffusekiIsManaged();
         if (FusekiServerConn.isEmbeddedFuseki) {
             fusekiServer.stop();
         } else {
