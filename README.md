@@ -35,7 +35,7 @@ r!-- vim-markdown-toc GFM -->
     * [Jena TDB2 vs Jena Fuseki2 vs OpenLink Virtuoso and Linked Data Platform](#jena-tdb2-vs-jena-fuseki2-vs-openlink-virtuoso-and-linked-data-platform)
         * [Why Fuseki is completely not a Linked Data Platform](#why-fuseki-is-completely-not-a-linked-data-platform)
     * [Fuseki and TDB, sempic.ttl](#fuseki-and-tdb-sempicttl)
-    * [Protege](#protege)
+    * [Protégé](#protege)
     * [How to install Jena](#how-to-install-jena)
     * [Construct a Jena Query](#construct-a-jena-query)
         * [Sparql syntax](#sparql-syntax)
@@ -116,7 +116,7 @@ The current project should work with Java 8
 
 I develop with OpenJDK 11 on Linux. I've set java.version to 11 in `pom.xml`.
 
-Note that the current release of Protege software should use Java 8,
+Note that the current release of Protégé software should use Java 8,
 see https://github.com/protegeproject/protege/issues/822 .
 
 ## scholarProjectWebSemantic
@@ -144,6 +144,9 @@ wget \
 * See also (not mandatory) the section « Retrieve departments and communes »
 
 * Preceding files are overwriting without warning.
+
+* Note: do not use `curl` because it displays the error:
+    `curl: (3) nested brace in URL position [number]`
 
 ### How to set up Fuseki and Openllet
 
@@ -789,7 +792,7 @@ SLF4J: Actual binding is of type [ch.qos.logback.classic.util.ContextSelectorSta
 
 * The Course of M.  Atencias: http://imss-www.upmf-grenoble.fr/~atenciam/WS/
     * Two well understand http://imss-www.upmf-grenoble.fr/~atenciam/WS/5-owl.pdf
-        see the Protege software.
+        see the Protégé software.
     * What is a statement: https://stackoverflow.com/questions/21391135/what-is-the-owlnothing-class-designed-to-do/21391737
     * Nodes in hierarchy:
         * http://soft.vub.ac.be/svn-pub/PlatformKit/platformkit-kb-owlapi3-doc/doc/owlapi3/javadoc/org/semanticweb/owlapi/reasoner/Node.html
@@ -818,6 +821,21 @@ SLF4J: Actual binding is of type [ch.qos.logback.classic.util.ContextSelectorSta
     * https://www.forbes.com/sites/cognitiveworld/2018/08/03/the-importance-of-schema-org/
 
 
+## Resources, classes, literals
+
+* Read https://www.w3.org/TR/rdf-schema to understand, especially
+    1. https://www.w3.org/TR/rdf-schema/#ch_resource
+        * Simpler
+            > « In RDF, anything with a subject URI is called a resource. »
+            http://www.linkeddatatools.com/help/classes
+    2. https://www.w3.org/TR/rdf-schema/#ch_class
+    3. https://www.w3.org/TR/rdf-schema/#ch_literal
+
+* ***BIG WARNING*** `rdf:resource !== rdfs:Resource`
+
+* Read also https://stackoverflow.com/questions/25737584/subclassof-and-instance-of-rdf-rdfsclass
+    about rdfs:Resource and rdfs:Class
+
 ## rdfs:subClassOf, rdf:type
 
 * Even if this definition is outdated I like very much because I understand
@@ -838,20 +856,80 @@ SLF4J: Actual binding is of type [ch.qos.logback.classic.util.ContextSelectorSta
     > and the property value is always an instanceOf Class. A Class may be a
     > subClassOf more than one Class.
 
+* Better definition https://www.w3.org/2001/sw/RDFCore/Schema/20010913/#s2.1
+    > As described in the RDF Model and Syntax specification [RDFMS], resources
+    > may be instances of one or more classes; this is indicated with the
+    > rdf:type property. Classes themselves are often organized in a
+    > hierarchical fashion, for example a class Dog might be considered a
+    > subclass of Mammal which is a subclass of Animal, meaning that any
+    > resource which is of rdf:type Dog is also considered to be of rdf:type
+    > Animal. This specification describes a property, rdfs:subClassOf, to
+    > denote such relationships between classes.
+
 * Conclusion.
     * If Théo is an instanceOf (type) Human, and Human an subclassOf Primate
-    Théo is an instanceOf (type) Human and Primate.
+        Théo is an instanceOf (type) Human and Primate.
     * But as Human is only instanceOf (type) Species, Théo is no an instanceOf
     (type) Spacies
+
+### rdfs:domain rdfs:range
 
 * rdfs:domain and rdfs:range are constraints linked to rdf:type
     of the class
     `P rdfs:domain <http://example/Human>`
     means that the property P should be placed in a context of
     its subject is of type `<http://example/Human>`.
+    * Above, conclusion by me because of
+    1. https://www.w3.org/TR/rdf-schema/#ch_domain
+    > rdfs:domain is an instance of rdf:Property that is used to state that any
+    > resource that has a given property is an instance of one or more classes.
+    2. https://www.w3.org/TR/rdf-schema/#ch_range
+    > rdfs:range is an instance of rdf:Property that is used to state that the
+    > values of a property are instances of one or more classes.
 
-* Read also https://stackoverflow.com/questions/25737584/subclassof-and-instance-of-rdf-rdfsclass
-    about rdfs:Resource and rdfs:Class
+* More concept atout domain and range
+ > The RDF Schema type system is similar to the type systems of object-oriented
+ > programming languages such as Java. However, RDF differs from many such systems
+ > in that instead of defining a class in terms of the properties its instances
+ > may have, an RDF schema will define properties in terms of the classes of
+ > resource to which they apply. This is the role of the rdfs:domain and
+ > rdfs:range constraints described in Section 3. For example, we could define the
+ > author property to have a domain of Book and a range of Literal, whereas a
+ > classical OO system might typically define a class Book with an attribute
+ > called author of type Literal. One benefit of the RDF property-centric approach
+ > is that it is very easy for anyone to say anything they want about existing
+ > resources, which is one of the architectural principles of the Web
+ > [BERNERS-LEE98].
+ https://www.w3.org/2001/sw/RDFCore/Schema/20010913/#s2.1
+
+### Individual vs Class
+
+* https://stackoverflow.com/questions/37186507/ontology-design-class-or-individuals
+    > In OWL classes represent sets. So you can have a class :MicrostrategyManual
+    > with members, which are URIs representing concrete files or paper copies,
+    > which can be classified as a :MicrostrategyManual.
+    > (…)
+        > the only (except when going with option 3 below [pruning]) property that can link
+        > individual with a class is rdf:type and the one between classes is
+        > rdfs:subClassOf.
+
+
+* Very interesting paper https://pdfs.semanticscholar.org/97bf/4ccca4c44b71c7e9ccf40ce57dce45fb7000.pdf
+    *Classes versus Individuals: Fundamental Design Issues for Ontologies on the Biomedical Semantic Web*
+    > a molecular biologist might instantiate the class Protein with the individual
+    > ‘Serotonin_Receptor’ , which is a clear enough description in many cases. In
+    > another context, a neur oscientist might instantiate the class Protein with the
+    > individual ‘ Serotonin_Receptor_2A’ . Serotonin_Receptor_2A is in fact a
+    > subclass of Serotonin_Receptor, but this information cannot be represented in
+    > accordance to OWL DL semantics, since both have been defined as individuals.
+    * The solution for this problem is https://www.w3.org/TR/owl2-new-features/#F12:_Punning
+        When this paper was published maybe it was not published
+
+* Very cool explanation https://mailman.stanford.edu/pipermail/protege-owl/2007-February/001427.html
+    Official Protégé Mailist
+
+* See an other explanation. Very cool explanations
+    about concepts http://www.linkeddatatools.com/help/classes
 
 ## Owl vs Object Oriented programming
 
@@ -1539,7 +1617,7 @@ ORDER BY ?communeLabel ?commune
     therefore less than a draft!
     But it's a very simple Ontology
     See an example non official of an Ontology :
-    http://content.scottstreit.com/Semantic_Web/Assignments/Resources/Protege/protegeLab/original_vCard/vCard.owl
+    http://content.scottstreit.com/Semantic_Web/Assignments/Resources/Protégé/protegeLab/original_vCard/vCard.owl
     (should be downloaded, or view-source in Firefox).
 
 > The Semantic Web provides a common framework that allows data to be shared and
@@ -1561,15 +1639,6 @@ ORDER BY ?communeLabel ?commune
     https://www.w3.org/TR/rdfcal/
     But too much to answer at question « When photo was taken », user
     simply https://www.rubydoc.info/github/ruby-rdf/rdf/RDF/Literal/Date
-
-## Resource vs Individual vs Class
-
-* Take a time to understand difference
-
-* Read https://www.w3.org/TR/rdf-schema to understand, especially
-    1. https://www.w3.org/TR/rdf-schema/#ch_resource
-    2. https://www.w3.org/TR/rdf-schema/#ch_class
-    3. https://www.w3.org/TR/rdf-schema/#ch_literal
 
 ## Jena Documentation
 
@@ -1637,9 +1706,9 @@ https://jena.apache.org/documentation/tdb2/tdb2_fuseki.html
 > will be routed to the TDB2 database.
 https://github.com/apache/jena/blob/master/jena-db/use-fuseki-tdb2.md
 
-## Protege
+## Protégé
 
-* Currently release version of Protege is compatible with Java 8 and not Java 11
+* Currently release version of Protégé is compatible with Java 8 and not Java 11
     See https://github.com/protegeproject/protege/issues/822
 
 * `rdfs:comment` become JavaDoc into the generated file
@@ -1650,7 +1719,7 @@ https://github.com/apache/jena/blob/master/jena-db/use-fuseki-tdb2.md
     Under its pan `Entity`, the left-pan `Classes`
     * `Menu View -> Custom Rendering` add « fr »
 
-* Files catalog-v001.xml are generated by Protege.
+* Files catalog-v001.xml are generated by Protégé.
 
 ## How to install Jena
 
@@ -2721,6 +2790,10 @@ simplify in twice place
 It should be have only one SPARQL request
 
 2. For PhotoRDF use rdf:bag to `depiction`
+
+3. Why when we open ./julioJuGeographicalZone.owl in Protégé
+    Departments are Individuals and Classes.
+    Don't understand. TODO ask to teacher.
 
 
 # Credits

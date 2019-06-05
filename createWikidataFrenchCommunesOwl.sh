@@ -24,7 +24,8 @@ sed -i 1d "${fileDepartments}"
 sed -i 's/<//g' ${fileDepartments}
 sed -i 's/>//g' ${fileDepartments}
 sed -i 's/@fr//g' ${fileDepartments}
-sed -i 's/	$/	http:\/\/julioJuGeographicalZone.owl\/ResourceIncompleteTODOCompleteOnWikidata/' "${fileDepartments}"
+sed -i 's/.$//' ${fileDepartments} # assumes that all lines end with CR/LF
+sed -i 's/	$/	http:\/\/julioJuGeographicalZone.owl\/ErrorInWikidataTODOCorrectItNotADepartment/' "${fileDepartments}"
 # shellcheck disable=SC2016
 nvim -n -i NONE -u NORC --cmd "set nostartofline runtimepath=~/.vim/plugged/tabular,~/.vim/plugged/tabular/after" "${fileDepartments}" --headless +'%s#http://www.wikidata.org#http://wikidataJulioJuEntity#g | %s#http://wikidataJulioJuEntity#http://yoyoyoyoyoyoyoyoyoyoyoyoyoyo.fr# | %s/	/ 	 /g | %s/$/ 	 toto/' +'Tabularize / 	' +'%s/toto$//' +'normal gg^WhGy$p' +'%s#http://yoyoyoyoyoyoyoyoyoyoyoyoyoyo.fr#http://wikidataJulioJuEntity# | %s#http://yoyoyoyoyoyoyoyoyoyoyoyoyoyo.fr#http://www.wikidata.org# | %s/ \+	 \+/	/g | %s/\s\+$//g' +x
 sed -i 's/^/<owl:Class rdf:about="/' "${fileDepartments}"
@@ -38,7 +39,8 @@ sed -i 1d "${fileCommunes}"
 sed -i 's/<//g' ${fileCommunes}
 sed -i 's/>//g' ${fileCommunes}
 sed -i 's/@fr//g' ${fileCommunes}
-sed -i 's/	$/	http:\/\/julioJuGeographicalZone.owl\/ResourceIncompleteTODOCompleteOnWikidata/' "${fileCommunes}"
+sed -i 's/.$//' ${fileCommunes} # assumes that all lines end with CR/LF
+sed -i 's/	$/	http:\/\/julioJuGeographicalZone.owl\/CommuneWithoutDepartmentInWikiDataTODOCorrectIt/' "${fileCommunes}"
 # shellcheck disable=SC2016
 nvim -n -i NONE -u NORC --cmd "set nostartofline runtimepath=~/.vim/plugged/tabular,~/.vim/plugged/tabular/after" "${fileCommunes}" --headless +'%s#http://www.wikidata.org#http://wikidataJulioJuEntity#g | %s#http://wikidataJulioJuEntity#http://yoyoyoyoyoyoyoyoyoyoyoyoyoyo.fr# | %s/	/ 	 /g | %s/$/ 	 toto/' +'Tabularize / 	' +'%s/toto$//' +'normal gg^WhGy$p' +'%s#http://yoyoyoyoyoyoyoyoyoyoyoyoyoyo.fr#http://wikidataJulioJuEntity# | %s#http://yoyoyoyoyoyoyoyoyoyoyoyoyoyo.fr#http://www.wikidata.org# | %s/ \+	 \+/	/g | %s/\s\+$//g' +x
 sed -i 's/^/<owl:Class rdf:about="/' "${fileCommunes}"
@@ -69,12 +71,16 @@ xmlns:wikidataProperty="http://wikidataJulioJuProp/"
         <rdfs:label xml:lang="en">Place under geographical zone France</rdfs:label>
     </owl:Class>
 
+    <owl:Class rdf:about="http://julioJuGeographicalZone.owl/CommuneWithoutDepartmentInWikiDataTODOCorrectIt" >
+        <rdfs:label xml:lang="en">Without Department.</rdfs:label>
+        <rdfs:comment xml:lang="en">This Commune has no Department referenced in WikiData. TODO correct it.</rdfs:comment>
+        <rdfs:subClassOf rdf:resource="http://julioJuGeographicalZone.owl/geographicalZoneFrance" />
+    </owl:Class>
 END
 cat "${fileDepartments}" "${fileCommunes}" >> "${outputFile}"
 echo "</rdf:RDF>" >> "${outputFile}"
 # Tidy (used by Neoformat) add carriage inner a pair of tags. So bad for `<rdfs:label>toto toto \n\t\t toto</toto>`
 # Set ft in html is better. Use html-beautify
 nvim -n -i NONE -u NORC --cmd 'filetype plugin indent on | set runtimepath=~/.vim/plugged/neoformat/' "${outputFile}" --headless +'set ft=html' +'Neoformat' +x
-sed -i 's/<rdfs:subClassOf rdf:resource="" \/>/<rdfs:subClassOf rdf:resource="http:\/\/julioJuGeographicalZone.owl\/ResourceIncompleteTODOCompleteOnWikidata" \/>/' "${outputFile}"
 
 rm "${fileDepartments}" "${fileCommunes}"
