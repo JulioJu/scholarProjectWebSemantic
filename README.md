@@ -1036,14 +1036,14 @@ SLF4J: Actual binding is of type [ch.qos.logback.classic.util.ContextSelectorSta
 
     ```
     select distinct ?subject where {
-    ?subject <http://dbpedia.org/ontology/inseeCode> "38185" .
-      }
+        ?subject <http://dbpedia.org/ontology/inseeCode> "38185" .
+    }
     ```
 
     ```
     select distinct ?subject where {
-    ?subject rdfs:label "Grenoble"@en .
-      }
+        ?subject rdfs:label "Grenoble"@en .
+    }
     ```
 
 3. Click « Run Query »
@@ -1216,7 +1216,7 @@ SLF4J: Actual binding is of type [ch.qos.logback.classic.util.ContextSelectorSta
     Adapted to Grenoble
     SELECT ?item ?coord WHERE {
         # instance of the object class (P31) or a sub-sub-*-class of this object class (P279*) (wd:P31/wdt:p279*) `human settlement` (wd:Q486972)
-        # same has if we had notions of `rdf:type` and `owl:subPropertyOf``owl:subPropertyOf` with inference (with a reasonner)
+        # same has if we had notions of `rdf:type` and `owl:subPropertyOf``rdfs:subPropertyOf`. Use SPARQL property paths.
         ?item (wdt:P31/wdt:P279*) wd:Q486972.
         # ?item country(P17) France (wd:Q142)
         ?item wdt:P17 wd:Q142.
@@ -1237,7 +1237,7 @@ SLF4J: Actual binding is of type [ch.qos.logback.classic.util.ContextSelectorSta
     ```
     SELECT ?item ?itemLabel WHERE {
         # instance of the object class (P31) or a sub-sub-*-class of this object class (P279*)  (wd:P31/wdt:p279*) `human settlement` (wd:Q486972)
-        # same has if we had notions of `rdf:type` and `owl:subPropertyOf``owl:subPropertyOf` with inference (with a reasonner)
+        # same has if we had notions of `rdf:type` and `owl:subPropertyOf``rdfs:subPropertyOf`. Use SPARQL property paths.
         ?item (wdt:P31/wdt:P279*) wd:Q486972.
         # ?item country(P17) France (wd:Q142)
         ?item wdt:P17 wd:Q142.
@@ -1250,7 +1250,7 @@ SLF4J: Actual binding is of type [ch.qos.logback.classic.util.ContextSelectorSta
     ```
     SELECT DISTINCT ?item ?itemLabel ?department WHERE {
     # instance of the object class (P31) or a sub-sub-*-class of this object class (P279*) (wd:P31/wdt:p279*) `commune of France` (wd:Q484170)
-    # same has if we had notions of `rdf:type` and `owl:subPropertyOf``owl:subPropertyOf` with inference (with a reasonner)
+    # same has if we had notions of `rdf:type` and `owl:subPropertyOf``rdfs:subPropertyOf`. Use SPARQL property paths.
     ?item (wdt:P31/(wdt:P279*)) wd:Q484170;
         # Official name (P1448)
         wdt:P1448 ?itemLabel.
@@ -1265,7 +1265,7 @@ SLF4J: Actual binding is of type [ch.qos.logback.classic.util.ContextSelectorSta
     ```
     SELECT DISTINCT ?communeURI ?communeLabel ?departmentURI ?departmentLabel WHERE {
     # instance of the object class (P31) or a sub-sub-*-class of this object class (P279*) (wd:P31/wdt:p279*) `commune of France` (wd:Q484170)
-    # same has if we had notions of `rdf:type` and `owl:subPropertyOf``owl:subPropertyOf` with inference (with a reasonner)
+    # same has if we had notions of `rdf:type` and `owl:subPropertyOf``rdfs:subPropertyOf`. Use SPARQL property paths.
     ?communeURI (wdt:P31/(wdt:P279*)) wd:Q484170;
         wdt:P1448 ?communeLabel;
         # located in the administrative territorial entity (P131)
@@ -1292,7 +1292,7 @@ SLF4J: Actual binding is of type [ch.qos.logback.classic.util.ContextSelectorSta
         # « (wdt:P31/(wdt:P279*)) » is very important to display La Réunion
         # that is not directly an instance of Q6465 (Department of France)
         # instance of the object class (P31) or a sub-sub-*-class of this object class (P279*) (wd:P31/wdt:p279*) `Department of France` (wd:16465)
-        # same has if we had notions of `rdf:type` and `owl:subPropertyOf``owl:subPropertyOf` with inference (with a reasonner)
+        # same has if we had notions of `rdf:type` and `owl:subPropertyOf``rdfs:subPropertyOf`. Use SPARQL property paths.
         ?departmentURI (wdt:P31/(wdt:P279*)) wd:Q6465.
 
         # « Insee Departemenmt Code »
@@ -1335,7 +1335,7 @@ SLF4J: Actual binding is of type [ch.qos.logback.classic.util.ContextSelectorSta
         # « (wdt:P31/(wdt:P279*)) » is very important to display La Réunion
         # that is not directly an instance of Q6465 (Department of France)
         # instance of the object class (P31) or a sub-sub-*-class of this object class (P279*) (wd:P31/wdt:p279*) `Department of France` (wd:16465)
-        # same has if we had notions of `rdf:type` and `owl:subPropertyOf``owl:subPropertyOf` with inference (with a reasonner)
+        # same has if we had notions of `rdf:type` and `owl:subPropertyOf``rdfs:subPropertyOf`. Use SPARQL property paths.
         ?departmentURI (wdt:P31/(wdt:P279*)) wd:Q6465 ;
             # « Insee Departemenmt Code »
             wdt:P2586 ?inseedepartmentCode ;
@@ -1370,7 +1370,7 @@ SLF4J: Actual binding is of type [ch.qos.logback.classic.util.ContextSelectorSta
     ```
     SELECT DISTINCT ?communeURI ?communeLabel ?departmentURI WHERE {
     # instance of the object class (P31) or a sub-sub-*-class of this object class (P279*)  (wd:P31/wdt:p279*) of `commune of France` (wd:Q484170)
-    # same has if we had notions of `rdf:type` and `owl:subPropertyOf``owl:subPropertyOf` with inference (with a reasonner)
+    # same has if we had notions of `rdf:type` and `owl:subPropertyOf``rdfs:subPropertyOf`. Use SPARQL property paths.
     ?communeURI (wdt:P31/(wdt:P279*)) wd:Q484170 ;
       # located in the administrative territorial entity (P131)
         wdt:P131 ?departmentURI.
@@ -1440,7 +1440,7 @@ SLF4J: Actual binding is of type [ch.qos.logback.classic.util.ContextSelectorSta
         # « (wdt:P31/(wdt:P279*)) » is very important to display La Réunion
         # that is not directly an instance of Q6465 (Department of France)
         # instance of the object class (P31) or a sub-sub-*-class of this object class (P279*) (wd:P31/wdt:p279*) `Department of France` (wd:16465)
-        # same has if we had notions of `rdf:type` and `owl:subPropertyOf``owl:subPropertyOf` with inference (with a reasonner)
+        # same has if we had notions of `rdf:type` and `owl:subPropertyOf``rdfs:subPropertyOf`. Use SPARQL property paths.
         ?department (wdt:P31/(wdt:P279*)) wd:Q6465.
 
         # « Insee Departemenmt Code »
@@ -1662,7 +1662,7 @@ ORDER BY ?communeLabel ?commune
     * See https://stackoverflow.com/questions/27958212/is-it-possible-to-add-virtuoso-as-a-storage-provider-in-jena-fuseki
 
 * Linked Data Platform specification (REST specification)
-    * It's not implemented for Fuseki (see below).
+    * Don't seem to be implemented by Fuseki (no found any reference about it)
     * (originally by IBM)
     * Virtuoso implements Linked Data Platform
         http://vos.openlinksw.com/owiki/wiki/VOS/VirtLDP
@@ -1679,7 +1679,7 @@ ORDER BY ?communeLabel ?commune
     (a proprietary software with open sources parts) and says
     that is more complicated to configure at startup.
 
-### Why Fuseki is completely not a Linked Data Platform
+### Why Fuseki is has HTTP POST is tricky
 
 * See my comments at ./rest_request_fuseki.roast
     * Shortly:
@@ -1827,6 +1827,97 @@ Even if we use directly Algebra, as:
 > https://jena.apache.org/documentation/query/manipulating_sparql_using_arq.html
 
 You should see https://jena.apache.org/documentation/query/app_api.html
+
+### Difference between SELECT and CONSTRUCT
+
+* Select could retrieve only result in Format XML, json, csv, tsv
+
+* CONSTRUCT could only retrieve in format turtle, JSON-LD, N-Triples,
+    XML (rdf xml).
+
+### SPARQL RDF collection and container
+
+* General doc to retrieve, delete, insert members:
+    http://www.snee.com/bobdc.blog/2014/04/rdf-lists-and-sparql.html
+
+#### SPARQL Query
+
+##### With SELECT
+
+* With select
+    See https://stackoverflow.com/questions/10162052/rdfcollection-in-sparql
+    (syntax )
+    `rdf:rest*/rdf:first`
+
+##### WITH CONSTRUCT
+
+* With construct, retrieve list
+    ***IMPLEMENTED IN ALGEBRA FORM ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/sempic/ReadAlbum.java***
+
+    ```
+CONSTRUCT
+  {
+    <http://fr.uga.julioju.sempic/ResourcesCreated/album/2> <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumSharedWith> ?albumSharedWithList .
+    <http://fr.uga.julioju.sempic/ResourcesCreated/album/2> <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumOwnerLogin> ?albumOwnerLogin .
+    ?listRest <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> ?head .
+    ?listRest <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> ?tail .
+  }
+WHERE
+  { <http://fr.uga.julioju.sempic/ResourcesCreated/album/2>
+              <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumSharedWith>  ?albumSharedWithList ;
+              <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumOwnerLogin>  ?albumOwnerLogin
+    OPTIONAL
+      { ?albumSharedWithList (<http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>)* ?listRest .
+        ?listRest  <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>  ?head ;
+                  <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>  ?tail
+      }
+  }
+
+  ```
+* Following can't work, because in the construct clause it didn't know that it's
+    a list
+    ```
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+CONSTRUCT
+  {
+  <http://fr.uga.julioju.sempic/ResourcesCreated/album/2> <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumSharedWith>  ?listRest ;
+    <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumOwnerLogin> ?o1 .
+
+  }
+WHERE
+  {
+  <http://fr.uga.julioju.sempic/ResourcesCreated/album/2> <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumSharedWith> ?list ;
+    <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumOwnerLogin> ?o1 .
+    ?list rdf:rest*/rdf:first ?listRest .
+  }
+  ```
+* Syntax `rdf:rest*/rdf:first`
+    is not allowed in `CONSTRUCT`.
+
+* See also
+    https://stackoverflow.com/questions/44221975/how-to-write-a-sparql-construct-query-that-returns-an-rdf-list
+
+##### Jena Doc
+* ARQ - Property Paths
+    https://jena.apache.org/documentation/query/property_paths.html
+
+* Property functions
+    https://jena.apache.org/documentation/query/extension.html#property-functions
+
+    ```
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX list: <http://jena.hpl.hp.com/ARQ/list#>
+CONSTRUCT
+  {
+  <http://fr.uga.julioju.sempic/ResourcesCreated/album/2> <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumSharedWith>  [ list:member ?member ] ;
+    <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumOwnerLogin> ?o1 .
+  }
+WHERE
+  {
+  <http://fr.uga.julioju.sempic/ResourcesCreated/album/2> <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumSharedWith> [ list:member ?member ] ;
+    <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumOwnerLogin> ?o1 .
+  }
+  ```
 
 ### Jena Source code organization
 

@@ -3,6 +3,8 @@ package fr.uga.julioju.sempic;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Node_URI;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.RDFList;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 
 import fr.uga.julioju.sempic.Exceptions.FusekiSubjectNotFoundException;
@@ -41,17 +43,29 @@ public class CreateResource  {
                     Namespaces.getUserUri(albumRDF.getOwnerLogin())
                 )
         );
-        for (String user : albumRDF.getSharedWith()) {
-            String sharedWithUri = Namespaces.getUserUri(user);
-            var node_URI = (Node_URI) NodeFactory.createURI(sharedWithUri);
-            if (RDFStore.isUriIsSubject(node_URI)) {
-                albumRDFResource.addProperty(SempicOnto.albumSharedWith,
-                        model.createResource(sharedWithUri)
-                );
-            } else {
-                throw new FusekiSubjectNotFoundException(node_URI);
+        RDFList rdfList = null;
+        if (albumRDF.getSharedWith() != null) {
+            System.out.println(new RDFNode[albumRDF.getSharedWith().length]);
+            RDFNode[] rdfListElement = new RDFNode[albumRDF.getSharedWith().length];
+            int forLoop = 0;
+            for (String user : albumRDF.getSharedWith()) {
+                String sharedWithUri = Namespaces.getUserUri(user);
+                var node_URI = (Node_URI) NodeFactory.createURI(sharedWithUri);
+                if (RDFStore.isUriIsSubject(node_URI)) {
+                    System.out.println("toto");
+                    rdfListElement[forLoop] =
+                        model.createResource(sharedWithUri);
+                } else {
+                    throw new FusekiSubjectNotFoundException(node_URI);
+                }
+                forLoop++;
             }
+            rdfList = model.createList(rdfListElement);
+        } else {
+            // Empty list are not persisted, but should not be null
+            rdfList = model.createList(new RDFNode[0]);
         }
+        albumRDFResource.addProperty(SempicOnto.albumSharedWith, rdfList);
         return albumRDFResource;
     }
 

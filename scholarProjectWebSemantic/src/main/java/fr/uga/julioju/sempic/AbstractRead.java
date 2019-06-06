@@ -20,6 +20,33 @@ public abstract class AbstractRead  {
     private static final Logger log =
         LoggerFactory.getLogger(AbstractRead.class);
 
+    protected static Model read (Node_URI node_URI,
+            BasicPattern basicPattern,
+            Op op) {
+        Query queryAlgebraBuild = OpAsQuery.asQuery(op);
+        queryAlgebraBuild.setQueryConstructType();
+
+        queryAlgebraBuild.setConstructTemplate(new Template(basicPattern));
+
+
+        log.debug("queryAlgebraBuild\n" + queryAlgebraBuild);
+
+        // Execution
+        // —————————
+
+        Model m = RDFConn.cnxQueryConstruct(queryAlgebraBuild);
+
+        // Print and tests
+        // ———————————————
+        log.debug("BELOW: PRINT MODEL RETRIEVED\n—————————————");
+        m.write(System.out, "turtle");
+        if (m.isEmpty()) {
+            throw new FusekiSubjectNotFoundException(node_URI);
+        }
+        return m;
+
+    }
+
     protected static Model read(Node_URI node_URI) {
 
         Triple tripleUri = Triple.create(
