@@ -25,7 +25,6 @@ public abstract class AbstractRead  {
 
         queryAlgebraBuild.setConstructTemplate(new Template(basicPattern));
 
-
         log.debug("queryAlgebraBuild\n" + queryAlgebraBuild);
 
         // Execution

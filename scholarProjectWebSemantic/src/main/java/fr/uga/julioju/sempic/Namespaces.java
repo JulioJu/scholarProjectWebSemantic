@@ -15,15 +15,15 @@ public class Namespaces {
     private final static String userNS = Namespaces.NS + "user/";
 
     public static String getPhotoUri(long photoId) {
-        return photoNS+photoId;
+        return photoNS + photoId;
     }
 
     public static String getAlbumUri(long albumId) {
-        return albumNS+albumId;
+        return albumNS + albumId;
     }
 
     public static String getUserUri(String login) {
-        return userNS+login;
+        return userNS + login;
     }
 
 }

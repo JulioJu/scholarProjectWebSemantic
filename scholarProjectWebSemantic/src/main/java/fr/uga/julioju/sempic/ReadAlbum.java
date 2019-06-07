@@ -1,12 +1,18 @@
 package fr.uga.julioju.sempic;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
+import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Node_URI;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.RDFList;
 import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.SimpleSelector;
+import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.op.OpBGP;
 import org.apache.jena.sparql.algebra.op.OpLeftJoin;
@@ -46,18 +52,19 @@ public class ReadAlbum extends AbstractRead {
         );
     }
 
-    /** See README.md section « WITH CONSTRUCT » */
-    private static Model read(long id) {
-        String albumURI = Namespaces.getAlbumUri(id);
-        Node_URI node_URIAlbum = (Node_URI) NodeFactory.createURI(albumURI);
-
+    /** Either albumNode or ownerNode should be on type {@link Node_URI}  */
+    private static Model read(Node albumNode, Node ownerNode) {
         // CONSTRUCT and WHERE clauses preparation
         Triple tripleAlbumOwnerLogin = Triple.create(
-                node_URIAlbum,
+                albumNode,
                 SempicOnto.albumOwnerLogin.asNode(),
-                Var.alloc("albumOwnerLogin"));
+                ownerNode);
+        Triple tripleAlbumSTitle = Triple.create(
+                albumNode,
+                SempicOnto.albumSTitle.asNode(),
+                Var.alloc("albumSTitle"));
         Triple tripleAlbumSharedWith = Triple.create(
-                node_URIAlbum,
+                albumNode,
                 SempicOnto.albumSharedWith.asNode(),
                 Var.alloc("albumSharedWithList"));
         Triple tripleListFirst = Triple.create(
@@ -69,8 +76,9 @@ public class ReadAlbum extends AbstractRead {
                 RDF.rest.asNode(),
                 Var.alloc("tail"));
         BasicPattern basicPatternAlbum = new BasicPattern();
-        basicPatternAlbum.add(tripleAlbumSharedWith);
         basicPatternAlbum.add(tripleAlbumOwnerLogin);
+        basicPatternAlbum.add(tripleAlbumSTitle);
+        basicPatternAlbum.add(tripleAlbumSharedWith);
         BasicPattern basicPatternList = new BasicPattern();
         basicPatternList.add(tripleListFirst);
         basicPatternList.add(tripleListRest);
@@ -93,12 +101,38 @@ public class ReadAlbum extends AbstractRead {
         basicPattern.addAll(basicPatternAlbum);
         basicPattern.addAll(basicPatternList);
 
-        return AbstractRead.read(node_URIAlbum, basicPattern, op);
+        if (albumNode instanceof Node_URI) {
+            Node_URI node_URIAlbum = (Node_URI) albumNode;
+            return AbstractRead.read(node_URIAlbum, basicPattern, op);
+        } else {
+            Node_URI node_URIOwner = (Node_URI) ownerNode;
+            return AbstractRead.read(node_URIOwner, basicPattern, op);
+        }
+
     }
 
-    public static AlbumRDF readAlbum(Long id) {
+    /** See README.md section « WITH CONSTRUCT » */
+    private static Model readOnAlbum(long id) {
         log.debug("REST request to get albumRDF : {}", id);
-        Model model = ReadAlbum.read(id);
+        String albumURI = Namespaces.getAlbumUri(id);
+        Node_URI node_URIAlbum = (Node_URI) NodeFactory.createURI(albumURI);
+        Var albumOwnerLogin = Var.alloc("albumOwnerLogin");
+        return ReadAlbum.read(node_URIAlbum, albumOwnerLogin);
+    }
+
+    private static Model readAlbumSOwner(String login) {
+        String ownerURI = Namespaces.getUserUri(login);
+        Node_URI node_URIOwner = (Node_URI) NodeFactory.createURI(ownerURI);
+        Var varAlbum = Var.alloc("album");
+        return ReadAlbum.read(varAlbum, node_URIOwner);
+    }
+
+    private static AlbumRDF parseModelWithOnlyOneAlbumRDF(Model model,
+            Long id
+    ) {
+        String title =
+            model.listObjectsOfProperty(SempicOnto.albumSTitle)
+            .toList().get(0).toString();
         String albumOwnerId =
             model.listObjectsOfProperty(SempicOnto.albumOwnerLogin)
             .toList().get(0).toString();
@@ -121,7 +155,67 @@ public class ReadAlbum extends AbstractRead {
                 })
                 .toArray(String[]::new);
         }
-        AlbumRDF albumRDF = new AlbumRDF(id, albumOwnerId, sharedWithLogin);
+        AlbumRDF albumRDF = new AlbumRDF(
+                id,
+                title,
+                albumOwnerId,
+                sharedWithLogin);
         return albumRDF;
     }
+
+    public static AlbumRDF readAlbum(Long id) {
+        Model model = ReadAlbum.readOnAlbum(id);
+        return parseModelWithOnlyOneAlbumRDF(model, id);
+    }
+
+    public static List<AlbumRDF> readAlbumsOfAnUser(String login) {
+        Model model = ReadAlbum.readAlbumSOwner(login);
+        List<AlbumRDF> albumRDF = new ArrayList<AlbumRDF>();
+        model
+            .listSubjectsWithProperty(SempicOnto.albumOwnerLogin)
+            .toList()
+            .forEach(subject -> {
+                Model modelWithOnlyOneAlbum = model.query(
+                        new SimpleSelector(subject,
+                            null,
+                            (RDFNode) null
+                            )
+                );
+                Statement resourceListSharedWith = model.getProperty(subject,
+                        SempicOnto.albumSharedWith);
+                RDFList rdfList = resourceListSharedWith.getList();
+                if (rdfList != RDF.nil) {
+                    RDFNode[] rdfNodeArray = rdfList
+                        .iterator()
+                        .toList()
+                        .toArray(new RDFNode[rdfList.size()]);
+                    RDFList rdfListNewModel =
+                        modelWithOnlyOneAlbum.createList(rdfNodeArray);
+
+                    // We should remove the old list before add an other
+                    modelWithOnlyOneAlbum
+                        .removeAll(subject, SempicOnto.albumSharedWith, null);
+
+                    modelWithOnlyOneAlbum.add(subject,
+                            SempicOnto.albumSharedWith,
+                            // We can't add simply `rdfList` (underlying Model is
+                            // `model` and not `modelWithOnlyOneAlbum`)
+                            rdfListNewModel
+                    );
+                }
+
+                String subjectString = subject.getURI();
+                Long id = Long.parseLong(
+                        subjectString
+                        .substring(subjectString.lastIndexOf('/') + 1)
+                        );
+                AlbumRDF oneAlbum = ReadAlbum
+                    .parseModelWithOnlyOneAlbumRDF(modelWithOnlyOneAlbum, id);
+                albumRDF.add(oneAlbum);
+                // modelWithOnlyOneAlbum.write(System.out, "turtle");
+
+            });
+        return albumRDF;
+    }
+
 }

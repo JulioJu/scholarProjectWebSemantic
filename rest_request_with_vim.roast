@@ -69,7 +69,7 @@ Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJBRE1JT
 # Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhbm90aGVydXNlciIsImF1dGgiOiJOT1JNQUxfVVNFUl9HUk9VUCIsImV4cCI6MTU2MTIyMjYzNX0.kdd4tTOpI-xrb5oEGnpXiD8Rc2rKtPKwFpfyy07dbJP3GV8BQfW6mEr1ouhJ_0-g8TAJ_MZbOI-v6VUXr-Aidw
 
 # AUTHORIZATION FOR anOtherUser (user1)
-# Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyMSIsImF1dGgiOiJOT1JNQUxfVVNFUl9HUk9VUCIsImV4cCI6MTU2MTQ1NTk4Nn0.5jbEdcQwwo_UB7UiBWbL-LDNn8yk89Zy5qEihXmCW2YlsgXCtAw9bQhWM7993C74bvELrCPpLOC9D8NDvCqSvA
+# Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyMSIsImF1dGgiOiJOT1JNQUxfVVNFUl9HUk9VUCIsImV4cCI6MTU2MTQ1NTk4Nn0.5jbEdcQwwo_UB7UiBWbL-LDNn8yk89Zy5qEihXmCW2YlsgXCtAw9bQhWM7993C74bvELrCPpLOC9D8NDvCqSvA
 
 # Authorisation with outdated Spring Security roles
 # ———————————————————————
@@ -144,7 +144,7 @@ GET {root}/api/rdfquery_listsubclassof/Person
 GET {root}/api/rdfquery_listsubclassof/jioejiewijweiojfeji
 
 # ——————
-# USERS ] {{{1
+# USERS ]
 # ——————
 
 # CREATE / UPDATE
@@ -226,7 +226,9 @@ DELETE {root}/api/userRDF/anOtherUser
 PUT {root}/api/albumRDF << END
 {{
     "id": 1,
-    "ownerLogin": "anotheruser"
+    "ownerLogin": "anOtherUser",
+    "title": "title1"
+
 }}
 END
 
@@ -241,6 +243,7 @@ END
 PUT {root}/api/albumRDF << END
 {{
     "id": 2,
+    "title": "title1",
     "ownerLogin": "notexistuser"
 }}
 END
@@ -249,6 +252,7 @@ END
 PUT {root}/api/albumRDF << END
 {{
     "id": 2,
+    "title": "title1",
     "ownerLogin": "admin"
 }}
 END
@@ -256,6 +260,7 @@ END
 PUT {root}/api/albumRDF << END
 {{
     "id": 2,
+    "title": "title1",
     "ownerLogin": "anOtherUser"
 }}
 END
@@ -263,16 +268,18 @@ END
 PUT {root}/api/albumRDF << END
 {{
     "id": 2,
-    "ownerLogin": "anotheruser",
+    "title": "title1",
+    "ownerLogin": "anOtherUser",
     "sharedWith": ["user", "admin"]
 }}
 END
 
-// Error 404 as user 999999 not found in Database
+# Error 404 as user 999999 not found in Database
 PUT {root}/api/albumRDF << END
 {{
     "id": 2,
-    "ownerLogin": "anotheruser",
+    "title": "title1",
+    "ownerLogin": "anOtherUser",
     "sharedWith": ["user", "999999"]
 }}
 END
@@ -280,7 +287,7 @@ END
 # READ
 # —————
 
-# ERROR 403 if the user logged is `user1` (as the ownerLogin is anotheruser)
+# ERROR 403 if the user logged is `user1` (as the ownerLogin is anOtherUser)
 # and has the album is not shared with the current user logged
 GET {root}/api/albumRDF/1
 
@@ -289,6 +296,25 @@ GET {root}/api/albumRDF/2
 
 # ERROR 404 not found
 GET {root}/api/albumRDF/999999
+
+# Get users album API
+# ——————————————————————
+# Now idea how to parse the SPARQL result
+# This API are very factorized
+
+# If this user is not register in database, when we try to retrieve album
+# error 409
+GET {root}/api/albumRDFOfUserLogged
+
+# 403 if the current user is not an admin
+# 204 (NO_CONTENT) if the user has no album
+GET {root}/api/getUserSAlbum/user
+
+# 403 if the current user is not an admin
+GET {root}/api/getUserSAlbum/anOtherUser
+
+# Error 404
+GET {root}/api/getUserSAlbum/notexistuser
 
 # DELETE
 # ———————

@@ -6,6 +6,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.RDFList;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.vocabulary.RDF;
 
 import fr.uga.julioju.sempic.Exceptions.FusekiSubjectNotFoundException;
 import fr.uga.julioju.sempic.entities.AlbumRDF;
@@ -38,12 +39,14 @@ public class CreateResource  {
                 Namespaces.getAlbumUri(albumRDF.getId()),
                 SempicOnto.Album
         );
+        albumRDFResource.addProperty(SempicOnto.albumSTitle,
+                albumRDF.getTitle()
+        );
         albumRDFResource.addProperty(SempicOnto.albumOwnerLogin,
                 model.createResource(
                     Namespaces.getUserUri(albumRDF.getOwnerLogin())
                 )
         );
-        RDFList rdfList = null;
         if (albumRDF.getSharedWith() != null) {
             System.out.println(new RDFNode[albumRDF.getSharedWith().length]);
             RDFNode[] rdfListElement = new RDFNode[albumRDF.getSharedWith().length];
@@ -52,7 +55,6 @@ public class CreateResource  {
                 String sharedWithUri = Namespaces.getUserUri(user);
                 var node_URI = (Node_URI) NodeFactory.createURI(sharedWithUri);
                 if (RDFStore.isUriIsSubject(node_URI)) {
-                    System.out.println("toto");
                     rdfListElement[forLoop] =
                         model.createResource(sharedWithUri);
                 } else {
@@ -60,12 +62,12 @@ public class CreateResource  {
                 }
                 forLoop++;
             }
-            rdfList = model.createList(rdfListElement);
+            RDFList rdfList = model.createList(rdfListElement);
+            albumRDFResource.addProperty(SempicOnto.albumSharedWith, rdfList);
         } else {
             // Empty list are not persisted, but should not be null
-            rdfList = model.createList(new RDFNode[0]);
+            albumRDFResource.addProperty(SempicOnto.albumSharedWith, RDF.nil);
         }
-        albumRDFResource.addProperty(SempicOnto.albumSharedWith, rdfList);
         return albumRDFResource;
     }
 

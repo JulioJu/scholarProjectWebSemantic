@@ -24,10 +24,6 @@ public final class ErrorConstantsSempic {
         URI.create(PROBLEM_BASE_URL_SEMPIC +
             "/fuseki-subject-not-found");
 
-    protected static final URI FUSEKI_RESOURCE_FORBIDDEN =
-        URI.create(PROBLEM_BASE_URL_SEMPIC +
-            "/fuseki-resource-forbidden");
-
     protected static final URI FUSEKI_URI_NOT_A_CLASS =
         URI.create(PROBLEM_BASE_URL_SEMPIC +
             "/fuseki-uri-not-a-class");

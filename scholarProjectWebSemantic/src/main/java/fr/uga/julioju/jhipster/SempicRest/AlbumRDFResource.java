@@ -1,5 +1,7 @@
 package fr.uga.julioju.jhipster.SempicRest;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.apache.jena.graph.NodeFactory;
@@ -7,6 +9,7 @@ import org.apache.jena.graph.Node_URI;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.shared.AccessDeniedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +26,7 @@ import fr.uga.julioju.sempic.Namespaces;
 import fr.uga.julioju.sempic.RDFConn;
 import fr.uga.julioju.sempic.RDFStore;
 import fr.uga.julioju.sempic.ReadAlbum;
+import fr.uga.julioju.sempic.ReadUser;
 import fr.uga.julioju.sempic.Exceptions.FusekiSubjectNotFoundException;
 import fr.uga.julioju.sempic.entities.AlbumRDF;
 
@@ -42,12 +46,12 @@ public class AlbumRDFResource  {
      * @return the {@link ResponseEntity}
      * with status {@code 200 (OK)} and with
      * body the updated entity,
-     * or with status {@code 201 (created)} and with body the created albumRDF,
+     * or with status {@code 201 (created)} and with body the created {@link AlbumRDF},
      * Errors:
-     * status {@code 400 (Bad Request)} if the albumRDF is not valid,
+     * status {@code 400 (Bad Request)} if the {@link AlbumRDF} is not valid,
      * status {@code 500 (Internal Server Error)} if the albumRDF couldn't be updated.
      * status {@code 409 (Conflict)} if the authentification token is outdated with the state of the database
-     * status {@code 401 (Unauthorized)} if the user has no the authorization to read
+     * status {@code 403 (Forbidden)} if the user has no the permission to read
      * (not owner or not administrator)
      * status {@code 404 (Not found)} if a resource used in the request
      * in not found in the database.
@@ -95,13 +99,11 @@ public class AlbumRDFResource  {
      *
      * @param id the id of the albumRDF to retrieve.
      * @return the {@link ResponseEntity}
-     * with status {@code 200 (OK)} and with
-     * body the updated entity,
-     * or with status {@code 201 (created)} and with body the created albumRDF,
+     * with status {@code 200 (OK)} and with the entity in the body,
+     * or with status {@code 201 (created)} and with body the {@link AlbumRDF},
      * Errors:
-     * status {@code 500 (Internal Server Error)} if the albumRDF couldn't be updated.
-     * status {@code 409 (Conflict)} if the authentification token is outdated with the state of the database
-     * status {@code 403 (Forbidden)} if the user has no the authorization to read
+     * status {@code 500 (Internal Server Error)} if the {@link AlbumRDF} couldn't be updated.
+     * status {@code 403 (Forbidden)} if the user has no the permission to read
      * (not owner or not administrator)
      * status {@code 404 (Not found)} if a resource used in the request
      * in not found in the database.
@@ -114,15 +116,80 @@ public class AlbumRDFResource  {
         return ResponseEntity.ok().body(albumRDF);
     }
 
+
+    /**
+     * {@code GET  /albumRDFOfUserLogged} : get all albums owned by the current user logged
+     *
+     * @return the {@link ResponseEntity}
+     * with status {@code 200 (OK)} and with the entity in the body,
+     * with status {@code 204 (NO_CONTENT)} if the user has no album
+     * Errors:
+     * status {@code 409 (Conflict)} if the authentification token is outdated with the state of the database
+     * status {@code 403 (Forbidden)} if the user has no the permission to read
+     * (not owner or not administrator)
+     * status {@code 404 (Not found)} if a resource used in the request
+     * in not found in the database.
+     */
+    @GetMapping("/albumRDFOfUserLogged")
+    public ResponseEntity<List<AlbumRDF>> getLoggedUserSAlbum() {
+        try {
+            return ResponseEntity.ok(
+                    ReadAlbum.readAlbumsOfAnUser(
+                        ReadUser.getUserLogged().getLogin()
+                    )
+            );
+        } catch (FusekiSubjectNotFoundException e) {
+            return ResponseEntity.noContent().build();
+        }
+    }
+
+    /**
+     * {@code GET  /getUserSAlbum/:login} : if the user
+     *   logged is admin get all albums owned by the
+     *   user with login :login.
+     *
+     * @return the {@link ResponseEntity}
+     * with status {@code 200 (OK)} and with the entity in the body,
+     * with status {@code 204 (NO_CONTENT)} if the user has no album
+     * Errors:
+     * status {@code 409 (Conflict)} if the authentification token is outdated with the state of the database
+     * status {@code 403 (Forbidden)} if the user has no the permission to read
+     * (not owner or not administrator)
+     * status {@code 404 (Not found)} if a resource used in the request
+     * in not found in the database.
+     */
+    @GetMapping("/getUserSAlbum/{login}")
+    public ResponseEntity<List<AlbumRDF>> getUserSAlbum(
+            @PathVariable String login) {
+        login = login.toLowerCase();
+
+        // TODO bettwer ASK WHERE
+        // Test if user exists
+        // ReadUser.getUserByLogin(login);
+
+        if (! ReadUser.isUserLoggedAdmin(ReadUser.getUserLogged())) {
+            throw new AccessDeniedException(
+                    "FORBIDDEN: current user is not an admin");
+        }
+        try {
+            return ResponseEntity.ok(
+                    ReadAlbum.readAlbumsOfAnUser(
+                        ReadUser.getUserByLogin(login).getLogin())
+            );
+        } catch (FusekiSubjectNotFoundException e) {
+            return ResponseEntity.noContent().build();
+        }
+    }
+
     /**
      * {@code DELETE  /albumRDF/:id} : delete the "id" albumRDF.
      *
      * @param id the id of the albumRDF to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      * Errors:
-     * status {@code 500 (Internal Server Error)} if the albumRDF couldn't be updated.
+     * status {@code 500 (Internal Server Error)} if the {@link AlbumRDF} couldn't be deleted.
      * status {@code 409 (Conflict)} if the authentification token is outdated with the state of the database
-     * status {@code 403 (Forbidden)} if the user has no the authorization to read
+     * status {@code 403 (Forbidden)} if the user has no the permission to read
      * (not owner or not administrator)
      * status {@code 404 (Not found)} if a resource used in the request
      * in not found in the database.

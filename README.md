@@ -1751,8 +1751,10 @@ to not in a Java Program
 
 See also https://en.wikipedia.org/wiki/SQL_injection
 
-* But as it's a standard, if we change of implementation it
-  could be a little more bit hard.
+* Say that as it's not the best solution because it's not a standard
+    is IHMO not an argument. In fact, we could very easy
+    retrieve the SPARQL syntax in the output of the console! Then
+    if we want to use Virtuoso, simply see the output of the Console!
 
 ### Java API 1) syntax form of the query
 
@@ -1817,7 +1819,9 @@ Use instead:
                 new Template(basicPatternConstructClause));
 ```
 
-### Java API, Query
+### Result format
+
+#### Result format isn't part of the Algebra
 
 Even if we use directly Algebra, as:
 
@@ -1828,12 +1832,16 @@ Even if we use directly Algebra, as:
 
 You should see https://jena.apache.org/documentation/query/app_api.html
 
-### Difference between SELECT and CONSTRUCT
+#### Difference between SELECT and CONSTRUCT
 
 * Select could retrieve only result in Format XML, json, csv, tsv
 
 * CONSTRUCT could only retrieve in format turtle, JSON-LD, N-Triples,
     XML (rdf xml).
+
+#### LIMIT and OFFSET
+* http://rdf.myexperiment.org/howtosparql?page=LIMIT
+
 
 ### SPARQL RDF collection and container
 
@@ -1848,6 +1856,21 @@ You should see https://jena.apache.org/documentation/query/app_api.html
     See https://stackoverflow.com/questions/10162052/rdfcollection-in-sparql
     (syntax )
     `rdf:rest*/rdf:first`
+
+* For instance:
+
+    ```
+SELECT DISTINCT ?album ?albumSTitle ?listRest
+
+WHERE
+  { ?album  <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumOwnerLogin>  <http://fr.uga.julioju.sempic/ResourcesCreated/user/anotheruser> ;
+            <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumSTitle>  ?albumSTitle ;
+            <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumSharedWith>  ?albumSharedWithList
+    OPTIONAL
+      { ?albumSharedWithList (<http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>)*/rdf:first ?listRest .
+      }
+  }
+  ```
 
 ##### WITH CONSTRUCT
 
@@ -1891,8 +1914,10 @@ WHERE
     ?list rdf:rest*/rdf:first ?listRest .
   }
   ```
-* Syntax `rdf:rest*/rdf:first`
-    is not allowed in `CONSTRUCT`.
+    * Syntax `rdf:rest*/rdf:first`
+        is not allowed in `CONSTRUCT`.
+
+* But following works
 
 * See also
     https://stackoverflow.com/questions/44221975/how-to-write-a-sparql-construct-query-that-returns-an-rdf-list
@@ -1918,6 +1943,31 @@ WHERE
     <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumOwnerLogin> ?o1 .
   }
   ```
+
+### org.apache.jena.rdf.model.Model
+
+#### Important tuto
+
+* ***You MUST read https://jena.apache.org/tutorials/rdf_api.html***
+
+#### Querying a model (to retrieve all AlbumRDF on an user)
+
+* To query all albumRDF of an user we use only one Query.
+
+* As the code is very factorized, the Query and the parse of the result is
+    the same as when we request only one AlbumRDF.
+
+* See ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/sempic/ReadAlbum.java
+
+* When we request all albumRDF of one user we have a succession
+    of several albumRDF. We split the `org.apache.jena.rdf.model.Model`
+    into several `Model` that contains only one AlbumRDF.
+    Then each `Model` thant contains only one AlbumRDF is parsed
+    and when we parse one AlbumRDF.
+
+* See especially the doc
+    ***https://jena.apache.org/tutorials/rdf_api.html#ch-Querying%20a%20Model***
+
 
 ### Jena Source code organization
 
@@ -2195,6 +2245,8 @@ pes.fr/ontologies/sempic.owl#ownerId>) )
 ```sh
 wget 'http://localhost:3030/sempic/?query=CONSTRUCT+%0A++%7B+%0A++++%3Chttp%3A%2F%2Ffr.uga.julioju.sempic%2FResourcesCreated%2Fuser%2Fadmin%3E+%3Fp+%3Fo+.%0A++%7D%0AWHERE%0A++%7B+%3Chttp%3A%2F%2Ffr.uga.julioju.sempic%2FResourcesCreated%2Fuser%2Fadmin%3E%0A++++++++++++++%3Fp++%3Fo%0A++%7D%0A'
 ```
+
+* The teacher confirms that this reasoner bug for scaffolding.
 
 ## A solution studied: restart Fuseki Server
 
@@ -2885,6 +2937,11 @@ It should be have only one SPARQL request
 3. Why when we open ./julioJuGeographicalZone.owl in Protégé
     Departments are Individuals and Classes.
     Don't understand. TODO ask to teacher.
+
+4. On the official doc https://jena.apache.org/tutorials/rdf_api.html#ch-Containers
+    they speaks of « Collection »
+    Contradiction with https://www.w3.org/2007/02/turtle/primer/#L2986
+    TODO send an e-mail to ask to correct this mistake or create a PR
 
 
 # Credits

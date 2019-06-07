@@ -11,17 +11,22 @@ public class AlbumRDF extends AbstractRDF {
     @Nullable
     private String[] sharedWith;
 
+    @NotNull
+    private String title;
+
     // Needed for Jackson if an other constructor is defined
     public AlbumRDF() {
     }
 
-    public AlbumRDF(long id, String ownerLogin) {
+    public AlbumRDF(long id, String title, String ownerLogin) {
         super(id);
+        this.title = title;
         this.ownerLogin = ownerLogin;
     }
 
-    public AlbumRDF(long id, String ownerLogin, String[] sharedWithLogin) {
+    public AlbumRDF(long id, String title, String ownerLogin, String[] sharedWithLogin) {
         super(id);
+        this.title = title;
         this.ownerLogin = ownerLogin;
         this.sharedWith = sharedWithLogin;
     }
@@ -34,4 +39,7 @@ public class AlbumRDF extends AbstractRDF {
         return sharedWith;
     }
 
+    public String getTitle() {
+        return title;
+    }
 }

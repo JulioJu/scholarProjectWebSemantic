@@ -46,12 +46,12 @@ public class PhotoRDFResource {
      * @return the {@link ResponseEntity}
      * with status {@code 200 (OK)} and with
      * body the updated entity,
-     * or with status {@code 201 (created)} and with body the created albumRDF,
+     * or with status {@code 201 (created)} and with body the created {@link PhotoRDF},
      * Errors:
-     * status {@code 400 (Bad Request)} if the albumRDF is not valid,
-     * status {@code 500 (Internal Server Error)} if the albumRDF couldn't be updated.
+     * status {@code 400 (Bad Request)} if the {@link PhotoRDF} is not valid,
+     * status {@code 500 (Internal Server Error)} if the {@link PhotoRDF} couldn't be updated.
      * status {@code 409 (Conflict)} if the authentification token is outdated with the state of the database
-     * status {@code 403 (Forbidden)} if the user has no the authorization to read
+     * status {@code 403 (Forbidden)} if the user has no the permission to read
      * (not owner or not administrator)
      * status {@code 404 (Not found)} if a resource used in the request
      * in not found in the database.
@@ -133,13 +133,10 @@ public class PhotoRDFResource {
      *
      * @param id the id of the photoRDF
      * @return the {@link ResponseEntity}
-     * with status {@code 200 (OK)} and with
-     * body the updated entity,
-     * or with status {@code 201 (created)} and with body the created albumRDF,
+     * with status {@code 200 (OK)} and with the entity in the body,
      * Errors:
-     * status {@code 500 (Internal Server Error)} if the albumRDF couldn't be updated.
      * status {@code 409 (Conflict)} if the authentification token is outdated with the state of the database
-     * status {@code 403 (Forbidden)} if the user has no the authorization to read
+     * status {@code 403 (Forbidden)} if the user has no the permission to read
      * (not owner or not administrator)
      * status {@code 404 (Not found)} if a resource used in the request
      * in not found in the database.
@@ -161,9 +158,9 @@ public class PhotoRDFResource {
      * @param id the id of the photoRDF to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      * Errors:
-     * status {@code 500 (Internal Server Error)} if the albumRDF couldn't be updated.
+     * status {@code 500 (Internal Server Error)} if the {@link PhotoRDF} couldn't be deleted.
      * status {@code 409 (Conflict)} if the authentification token is outdated with the state of the database
-     * status {@code 403 (Forbidden)} if the user has no the authorization to read
+     * status {@code 403 (Forbidden)} if the user has no the permission to read
      * (not owner or not administrator)
      * status {@code 404 (Not found)} if a resource used in the request
      * in not found in the database.

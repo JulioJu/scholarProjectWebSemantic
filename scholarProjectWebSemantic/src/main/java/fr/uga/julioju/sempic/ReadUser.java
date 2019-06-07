@@ -119,7 +119,12 @@ public class ReadUser extends AbstractRead {
         if (login.isEmpty()) {
             throw new SpringSecurityTokenException();
         }
-        UserRDF userRDF  = ReadUser.getUserByLogin(login.get());
+        UserRDF userRDF;
+        try {
+            userRDF = ReadUser.getUserByLogin(login.get());
+        } catch (FusekiSubjectNotFoundException e) {
+            throw new TokenOutOfDateException(e);
+        }
         if (! SecurityUtils.isCurrentUserInRole(
                     userRDF.getUserGroup().toString())
         ) {
