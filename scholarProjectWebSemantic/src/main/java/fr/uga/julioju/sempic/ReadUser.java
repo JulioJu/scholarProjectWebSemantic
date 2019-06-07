@@ -5,8 +5,14 @@ import java.util.stream.Collectors;
 
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Node_URI;
+import org.apache.jena.graph.Triple;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.sparql.algebra.Op;
+import org.apache.jena.sparql.algebra.op.OpBGP;
+import org.apache.jena.sparql.core.BasicPattern;
+import org.apache.jena.sparql.core.Var;
 import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
@@ -28,8 +34,30 @@ public class ReadUser extends AbstractRead {
         LoggerFactory.getLogger(ReadUser.class);
 
     private static Model read(String login) {
-        String uri = Namespaces.getUserUri(login);
-        return AbstractRead.read((Node_URI) NodeFactory.createURI(uri));
+        String uriLogin = Namespaces.getUserUri(login);
+        Node_URI node_URILogin = (Node_URI) NodeFactory.createURI(uriLogin);
+
+        // CONSTRUCT and WHERE clauses preparation
+        Triple tripleUser = Triple.create(
+                node_URILogin,
+                RDF.type.asNode(),
+                Var.alloc("adminGroup")
+                );
+
+        // Prepare WHERE clause
+        Triple tripleSubClassOf = Triple.create(
+                Var.alloc("adminGroup"),
+                RDFS.subClassOf.asNode(),
+                SempicOnto.User.asNode());
+        BasicPattern basicPatternWhere = new BasicPattern();
+        basicPatternWhere.add(tripleUser);
+        basicPatternWhere.add(tripleSubClassOf);
+        Op op = new OpBGP(basicPatternWhere);
+
+        // Prepare CONSTRUCT clause
+        BasicPattern basicPattern = new BasicPattern();
+        basicPattern.add(tripleUser);
+        return AbstractRead.read(node_URILogin, basicPattern, op);
     }
 
     /** Test if user logged has permissions to manage album */
@@ -74,8 +102,6 @@ public class ReadUser extends AbstractRead {
     public static UserRDF getUserByLogin(String login) {
         log.debug("Get userRDF : {}", login);
         Model model = ReadUser.read(login);
-        String password = model.listObjectsOfProperty(SempicOnto.usersPassword)
-            .toList().get(0).toString();
         UserGroup userGroup = UserGroup.NORMAL_USER_GROUP;
         if (
             model.listObjectsOfProperty(RDF.type)
@@ -83,7 +109,8 @@ public class ReadUser extends AbstractRead {
         ) {
             userGroup = UserGroup.ADMIN_GROUP;
         }
-        UserRDF userRDF = new UserRDF(login, password, userGroup);
+        UserRDF userRDF = new UserRDF(login, "NOT RETRIEVED (saved as a hash)",
+                userGroup);
         return userRDF;
     }
 
