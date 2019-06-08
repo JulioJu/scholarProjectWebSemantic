@@ -195,7 +195,7 @@ public class UserRDFResource  {
         this.testUserLoggedPermissions(login);
         String uri = Namespaces.getUserUri(login);
         Node_URI node_URI = (Node_URI) NodeFactory.createURI(uri);
-        RDFStore.deleteClassUriWithTests(node_URI);
+        RDFStore.cascadingDeleteWithTests(node_URI);
         return ResponseEntity.noContent().build();
     }
 

@@ -50,7 +50,7 @@ public class RDFStore {
             );
             UpdateRequest updateRequest =
                 new UpdateRequest(new UpdateDeleteWhere(acc));
-            log.debug("deleteClassUri\n" + updateRequest.toString());
+            log.debug("\ndeleteSubjectUri" + updateRequest.toString());
             RDFConn.cnxUpdateRequest(updateRequest);
     }
 
@@ -71,7 +71,7 @@ public class RDFStore {
             );
             UpdateRequest updateRequest =
                 new UpdateRequest(new UpdateDeleteWhere(acc));
-            log.debug("deleteClassUri\n" + updateRequest.toString());
+            log.debug("deleteObjectUri\n" + updateRequest.toString());
             RDFConn.cnxUpdateRequest(updateRequest);
     }
 
@@ -80,7 +80,7 @@ public class RDFStore {
      * Delete with three levels:
      * When we delete a user, it its albums, and it deletes album's photo
      */
-    public static void deleteClassUri(Node_URI node_URI) {
+    public static void cascadingDelete(Node_URI node_URI) {
 
             QuadAcc acc = new QuadAcc();
             acc.addTriple(
@@ -112,12 +112,12 @@ public class RDFStore {
             );
             Update update = new UpdateDeleteWhere(acc);
             UpdateRequest updateRequest = new UpdateRequest(update);
-            log.debug("deleteClassUri\n" + updateRequest.toString());
+            log.debug("cascadingDelete\n" + updateRequest.toString());
 
             RDFConn.cnxUpdateRequest(updateRequest);
     }
 
-    public static void deleteClassUriWithTests(Node_URI node_URI) {
+    public static void cascadingDeleteWithTests(Node_URI node_URI) {
         String uri = node_URI.getURI();
         if (!RDFStore.isUriIsSubject(node_URI)) {
             throw new FusekiSubjectNotFoundException(node_URI);
@@ -125,7 +125,7 @@ public class RDFStore {
         log.debug("Uri '" + uri + "' exists"
                 + ", this RDF subject will be deleted.");
 
-        RDFStore.deleteClassUri(node_URI);
+        RDFStore.cascadingDelete(node_URI);
 
         if (RDFStore.isUriIsSubject(node_URI)) {
             throw new FusekiUriNotAClass("Uri '" + uri

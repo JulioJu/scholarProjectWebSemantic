@@ -2852,7 +2852,7 @@ nmap <F3> 1gt<C-w>j:bd!<CR>:sp enew<CR>:call termopen("bash ../MAKEFILE.sh")<CR>
     even only `./scholarProjectWebSemantic/target/classes` .
     In this case, run again `./mvn -P \!webpack`
 
-## But FusekiServer is totally buggy
+## But FusekiServer doesn't seem to work with Spring / JHipster
 
 In ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/sempic/FusekiServerConn.java in the method `serverRestart()`, as FusekiServer has no callback to say when
 it is ready, I've added a delay between `FusekiServer.stop()` and
@@ -2921,6 +2921,17 @@ then restart server. Only restart the computer solve my issue.
 
 * Manage several albums photos thanks the Ressource in sempic.owl `AlbumPhoto`
 
+* When we start the app and send the first POST request we have
+
+```
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by com.fasterxml.jackson.module.afterburner.util.MyClassLoader (file:/media/data/home/m2/repository/com/fasterxml/jackson/module/jackson-module-afterburner/
+2.9.8/jackson-module-afterburner-2.9.8.jar) to method java.lang.ClassLoader.defineClass(java.lang.String,byte[],int,int)
+WARNING: Please consider reporting this to the maintainers of com.fasterxml.jackson.module.afterburner.util.MyClassLoader
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+```
+
 ## TODO very important for teacher
 
 1. Under ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/jhipster/SempicRest/PhotoRDFResource.java
@@ -2938,10 +2949,15 @@ It should be have only one SPARQL request
     Departments are Individuals and Classes.
     Don't understand. TODO ask to teacher.
 
-4. On the official doc https://jena.apache.org/tutorials/rdf_api.html#ch-Containers
+5. On the official doc https://jena.apache.org/tutorials/rdf_api.html#ch-Containers
     they speaks of « Collection »
     Contradiction with https://www.w3.org/2007/02/turtle/primer/#L2986
     TODO send an e-mail to ask to correct this mistake or create a PR
+
+6. Big ERROR cascading delete delete all.
+    For instance, delete an Album delete its user and users shared with.
+    Also, delete photos, and its album, and owner's album and users shared
+    with.
 
 
 # Credits

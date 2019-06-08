@@ -113,7 +113,7 @@ public class PhotoRDFResource {
         log.debug("Delete photos before update, otherwise it appends");
 
         if (isUpdate) {
-            RDFStore.deleteClassUri((Node_URI) photoResource.asNode());
+            RDFStore.deleteSubjectUri((Node_URI) photoResource.asNode());
         }
 
         RDFConn.saveModel(model);
@@ -175,7 +175,7 @@ public class PhotoRDFResource {
         ReadAlbum.testUserLoggedPermissions(albumRDF, false);
 
         Node_URI node_URI = (Node_URI) NodeFactory.createURI(uri);
-        RDFStore.deleteClassUriWithTests(node_URI);
+        RDFStore.cascadingDeleteWithTests(node_URI);
         return ResponseEntity.noContent().build();
     }
 

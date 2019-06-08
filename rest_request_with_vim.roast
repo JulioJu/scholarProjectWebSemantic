@@ -144,7 +144,7 @@ GET {root}/api/rdfquery_listsubclassof/Person
 GET {root}/api/rdfquery_listsubclassof/jioejiewijweiojfeji
 
 # ——————
-# USERS ]
+# USERS ] {{{1
 # ——————
 
 # CREATE / UPDATE
@@ -219,6 +219,10 @@ DELETE {root}/api/userRDF/anOtherUser
 # CREATE / UPDATE
 # ———————————————
 
+# IMPORTANT NOTE: on PUT requests for album NO login.toLowerCase() function
+# trieggered
+# TODO
+
 # HTTP code 201 if create
 # HTTP code 200 if update (Delete the resource before update)
 
@@ -226,7 +230,7 @@ DELETE {root}/api/userRDF/anOtherUser
 PUT {root}/api/albumRDF << END
 {{
     "id": 1,
-    "ownerLogin": "anOtherUser",
+    "ownerLogin": "anotheruser",
     "title": "title1"
 
 }}
@@ -261,7 +265,7 @@ PUT {root}/api/albumRDF << END
 {{
     "id": 2,
     "title": "title1",
-    "ownerLogin": "anOtherUser"
+    "ownerLogin": "anotheruser"
 }}
 END
 
@@ -269,7 +273,7 @@ PUT {root}/api/albumRDF << END
 {{
     "id": 2,
     "title": "title1",
-    "ownerLogin": "anOtherUser",
+    "ownerLogin": "anotheruser",
     "sharedWith": ["user", "admin"]
 }}
 END
@@ -279,7 +283,7 @@ PUT {root}/api/albumRDF << END
 {{
     "id": 2,
     "title": "title1",
-    "ownerLogin": "anOtherUser",
+    "ownerLogin": "anotheruser",
     "sharedWith": ["user", "999999"]
 }}
 END
@@ -426,9 +430,5 @@ GET {root}/api/photoRDF/2
 # ——————
 
 DELETE {root}/api/photoRDF/1
-
-Content-Type: application/xml
-
-GET http://localhost:8080
 
 # vim:foldmethod=marker:foldlevel=0
