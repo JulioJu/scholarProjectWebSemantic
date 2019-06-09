@@ -221,6 +221,13 @@ All API implemented are described in this file.
 
 ***All API are protected against SQL injection.***
 
+***THE BEST API IS FOR GET ALBUM***
+* READ ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/jhipster/SempicRest/AlbumRDFResourceGet.java
+* READ ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/sempic/ReadAlbum.java
+* This API demonstrates why we should use Jena API and no SPARQL
+    Very clear and very easy to factorized!!!
+* ==> Very factorized and commented
+
 ### HTTP codes returned
 
 * See ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/jhipster/SempicRest/
@@ -1679,6 +1686,15 @@ ORDER BY ?communeLabel ?commune
     (a proprietary software with open sources parts) and says
     that is more complicated to configure at startup.
 
+* Virtuoso use an SQL Database under the hood
+    https://stackoverflow.com/questions/17719341/difference-between-virtuoso-native-rdf-quad-store-and-virtuoso-sql-based-rdf-tri
+
+* Virtuoso could use Jena API
+    http://vos.openlinksw.com/owiki/wiki/VOS/VirtJenaProvider
+
+* In a future, we could use RDFConnection to a Virtuoso Database
+    https://github.com/openlink/virtuoso-opensource/issues/792
+
 ### Why Fuseki is has HTTP POST is tricky
 
 * See my comments at ./rest_request_fuseki.roast
@@ -1737,9 +1753,9 @@ file. This file is not factorize, my goal is keep as an example.
 The most important doc is the ***official doc***
     https://jena.apache.org/documentation/query/manipulating_sparql_using_arq.html
 
-### Sparql syntax
+### Why use Jena API and not Sparql W3C syntax
 
-The Sparql syntax is very known and very documented. But it's better
+The Sparql syntax from W3c is very known and very documented. But it's better
 to not in a Java Program
 
 > “But what about [little Bobby Tables](https://xkcd.com/327/)? And, even if you
@@ -1755,8 +1771,19 @@ See also https://en.wikipedia.org/wiki/SQL_injection
     is IHMO not an argument. In fact, we could very easy
     retrieve the SPARQL syntax in the output of the console! Then
     if we want to use Virtuoso, simply see the output of the Console!
+    Furthermore we could use Jena API into Virtuoso or opposite
+    http://docs.openlinksw.com/virtuoso/rdfsparqlprotocolendpoint/
+    https://stackoverflow.com/questions/27958212/is-it-possible-to-add-virtuoso-as-a-storage-provider-in-jena-fuseki
+    * Furthermore, probably we could connect Jena to Fuseki.
+    * See also section above about « Virtuoso »
 
-### Java API 1) syntax form of the query
+* Read
+    * READ ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/jhipster/SempicRest/AlbumRDFResourceGet.java
+    * READ ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/sempic/ReadAlbum.java
+    * This API demonstrates why we should use Jena API and no SPARQL
+        Very clear and very easy to factorized!!!
+
+#### Java API 1) syntax form of the query
 
 See the official doc presented above and
 also:
@@ -1770,7 +1797,7 @@ But we could see that it's very verbose. Maybe it's a little bit more
 understandable, because contrary to Algebra form, we could define
 `CONSTRUCT clause` before the `WHERE clause`.
 
-### Java API 2) Algebra form of the query
+#### Java API 2) Algebra form of the query
 
 I believe the best solution is to use directly Sparql Algebra.
 To understand what is Spqral Algebra,
@@ -1942,6 +1969,16 @@ WHERE
     <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumOwnerLogin> ?o1 .
   }
   ```
+
+### Use UNION instead of FILTER if possible
+
+* https://www.cray.com/blog/tuning-sparql-queries-performance/``
+    Again, this will likely be much more performant because it creates a lot
+    less work for the query engine than the FILTER form of the query.
+
+* to retrieve all all albums owned by and shared with an user
+    I thought at the beggining to use FILTER, but it's better to use UNION
+*   See  ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/sempic/ReadAlbum.java
 
 ### org.apache.jena.rdf.model.Model
 

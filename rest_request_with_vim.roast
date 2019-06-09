@@ -324,6 +324,8 @@ GET {root}/api/albumRDF/2
 
 GET {root}/api/albumRDF/3
 
+GET {root}/api/albumRDF/3
+
 # ERROR 404 not found
 GET {root}/api/albumRDF/999999
 
@@ -331,28 +333,47 @@ GET {root}/api/albumRDF/999999
 # ——————————————————————
 # This API are very factorized
 # Could send 204 (NO_CONTENT) if the user has no albums
+# Protected if JWT token is outdated
+# READ ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/jhipster/SempicRest/AlbumRDFResourceGet.java
+# READ ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/sempic/ReadAlbum.java
+# This API demonstrates why we should use Jena API and no SPARQL
+#    Very clear and very easy to factorized!!!
+# ||||||||||| VERY GOOD FILES ||||||
 
+# IF THE USER LOGGED IS ADMIN GET ALL ALBUMS
+GET {root}/api/allAlbums
+
+# GET ALL ALBUMS OWNED BY THE CURRENT USER LOGGED
 # If this user is not register in database, when we try to retrieve album
 # error 409
 GET {root}/api/albumsOfUserLogged
 
+# IF THE USER LOGGED IS ADMIN GET ALL ALBUMS OWNED BY THE USER WITH LOGIN USER
 # 403 if the current user is not an admin
 # 204 (NO_CONTENT) if the user has no album
 GET {root}/api/getUserSAlbums/user
 
+# IF THE USER LOGGED IS ADMIN GET ALL ALBUMS OWNED BY THE USER WITH LOGIN ANOTHERUSER
 # 403 if the current user is not an admin
 GET {root}/api/getUserSAlbums/anOtherUser
 
-# ERROR 404
 GET {root}/api/getUserSAlbums/noexixstuser
 
-# Error 404
-GET {root}/api/getUserSAlbums/notexistuser
-
+# GET ALL ALBUMS SHARED WITH CURRENT USER LOGGED
 GET {root}/api/albumsSharedWithUserLogged
+
+# IF THE USER LOGGED IS ADMIN GET ALL ALBUMS SHARED WITH THE USER WITH LOGIN ADMIN
+GET {root}/api/albumsSharedWith/admin
 
 # ERROR 404
 GET {root}/api/albumsSharedWith/notexistuser
+
+# GET ALL ALBUMS OWNED BY AND SHARED WITH CURRENT USER LOGGED
+GET {root}/api/albumsOwnedByAndSharedWithUserLogged
+
+# IF THE USER LOGGED IS ADMIN GET ALL ALBUMS OWNED BY AND SHARED WITH THE USER WITH LOGIN ADMIN.
+GET {root}/api/albumsOwnedByAndSharedWith/admin
+
 
 # DELETE
 # ———————
