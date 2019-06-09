@@ -147,6 +147,13 @@ public class ReadUser extends AbstractRead {
         return false;
     }
 
+    public static void testIfUserExists(String login) {
+        Node_URI node_URILogin =
+            (Node_URI) NodeFactory.createURI(Namespaces.getUserUri(login));
+        if (! RDFStore.isUriIsClass(node_URILogin)) {
+            throw new FusekiSubjectNotFoundException(node_URILogin);
+        }
+    }
 
 }
 

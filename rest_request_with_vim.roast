@@ -255,7 +255,7 @@ END
 # ERROR 403 if the user logged is `user`
 PUT {root}/api/albumRDF << END
 {{
-    "id": 2,
+    "id": 3,
     "title": "title1",
     "ownerLogin": "admin"
 }}
@@ -278,6 +278,30 @@ PUT {root}/api/albumRDF << END
 }}
 END
 
+PUT {root}/api/albumRDF << END
+{{
+    "id": 2,
+    "title": "title1",
+    "ownerLogin": "admin",
+    "sharedWith": ["user"]
+}}
+
+PUT {root}/api/albumRDF << END
+{{
+    "id": 4,
+    "title": "title1",
+    "ownerLogin": "user",
+    "sharedWith": ["admin"]
+}}
+
+PUT {root}/api/albumRDF << END
+{{
+    "id": 5,
+    "title": "title1",
+    "ownerLogin": "admin",
+    "sharedWith": ["user"]
+}}
+
 # Error 404 as user 999999 not found in Database
 PUT {root}/api/albumRDF << END
 {{
@@ -298,27 +322,37 @@ GET {root}/api/albumRDF/1
 # ERROR 403 if the user logged is `user` (as the ownerLogin is admin)
 GET {root}/api/albumRDF/2
 
+GET {root}/api/albumRDF/3
+
 # ERROR 404 not found
 GET {root}/api/albumRDF/999999
 
-# Get users album API
+# Get all album of an user
 # ——————————————————————
-# Now idea how to parse the SPARQL result
 # This API are very factorized
+# Could send 204 (NO_CONTENT) if the user has no albums
 
 # If this user is not register in database, when we try to retrieve album
 # error 409
-GET {root}/api/albumRDFOfUserLogged
+GET {root}/api/albumsOfUserLogged
 
 # 403 if the current user is not an admin
 # 204 (NO_CONTENT) if the user has no album
-GET {root}/api/getUserSAlbum/user
+GET {root}/api/getUserSAlbums/user
 
 # 403 if the current user is not an admin
-GET {root}/api/getUserSAlbum/anOtherUser
+GET {root}/api/getUserSAlbums/anOtherUser
+
+# ERROR 404
+GET {root}/api/getUserSAlbums/noexixstuser
 
 # Error 404
-GET {root}/api/getUserSAlbum/notexistuser
+GET {root}/api/getUserSAlbums/notexistuser
+
+GET {root}/api/albumsSharedWithUserLogged
+
+# ERROR 404
+GET {root}/api/albumsSharedWith/notexistuser
 
 # DELETE
 # ———————

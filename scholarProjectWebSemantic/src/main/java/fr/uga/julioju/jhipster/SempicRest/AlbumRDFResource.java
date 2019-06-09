@@ -116,9 +116,8 @@ public class AlbumRDFResource  {
         return ResponseEntity.ok().body(albumRDF);
     }
 
-
     /**
-     * {@code GET  /albumRDFOfUserLogged} : get all albums owned by the current user logged
+     * {@code GET  /albumsOfUserLogged} : get all albums owned by the current user logged
      *
      * @return the {@link ResponseEntity}
      * with status {@code 200 (OK)} and with the entity in the body,
@@ -130,7 +129,7 @@ public class AlbumRDFResource  {
      * status {@code 404 (Not found)} if a resource used in the request
      * in not found in the database.
      */
-    @GetMapping("/albumRDFOfUserLogged")
+    @GetMapping("/albumsOfUserLogged")
     public ResponseEntity<List<AlbumRDF>> getLoggedUserSAlbum() {
         try {
             return ResponseEntity.ok(
@@ -144,7 +143,69 @@ public class AlbumRDFResource  {
     }
 
     /**
-     * {@code GET  /getUserSAlbum/:login} : if the user
+     * {@code GET  /albumsSharedWithUserLogged} : get all albums sharted by current user logged
+     *
+     * @return the {@link ResponseEntity}
+     * with status {@code 200 (OK)} and with the entity in the body,
+     * with status {@code 204 (NO_CONTENT)} if the user has no album
+     * Errors:
+     * status {@code 409 (Conflict)} if the authentification token is outdated with the state of the database
+     * status {@code 403 (Forbidden)} if the user has no the permission to read
+     * (not owner or not administrator)
+     * status {@code 404 (Not found)} if a resource used in the request
+     * in not found in the database.
+     */
+    @GetMapping("/albumsSharedWithUserLogged")
+    public ResponseEntity<List<AlbumRDF>> getAlbumSharedWithUserLogged() {
+        try {
+            return ResponseEntity.ok(
+                    ReadAlbum.readAlbumsSharedWithAnUser(
+                        ReadUser.getUserLogged().getLogin()
+                    )
+            );
+        } catch (FusekiSubjectNotFoundException e) {
+            return ResponseEntity.noContent().build();
+        }
+    }
+
+    /**
+     * {@code GET  /albumsSharedWith/:login} : if the user
+     *   logged is admin get all albums shared with the user with login :login
+     *
+     * @return the {@link ResponseEntity}
+     * with status {@code 200 (OK)} and with the entity in the body,
+     * with status {@code 204 (NO_CONTENT)} if the user has no album
+     * Errors:
+     * status {@code 409 (Conflict)} if the authentification token is outdated with the state of the database
+     * status {@code 403 (Forbidden)} if the user has no the permission to read
+     * (not owner or not administrator)
+     * status {@code 404 (Not found)} if a resource used in the request
+     * in not found in the database.
+     */
+    @GetMapping("/albumsSharedWith/{login}")
+    public ResponseEntity<List<AlbumRDF>> getAlbumSharedWith(
+            @PathVariable String login) {
+        login = login.toLowerCase();
+
+        ReadUser.testIfUserExists(login);
+
+        if (! ReadUser.isUserLoggedAdmin(ReadUser.getUserLogged())) {
+            throw new AccessDeniedException(
+                    "FORBIDDEN: current user is not an admin");
+        }
+        try {
+            return ResponseEntity.ok(
+                    ReadAlbum.readAlbumsSharedWithAnUser(
+                        ReadUser.getUserByLogin(login).getLogin()
+                    )
+            );
+        } catch (FusekiSubjectNotFoundException e) {
+            return ResponseEntity.noContent().build();
+        }
+    }
+
+    /**
+     * {@code GET  /getUserSAlbums/:login} : if the user
      *   logged is admin get all albums owned by the
      *   user with login :login.
      *
@@ -158,14 +219,12 @@ public class AlbumRDFResource  {
      * status {@code 404 (Not found)} if a resource used in the request
      * in not found in the database.
      */
-    @GetMapping("/getUserSAlbum/{login}")
-    public ResponseEntity<List<AlbumRDF>> getUserSAlbum(
+    @GetMapping("/getUserSAlbums/{login}")
+    public ResponseEntity<List<AlbumRDF>> getUserSAlbums(
             @PathVariable String login) {
         login = login.toLowerCase();
 
-        // TODO bettwer ASK WHERE
-        // Test if user exists
-        // ReadUser.getUserByLogin(login);
+        ReadUser.testIfUserExists(login);
 
         if (! ReadUser.isUserLoggedAdmin(ReadUser.getUserLogged())) {
             throw new AccessDeniedException(
@@ -174,7 +233,8 @@ public class AlbumRDFResource  {
         try {
             return ResponseEntity.ok(
                     ReadAlbum.readAlbumsOfAnUser(
-                        ReadUser.getUserByLogin(login).getLogin())
+                        ReadUser.getUserByLogin(login).getLogin()
+                    )
             );
         } catch (FusekiSubjectNotFoundException e) {
             return ResponseEntity.noContent().build();

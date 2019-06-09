@@ -1,6 +1,7 @@
 package fr.uga.julioju.sempic;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,26 +16,29 @@ import org.apache.jena.rdf.model.SimpleSelector;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.op.OpBGP;
+import org.apache.jena.sparql.algebra.op.OpFilter;
 import org.apache.jena.sparql.algebra.op.OpLeftJoin;
 import org.apache.jena.sparql.algebra.op.OpPath;
 import org.apache.jena.sparql.algebra.op.OpSequence;
 import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.TriplePath;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.expr.E_Bound;
+import org.apache.jena.sparql.expr.E_LogicalOr;
+import org.apache.jena.sparql.expr.E_OneOf;
+import org.apache.jena.sparql.expr.Expr;
+import org.apache.jena.sparql.expr.ExprList;
+import org.apache.jena.sparql.expr.ExprVar;
+import org.apache.jena.sparql.expr.nodevalue.NodeValueNode;
 import org.apache.jena.sparql.path.P_ZeroOrMore1;
 import org.apache.jena.sparql.path.Path;
 import org.apache.jena.sparql.path.PathFactory;
 import org.apache.jena.vocabulary.RDF;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import fr.uga.julioju.sempic.entities.AlbumRDF;
 import fr.uga.miashs.sempic.model.rdf.SempicOnto;
 
 public class ReadAlbum extends AbstractRead {
-
-    private static final Logger log =
-        LoggerFactory.getLogger(ReadAlbum.class);
 
     /** Test if user logged has permissions to manage albumRDF */
     public static void testUserLoggedPermissions(AlbumRDF albumRDF,
@@ -52,8 +56,22 @@ public class ReadAlbum extends AbstractRead {
         );
     }
 
-    /** Either albumNode or ownerNode should be on type {@link Node_URI}  */
-    private static Model read(Node albumNode, Node ownerNode) {
+    /**
+      * @param albumNode should be on type {@link Node_URI}
+      *     only if 1.) ownerNode IS NOT INSTANCE OF {@link Node_URI}
+                    2.) albumSharedWith should be {@link Optional}.isEmpty()
+      * @param ownerNode should be on type {@link Node_URI}
+      *     only if 1.) albumNode IS NOT INSTANCE OF {@link Node_URI}
+                    2.) albumSharedWith should be {@link Optional}.isEmpty()
+      * @param ownerNode should be {@link Optional}.isPresent()
+      *     only if 1.) albumNode IS NOT INSTANCE OF {@link Node_URI}
+      *             2.) ownerNode IS NOT INSTANCE OF {@link Node_URI}
+      */
+    private static Model read(
+            Node albumNode,
+            Node ownerNode,
+            Optional<Node> albumSharedWith
+    ) {
         // CONSTRUCT and WHERE clauses preparation
         Triple tripleAlbumOwnerLogin = Triple.create(
                 albumNode,
@@ -96,6 +114,22 @@ public class ReadAlbum extends AbstractRead {
         Op opOptional = OpSequence.create(opPath, opBGPList);
         Op op = OpLeftJoin.createLeftJoin(opBGPAlbum, opOptional, null);
 
+        if (albumSharedWith.isPresent()) {
+            ExprVar listRest = new ExprVar("listRest");
+            Expr exprBound = new E_Bound(listRest);
+            Expr exprOneOfIn = new E_OneOf(
+                    listRest,
+                    new ExprList(
+                        Arrays.asList(new Expr[] {
+                            new NodeValueNode(albumSharedWith.get()),
+                        })
+                    )
+            );
+            Expr exprFilter = new E_LogicalOr(exprBound, exprOneOfIn);
+            // Filter that pattern with our expression
+            op = OpFilter.filter(exprFilter, op);
+        }
+
         // Prepare CONSTRUCT clause
         BasicPattern basicPattern = new BasicPattern();
         basicPattern.addAll(basicPatternAlbum);
@@ -104,27 +138,19 @@ public class ReadAlbum extends AbstractRead {
         if (albumNode instanceof Node_URI) {
             Node_URI node_URIAlbum = (Node_URI) albumNode;
             return AbstractRead.read(node_URIAlbum, basicPattern, op);
-        } else {
+        } else if (ownerNode instanceof Node_URI) {
             Node_URI node_URIOwner = (Node_URI) ownerNode;
             return AbstractRead.read(node_URIOwner, basicPattern, op);
+        } else if (albumSharedWith.isPresent()) {
+            Node_URI node_URIAlbumSharedWith =
+                (Node_URI) albumSharedWith.get();
+            return AbstractRead.read(node_URIAlbumSharedWith,
+                    basicPattern, op);
+        } else {
+            throw new
+                RuntimeException("Error in program. Contact the developper.");
         }
 
-    }
-
-    /** See README.md section « WITH CONSTRUCT » */
-    private static Model readOnAlbum(long id) {
-        log.debug("REST request to get albumRDF : {}", id);
-        String albumURI = Namespaces.getAlbumUri(id);
-        Node_URI node_URIAlbum = (Node_URI) NodeFactory.createURI(albumURI);
-        Var albumOwnerLogin = Var.alloc("albumOwnerLogin");
-        return ReadAlbum.read(node_URIAlbum, albumOwnerLogin);
-    }
-
-    private static Model readAlbumSOwner(String login) {
-        String ownerURI = Namespaces.getUserUri(login);
-        Node_URI node_URIOwner = (Node_URI) NodeFactory.createURI(ownerURI);
-        Var varAlbum = Var.alloc("album");
-        return ReadAlbum.read(varAlbum, node_URIOwner);
     }
 
     private static AlbumRDF parseModelWithOnlyOneAlbumRDF(Model model,
@@ -163,14 +189,8 @@ public class ReadAlbum extends AbstractRead {
         return albumRDF;
     }
 
-    public static AlbumRDF readAlbum(Long id) {
-        Model model = ReadAlbum.readOnAlbum(id);
-        return parseModelWithOnlyOneAlbumRDF(model, id);
-    }
-
-    public static List<AlbumRDF> readAlbumsOfAnUser(String login) {
-        Model model = ReadAlbum.readAlbumSOwner(login);
-        List<AlbumRDF> albumRDF = new ArrayList<AlbumRDF>();
+    private static List<AlbumRDF> parseModelWithSeveralAlbums(Model model) {
+        List<AlbumRDF> albumsRDF = new ArrayList<AlbumRDF>();
         model
             .listSubjectsWithProperty(SempicOnto.albumOwnerLogin)
             .toList()
@@ -211,11 +231,43 @@ public class ReadAlbum extends AbstractRead {
                         );
                 AlbumRDF oneAlbum = ReadAlbum
                     .parseModelWithOnlyOneAlbumRDF(modelWithOnlyOneAlbum, id);
-                albumRDF.add(oneAlbum);
+                albumsRDF.add(oneAlbum);
                 // modelWithOnlyOneAlbum.write(System.out, "turtle");
 
             });
-        return albumRDF;
+        return albumsRDF;
+    }
+
+    /** See README.md section « WITH CONSTRUCT » */
+    public static AlbumRDF readAlbum(Long id) {
+        String albumURI = Namespaces.getAlbumUri(id);
+        Node_URI node_URIAlbum = (Node_URI) NodeFactory.createURI(albumURI);
+        Var albumOwnerLogin = Var.alloc("albumOwnerLogin");
+        Model model =
+            ReadAlbum.read(node_URIAlbum, albumOwnerLogin, Optional.empty());
+        return parseModelWithOnlyOneAlbumRDF(model, id);
+    }
+
+    public static List<AlbumRDF> readAlbumsOfAnUser(String login) {
+        String ownerURI = Namespaces.getUserUri(login);
+        Node_URI node_URIOwner = (Node_URI) NodeFactory.createURI(ownerURI);
+        Var varAlbum = Var.alloc("album");
+        Model model = ReadAlbum.read(varAlbum, node_URIOwner, Optional.empty());
+        return ReadAlbum.parseModelWithSeveralAlbums(model);
+    }
+
+    public static List<AlbumRDF> readAlbumsSharedWithAnUser(String login) {
+        String albumSharedWithUri = Namespaces.getUserUri(login);
+        Var varAlbum = Var.alloc("album");
+        Var albumOwnerLogin = Var.alloc("albumOwnerLogin");
+        Node_URI node_URIAlbumSharedWith =
+            (Node_URI) NodeFactory.createURI(albumSharedWithUri);
+        Model model = ReadAlbum.read(
+                varAlbum,
+                albumOwnerLogin,
+                Optional.of(node_URIAlbumSharedWith)
+        );
+        return ReadAlbum.parseModelWithSeveralAlbums(model);
     }
 
 }

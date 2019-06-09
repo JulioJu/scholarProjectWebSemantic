@@ -1897,8 +1897,11 @@ WHERE
   }
 
   ```
-* Following can't work, because in the construct clause it didn't know that it's
-    a list
+* Syntax `rdf:rest*/rdf:first`
+    is not allowed in `CONSTRUCT`.
+
+* But following work (and more simple, but in the result we don't see it's a list,
+    maybe teachers don't like it.
     ```
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 CONSTRUCT
@@ -1914,10 +1917,6 @@ WHERE
     ?list rdf:rest*/rdf:first ?listRest .
   }
   ```
-    * Syntax `rdf:rest*/rdf:first`
-        is not allowed in `CONSTRUCT`.
-
-* But following works
 
 * See also
     https://stackoverflow.com/questions/44221975/how-to-write-a-sparql-construct-query-that-returns-an-rdf-list

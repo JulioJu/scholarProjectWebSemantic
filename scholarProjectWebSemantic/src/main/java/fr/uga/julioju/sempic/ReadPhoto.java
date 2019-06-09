@@ -104,14 +104,14 @@ public class ReadPhoto  {
 
         Expr exprFilter = new E_OneOf(
                 new ExprVar("p"),
-                    new ExprList(
-                        Arrays.asList(new Expr[] {
-                            new NodeValueNode(SempicOnto.photoDepicts.asNode()),
-                            new NodeValueNode(SempicOnto.photoInAlbum.asNode()),
-                            new NodeValueNode(SempicOnto.albumOwnerLogin.asNode())
-                        })
-                    )
-            );
+                new ExprList(
+                    Arrays.asList(new Expr[] {
+                        new NodeValueNode(SempicOnto.photoDepicts.asNode()),
+                        new NodeValueNode(SempicOnto.photoInAlbum.asNode()),
+                        new NodeValueNode(SempicOnto.albumOwnerLogin.asNode())
+                    })
+                )
+        );
 
         // Java API 1): Syntax form of the query
         // ———————————————
