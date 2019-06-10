@@ -20,10 +20,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import fr.uga.julioju.sempic.Ask;
 import fr.uga.julioju.sempic.CreateResource;
+import fr.uga.julioju.sempic.Delete;
 import fr.uga.julioju.sempic.Namespaces;
 import fr.uga.julioju.sempic.RDFConn;
-import fr.uga.julioju.sempic.RDFStore;
 import fr.uga.julioju.sempic.ReadAlbum;
 import fr.uga.julioju.sempic.ReadPhoto;
 import fr.uga.julioju.sempic.entities.AlbumRDF;
@@ -73,7 +74,7 @@ public class PhotoRDFResource {
                 );
 
         boolean isUpdate = false;
-        if (RDFStore.isUriIsSubject((Node_URI) photoResource.asNode())) {
+        if (Ask.isUriIsSubject((Node_URI) photoResource.asNode())) {
             isUpdate = true;
         }
 
@@ -84,7 +85,7 @@ public class PhotoRDFResource {
             String depictionURI = SempicOnto.NS
                 + photoRDF.getDepiction()[depictionIndex].getDepiction();
             Resource sempicOntoResource = model.createResource(depictionURI);
-            RDFStore.testIfUriIsClass((Node_URI) sempicOntoResource.asNode());
+            Ask.testIfUriIsClass((Node_URI) sempicOntoResource.asNode());
 
             Resource descriptionResource = model.createResource();
 
@@ -113,7 +114,7 @@ public class PhotoRDFResource {
         log.debug("Delete photos before update, otherwise it appends");
 
         if (isUpdate) {
-            RDFStore.deleteSubjectUri((Node_URI) photoResource.asNode());
+            Delete.deleteSubjectUri((Node_URI) photoResource.asNode());
         }
 
         RDFConn.saveModel(model);
@@ -154,6 +155,8 @@ public class PhotoRDFResource {
 
     /**
      * {@code DELETE  /photoRDF/:id} : delete the "id" photoRDF.
+     * Note: photos are only subjects, never object,
+     * needs only `deleteSubjectUri`
      *
      * @param id the id of the photoRDF to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
@@ -175,7 +178,7 @@ public class PhotoRDFResource {
         ReadAlbum.testUserLoggedPermissions(albumRDF, false);
 
         Node_URI node_URI = (Node_URI) NodeFactory.createURI(uri);
-        RDFStore.cascadingDeleteWithTests(node_URI);
+        Delete.deleteSubjectUri(node_URI);
         return ResponseEntity.noContent().build();
     }
 

@@ -8,6 +8,7 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
 
+import fr.uga.julioju.sempic.Ask;
 import fr.uga.julioju.sempic.Exceptions.FusekiSubjectNotFoundException;
 import fr.uga.julioju.sempic.entities.AlbumRDF;
 import fr.uga.julioju.sempic.entities.PhotoRDF;
@@ -54,7 +55,7 @@ public class CreateResource  {
             for (String user : albumRDF.getSharedWith()) {
                 String sharedWithUri = Namespaces.getUserUri(user);
                 var node_URI = (Node_URI) NodeFactory.createURI(sharedWithUri);
-                if (RDFStore.isUriIsSubject(node_URI)) {
+                if (Ask.isUriIsSubject(node_URI)) {
                     rdfListElement[forLoop] =
                         model.createResource(sharedWithUri);
                 } else {

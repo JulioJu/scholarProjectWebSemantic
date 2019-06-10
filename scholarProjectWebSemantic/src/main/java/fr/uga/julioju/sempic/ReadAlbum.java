@@ -39,7 +39,7 @@ import org.apache.jena.vocabulary.RDF;
 import fr.uga.julioju.sempic.entities.AlbumRDF;
 import fr.uga.miashs.sempic.model.rdf.SempicOnto;
 
-public class ReadAlbum extends AbstractRead {
+public class ReadAlbum extends ReadAbstract {
 
     /** Test if user logged has permissions to manage albumRDF */
     public static void testUserLoggedPermissions(AlbumRDF albumRDF,
@@ -202,7 +202,7 @@ public class ReadAlbum extends AbstractRead {
         basicPattern.addAll(basicPatternList);
 
         // Trigger request
-        return AbstractRead.read((Node_URI) RDF.nil.asNode(), basicPattern, op);
+        return ReadAbstract.read((Node_URI) RDF.nil.asNode(), basicPattern, op);
     }
 
     private static AlbumRDF parseModelWithOnlyOneAlbumRDF(Model model,

@@ -12,10 +12,10 @@ import org.slf4j.LoggerFactory;
 
 import fr.uga.julioju.sempic.Exceptions.FusekiSubjectNotFoundException;
 
-public abstract class AbstractRead  {
+public abstract class ReadAbstract  {
 
     private static final Logger log =
-        LoggerFactory.getLogger(AbstractRead.class);
+        LoggerFactory.getLogger(ReadAbstract.class);
 
     protected static Model read (Node_URI node_URI,
             BasicPattern basicPattern,

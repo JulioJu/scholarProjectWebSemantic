@@ -20,6 +20,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import fr.uga.julioju.jhipster.security.SecurityUtils;
+import fr.uga.julioju.sempic.Ask;
 import fr.uga.julioju.sempic.Exceptions.FusekiSubjectNotFoundException;
 import fr.uga.julioju.sempic.Exceptions.SpringSecurityTokenException;
 import fr.uga.julioju.sempic.Exceptions.TokenOutOfDateException;
@@ -28,7 +29,7 @@ import fr.uga.julioju.sempic.entities.UserRDF;
 import fr.uga.julioju.sempic.entities.UserRDF.UserGroup;
 import fr.uga.miashs.sempic.model.rdf.SempicOnto;
 
-public class ReadUser extends AbstractRead {
+public class ReadUser extends ReadAbstract {
 
     private static final Logger log =
         LoggerFactory.getLogger(ReadUser.class);
@@ -57,7 +58,7 @@ public class ReadUser extends AbstractRead {
         // Prepare CONSTRUCT clause
         BasicPattern basicPattern = new BasicPattern();
         basicPattern.add(tripleUser);
-        return AbstractRead.read(node_URILogin, basicPattern, op);
+        return ReadAbstract.read(node_URILogin, basicPattern, op);
     }
 
     /** Test if user logged has permissions to manage album */
@@ -150,7 +151,7 @@ public class ReadUser extends AbstractRead {
     public static void testIfUserExists(String login) {
         Node_URI node_URILogin =
             (Node_URI) NodeFactory.createURI(Namespaces.getUserUri(login));
-        if (! RDFStore.isUriIsClass(node_URILogin)) {
+        if (! Ask.isUriIsClass(node_URILogin)) {
             throw new FusekiSubjectNotFoundException(node_URILogin);
         }
     }

@@ -22,10 +22,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import fr.uga.julioju.sempic.Ask;
 import fr.uga.julioju.sempic.CreateResource;
+import fr.uga.julioju.sempic.Delete;
 import fr.uga.julioju.sempic.Namespaces;
 import fr.uga.julioju.sempic.RDFConn;
-import fr.uga.julioju.sempic.RDFStore;
 import fr.uga.julioju.sempic.ReadUser;
 import fr.uga.julioju.sempic.entities.UserRDF;
 import fr.uga.julioju.sempic.entities.UserRDF.UserGroup;
@@ -81,8 +82,8 @@ public class UserRDFResource  {
         Resource adminUserResource = CreateResource
             .create(model, adminUserRDF);
 
-        if (!RDFStore.isUriIsSubject((Node_URI) normalUserResource.asNode())
-                && !RDFStore.isUriIsSubject((Node_URI) adminUserResource.asNode())) {
+        if (!Ask.isUriIsSubject((Node_URI) normalUserResource.asNode())
+                && !Ask.isUriIsSubject((Node_URI) adminUserResource.asNode())) {
             log.debug("BELOW: PRINT MODEL THAT WILL BE SAVED\n—————————————");
             model.write(System.out, "turtle");
             RDFConn.saveModel(model);
@@ -122,7 +123,7 @@ public class UserRDFResource  {
         this.testUserLoggedPermissions(userRDFToSave.getLogin());
         Model model = ModelFactory.createDefaultModel();
         Resource UserRDFResource = CreateResource.create(model, userRDFToSave);
-        if (!RDFStore.isUriIsSubject((Node_URI) UserRDFResource.asNode())) {
+        if (!Ask.isUriIsSubject((Node_URI) UserRDFResource.asNode())) {
             if (!ReadUser.isUserLoggedAdmin(ReadUser.getUserLogged())) {
                 throw new AccessDeniedException("Only an administrator"
                         + " could register a new user.");
@@ -148,7 +149,7 @@ public class UserRDFResource  {
                             + userRDFToSave.getUserGroup());
                 }
             }
-            RDFStore.deleteSubjectUri((Node_URI) NodeFactory.createURI(
+            Delete.deleteSubjectUri((Node_URI) NodeFactory.createURI(
                         Namespaces.getUserUri(userRDFToSave.getLogin())));
             RDFConn.saveModel(model);
             return ResponseEntity.ok().body(userRDFToSave);
@@ -195,7 +196,7 @@ public class UserRDFResource  {
         this.testUserLoggedPermissions(login);
         String uri = Namespaces.getUserUri(login);
         Node_URI node_URI = (Node_URI) NodeFactory.createURI(uri);
-        RDFStore.cascadingDeleteWithTests(node_URI);
+        Delete.cascadingDeleteWithTests(node_URI);
         return ResponseEntity.noContent().build();
     }
 

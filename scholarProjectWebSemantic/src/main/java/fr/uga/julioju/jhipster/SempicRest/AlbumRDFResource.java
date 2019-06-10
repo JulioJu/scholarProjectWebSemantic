@@ -17,10 +17,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import fr.uga.julioju.sempic.Ask;
 import fr.uga.julioju.sempic.CreateResource;
+import fr.uga.julioju.sempic.Delete;
 import fr.uga.julioju.sempic.Namespaces;
 import fr.uga.julioju.sempic.RDFConn;
-import fr.uga.julioju.sempic.RDFStore;
 import fr.uga.julioju.sempic.ReadAlbum;
 import fr.uga.julioju.sempic.Exceptions.FusekiSubjectNotFoundException;
 import fr.uga.julioju.sempic.entities.AlbumRDF;
@@ -56,7 +57,7 @@ public class AlbumRDFResource  {
             @Valid @RequestBody AlbumRDF albumRDF) {
         log.debug("REST request to update AlbumRDF : {}", albumRDF);
 
-        if (!RDFStore.isUriIsSubject(
+        if (!Ask.isUriIsSubject(
                 (Node_URI) NodeFactory.createURI(
                     Namespaces.getUserUri(albumRDF.getOwnerLogin())
                     )
@@ -71,14 +72,14 @@ public class AlbumRDFResource  {
         Model model = ModelFactory.createDefaultModel();
         Resource resource = CreateResource.create(model, albumRDF);
         boolean isUpdate = false;
-        if (RDFStore.isUriIsSubject((Node_URI) resource.asNode())) {
+        if (Ask.isUriIsSubject((Node_URI) resource.asNode())) {
             isUpdate = true;
         }
 
         log.debug("BELOW: PRINT MODEL THAT WILL BE SAVED\n—————————————");
         model.write(System.out, "turtle");
         if (isUpdate) {
-            RDFStore.deleteSubjectUri((Node_URI) NodeFactory.createURI(
+            Delete.deleteSubjectUri((Node_URI) NodeFactory.createURI(
                         Namespaces.getAlbumUri(albumRDF.getId())));
         }
         RDFConn.saveModel(model);
@@ -109,7 +110,7 @@ public class AlbumRDFResource  {
         AlbumRDF albumRDF = ReadAlbum.readAlbum(id);
         ReadAlbum.testUserLoggedPermissions(albumRDF, false);
         Node_URI node_URI = (Node_URI) NodeFactory.createURI(uri);
-        RDFStore.cascadingDeleteWithTests(node_URI);
+        Delete.deleteClassUri(node_URI);
         return ResponseEntity.noContent().build();
     }
 
