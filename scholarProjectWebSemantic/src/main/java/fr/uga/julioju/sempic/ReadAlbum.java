@@ -24,13 +24,13 @@ import org.apache.jena.sparql.algebra.op.OpUnion;
 import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.TriplePath;
 import org.apache.jena.sparql.core.Var;
-import org.apache.jena.sparql.expr.E_Bound;
-import org.apache.jena.sparql.expr.E_LogicalAnd;
 import org.apache.jena.sparql.expr.E_OneOf;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.ExprVar;
 import org.apache.jena.sparql.expr.nodevalue.NodeValueNode;
+import org.apache.jena.sparql.path.P_Link;
+import org.apache.jena.sparql.path.P_Seq;
 import org.apache.jena.sparql.path.P_ZeroOrMore1;
 import org.apache.jena.sparql.path.Path;
 import org.apache.jena.sparql.path.PathFactory;
@@ -59,9 +59,16 @@ public class ReadAlbum extends ReadAbstract {
 
     private static Op createWhereClause(
         BasicPattern basicPatternAlbumWhereClause,
-        BasicPattern basicPatternList,
+        BasicPattern basicPatternListOptional,
         Optional<Node> albumSharedWith
     ) {
+        if (albumSharedWith.isPresent()) {
+            Triple tripleAlbumOwnerLogin = Triple.create(
+                    Var.alloc("album"),
+                    SempicOnto.albumSharedWith.asNode(),
+                    Var.alloc("albumShareFilter"));
+            basicPatternAlbumWhereClause.add(tripleAlbumOwnerLogin);
+        }
 
         // Path path = PathParser.parse("rdf:rest*", PrefixMapping.Standard) ;
         Path path = new P_ZeroOrMore1(PathFactory.pathLink(RDF.rest.asNode()));
@@ -71,21 +78,29 @@ public class ReadAlbum extends ReadAbstract {
                 Var.alloc("listRest"));
         Op opBGPAlbum = new OpBGP(basicPatternAlbumWhereClause);
         Op opPath = new OpPath(triplePath);
-        Op opBGPList = new OpBGP(basicPatternList);
-        Op opOptional = OpSequence.create(opPath, opBGPList);
+        Op opBGPListOptional = new OpBGP(basicPatternListOptional);
+        Op opOptional = OpSequence.create(opPath, opBGPListOptional);
         Op op = OpLeftJoin.createLeftJoin(opBGPAlbum, opOptional, null);
 
         if (albumSharedWith.isPresent()) {
-            Expr exprBound = new E_Bound(new ExprVar("listRest"));
-            Expr exprOneOfIn = new E_OneOf(
-                    new ExprVar("head"),
+            Path pathNeededForFilter =
+                new P_Seq(path, new P_Link(RDF.first.asNode()));
+            TriplePath triplePathNeededForFilter = new TriplePath(
+                    Var.alloc("albumShareFilter"),
+                    pathNeededForFilter,
+                    Var.alloc("listRestFilter"));
+            Op opPathNeededForFilter = new OpPath(triplePathNeededForFilter);
+            op = OpLeftJoin.createLeftJoin(op,
+                    opPathNeededForFilter,
+                    null);
+            Expr exprFilter = new E_OneOf(
+                    new ExprVar("listRestFilter"),
                     new ExprList(
                         Arrays.asList(new Expr[] {
                             new NodeValueNode(albumSharedWith.get()),
                         })
                     )
             );
-            Expr exprFilter = new E_LogicalAnd(exprBound, exprOneOfIn);
             // Filter that pattern with our expression
             op = OpFilter.filter(exprFilter, op);
         }
@@ -159,9 +174,9 @@ public class ReadAlbum extends ReadAbstract {
         basicPatternAlbum.add(tripleAlbumOwnerLogin);
         basicPatternAlbum.add(tripleAlbumSTitle);
         basicPatternAlbum.add(tripleAlbumSharedWith);
-        BasicPattern basicPatternList = new BasicPattern();
-        basicPatternList.add(tripleListFirst);
-        basicPatternList.add(tripleListRest);
+        BasicPattern basicPatternListOptional = new BasicPattern();
+        basicPatternListOptional.add(tripleListFirst);
+        basicPatternListOptional.add(tripleListRest);
 
         // Prepare WHERE clause
         BasicPattern basicPatternAlbumWhereClause =
@@ -179,19 +194,19 @@ public class ReadAlbum extends ReadAbstract {
             op = OpUnion.create (
                     ReadAlbum.createWhereClause(
                         basicPatternAlbumWhereClause,
-                        basicPatternList,
+                        basicPatternListOptional,
                         Optional.empty()
                     ),
                     ReadAlbum.createWhereClause(
                         basicPatternAlbum,
-                        basicPatternList,
+                        basicPatternListOptional,
                         albumSharedWith
                     )
                 );
         } else {
             op = ReadAlbum.createWhereClause(
                     basicPatternAlbumWhereClause,
-                    basicPatternList,
+                    basicPatternListOptional,
                     albumSharedWith
                     );
         }
@@ -199,9 +214,12 @@ public class ReadAlbum extends ReadAbstract {
         // Prepare CONSTRUCT clause
         BasicPattern basicPattern = new BasicPattern();
         basicPattern.addAll(basicPatternAlbum);
-        basicPattern.addAll(basicPatternList);
+        basicPattern.addAll(basicPatternListOptional);
 
         // Trigger request
+        if (albumNode instanceof Node_URI) {
+            return ReadAbstract.read((Node_URI) albumNode, basicPattern, op);
+        }
         return ReadAbstract.read((Node_URI) RDF.nil.asNode(), basicPattern, op);
     }
 

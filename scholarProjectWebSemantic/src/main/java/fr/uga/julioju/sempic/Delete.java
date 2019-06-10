@@ -10,15 +10,14 @@ import org.apache.jena.update.UpdateRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.uga.julioju.sempic.Exceptions.FusekiSubjectNotFoundException;
-import fr.uga.julioju.sempic.Exceptions.FusekiUriNotAClass;
+import fr.uga.miashs.sempic.model.rdf.SempicOnto;
 
 public class Delete  {
 
     private static final Logger log = LoggerFactory.getLogger(Delete.class);
 
     public static void deleteSubjectUri(Node_URI node_URI) {
-            // SPARQL syntax
+            // SPARQL w3c syntax
             // —————————————
             // this.cnxUpdate("DELETE WHERE { <" + node_URI + "> ?p ?o }");
             // Java
@@ -37,99 +36,81 @@ public class Delete  {
     }
 
     /**
-     * Delete all the statements where the URI appears as subject or object
+     * Delete user and its albums and its photos
      */
-    public static void deleteClassUri(Node_URI node_URI) {
-
-            // SPARQL syntax
-            // —————————————
-            // this.cnxUpdate("DELETE WHERE { <" + node_URI + "> ?p ?o }");
-            // this.cnxUpdate("DELETE WHERE { ?node_URI ?p <" + uri + "> }");
-
-            // Java
-            // —————————————
+    public static void deleteUserAndItsAlbumsAndItsPhotos(Node_URI userNode) {
             QuadAcc acc = new QuadAcc();
             acc.addTriple(
                     new Triple(
-                        node_URI,
-                        Var.alloc("p"),
-                        Var.alloc("o"))
+                        userNode,
+                        Var.alloc("anyUserProperty"),
+                        Var.alloc("anyUserObject")
+                    )
             );
-            Update u1 = new UpdateDeleteWhere(acc);
-            QuadAcc acc2 = new QuadAcc();
-            acc2.addTriple(
+            acc.addTriple(
                     new Triple(
-                        Var.alloc("s"),
-                        Var.alloc("p"),
-                        node_URI)
+                        Var.alloc("anyAlbumOwnByUserDeleted"),
+                        Var.alloc("anyAlbumProperty"),
+                        Var.alloc("anyAlbumObject")
+                    )
             );
-            Update u2 = new UpdateDeleteWhere(acc2);
-            UpdateRequest updateRequest = new UpdateRequest(u1).add(u2);
-            log.debug("deleteClassUri\n" + updateRequest.toString());
-
+            acc.addTriple(
+                    new Triple(
+                        Var.alloc("photoInTheAlbumDeleted"),
+                        Var.alloc("anyPhotoProperty"),
+                        Var.alloc("anyPhotoObject")
+                    )
+            );
+            acc.addTriple(
+                    new Triple(
+                        Var.alloc("photoInTheAlbumDeleted"),
+                        SempicOnto.photoInAlbum.asNode(),
+                        Var.alloc("anyAlbumOwnByUserDeleted")
+                    )
+            );
+            acc.addTriple(
+                    new Triple(
+                        Var.alloc("anyAlbumOwnByUserDeleted"),
+                        SempicOnto.albumOwnerLogin.asNode(),
+                        userNode
+                    )
+            );
+            Update u = new UpdateDeleteWhere(acc);
+            UpdateRequest updateRequest = new UpdateRequest(u);
+            log.debug("deleteAlbumsAndItsPhotos\n" + updateRequest.toString());
             RDFConn.cnxUpdateRequest(updateRequest);
     }
 
     /**
-     * Delete all the statements where the URI appears as subject or object
-     * Delete with three levels:
-     * When we delete a user, it its albums, and it deletes album's photo
+     * Delete albums and its photos
      */
-    public static void cascadingDelete(Node_URI node_URI) {
-
+    public static void deleteAlbumsAndItsPhotos(Node_URI albumNode) {
             QuadAcc acc = new QuadAcc();
             acc.addTriple(
                     new Triple(
-                        node_URI,
-                        Var.alloc("p1"),
-                        Var.alloc("o1"))
+                        albumNode,
+                        Var.alloc("anyAlbumProperty"),
+                        Var.alloc("anyAlbumObject"))
             );
             acc.addTriple(
                     new Triple(
-                        Var.alloc("s2"),
-                        Var.alloc("p2"),
-                        Var.alloc("o2")
+                        Var.alloc("photoInTheAlbumDeleted"),
+                        Var.alloc("anyPhotoProperty"),
+                        Var.alloc("anyPhotoObject")
                         )
             );
             acc.addTriple(
                     new Triple(
-                        Var.alloc("s2"),
-                        Var.alloc("p3"),
-                        node_URI
+                        Var.alloc("photoInTheAlbumDeleted"),
+                        SempicOnto.photoInAlbum.asNode(),
+                        albumNode
                         )
             );
-            acc.addTriple(
-                    new Triple(
-                        Var.alloc("s3"),
-                        Var.alloc("p4"),
-                        Var.alloc("s2")
-                        )
-            );
-            Update update = new UpdateDeleteWhere(acc);
-            UpdateRequest updateRequest = new UpdateRequest(update);
-            log.debug("cascadingDelete\n" + updateRequest.toString());
-
+            Update u = new UpdateDeleteWhere(acc);
+            UpdateRequest updateRequest = new UpdateRequest(u);
+            log.debug("deleteAlbumsAndItsPhotos\n" + updateRequest.toString());
             RDFConn.cnxUpdateRequest(updateRequest);
     }
-
-    public static void cascadingDeleteWithTests(Node_URI node_URI) {
-        String uri = node_URI.getURI();
-        if (!Ask.isUriIsSubject(node_URI)) {
-            throw new FusekiSubjectNotFoundException(node_URI);
-        }
-        log.debug("Uri '" + uri + "' exists"
-                + ", this RDF subject will be deleted.");
-
-        Delete.cascadingDelete(node_URI);
-
-        if (Ask.isUriIsSubject(node_URI)) {
-            throw new FusekiUriNotAClass("Uri '" + uri
-                    + "' not deleted.");
-        }
-        log.debug("Now uri '" + uri + "' doesn't exist as subject"
-                + ", therefore it was deleted (as subject).");
-    }
-
 
 }
 

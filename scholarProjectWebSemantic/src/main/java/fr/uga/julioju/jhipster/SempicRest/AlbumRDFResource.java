@@ -110,7 +110,7 @@ public class AlbumRDFResource  {
         AlbumRDF albumRDF = ReadAlbum.readAlbum(id);
         ReadAlbum.testUserLoggedPermissions(albumRDF, false);
         Node_URI node_URI = (Node_URI) NodeFactory.createURI(uri);
-        Delete.deleteClassUri(node_URI);
+        Delete.deleteAlbumsAndItsPhotos(node_URI);
         return ResponseEntity.noContent().build();
     }
 

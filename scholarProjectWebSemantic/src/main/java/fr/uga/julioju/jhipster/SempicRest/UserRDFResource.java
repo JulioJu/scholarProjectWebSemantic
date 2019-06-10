@@ -1,5 +1,6 @@
 package fr.uga.julioju.jhipster.SempicRest;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.validation.Valid;
@@ -27,7 +28,10 @@ import fr.uga.julioju.sempic.CreateResource;
 import fr.uga.julioju.sempic.Delete;
 import fr.uga.julioju.sempic.Namespaces;
 import fr.uga.julioju.sempic.RDFConn;
+import fr.uga.julioju.sempic.ReadAlbum;
 import fr.uga.julioju.sempic.ReadUser;
+import fr.uga.julioju.sempic.Exceptions.FusekiSubjectNotFoundException;
+import fr.uga.julioju.sempic.entities.AlbumRDF;
 import fr.uga.julioju.sempic.entities.UserRDF;
 import fr.uga.julioju.sempic.entities.UserRDF.UserGroup;
 
@@ -195,8 +199,41 @@ public class UserRDFResource  {
         log.debug("REST request to delete userRDF : {}", login);
         this.testUserLoggedPermissions(login);
         String uri = Namespaces.getUserUri(login);
+        try {
+            List<AlbumRDF> albumSharedWithCurrentUser =
+                ReadAlbum.readAlbumsSharedWithAnUser(login);
+            AlbumRDFResource albumRDFResource = new AlbumRDFResource();
+            albumSharedWithCurrentUser.forEach(
+                albumRDF -> {
+                    String [] albumSharedWithOrigin = albumRDF.getSharedWith();
+                    String [] albumRDFShareWithNew =
+                        new String[albumSharedWithOrigin.length - 1];
+                    int indexArraySource = 0;
+                    int indexArrayDest = 0;
+                    while (indexArrayDest < albumRDFShareWithNew.length) {
+                        if (! albumSharedWithOrigin[indexArraySource]
+                                .equals(uri)
+                        ) {
+                            albumRDFShareWithNew[indexArrayDest] =
+                                albumSharedWithOrigin[indexArraySource];
+                            indexArrayDest ++;
+                        }
+                        indexArraySource++;
+                    }
+
+                    albumRDF = new AlbumRDF(
+                            albumRDF.getId(),
+                            albumRDF.getTitle(),
+                            albumRDF.getOwnerLogin(),
+                            albumRDFShareWithNew
+                            );
+                    albumRDFResource.createOrUpdate(albumRDF);
+                });
+        } catch (FusekiSubjectNotFoundException e ) {
+            log.info("So cool, this user has no albums shared with him");
+        }
         Node_URI node_URI = (Node_URI) NodeFactory.createURI(uri);
-        Delete.cascadingDeleteWithTests(node_URI);
+        Delete.deleteUserAndItsAlbumsAndItsPhotos(node_URI);
         return ResponseEntity.noContent().build();
     }
 

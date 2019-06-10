@@ -35,6 +35,7 @@ public class CreateResource  {
         return userRessource;
     }
 
+    /** Precondition: user should exist */
     public static Resource create(Model model, AlbumRDF albumRDF) {
         Resource albumRDFResource = model.createResource(
                 Namespaces.getAlbumUri(albumRDF.getId()),

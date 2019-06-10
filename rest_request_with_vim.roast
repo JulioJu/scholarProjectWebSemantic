@@ -252,23 +252,6 @@ PUT {root}/api/albumRDF << END
 }}
 END
 
-# ERROR 403 if the user logged is `user`
-PUT {root}/api/albumRDF << END
-{{
-    "id": 3,
-    "title": "title1",
-    "ownerLogin": "admin"
-}}
-END
-
-PUT {root}/api/albumRDF << END
-{{
-    "id": 2,
-    "title": "title1",
-    "ownerLogin": "anotheruser"
-}}
-END
-
 PUT {root}/api/albumRDF << END
 {{
     "id": 2,
@@ -278,13 +261,14 @@ PUT {root}/api/albumRDF << END
 }}
 END
 
+# ERROR 403 if the user logged is `user`
 PUT {root}/api/albumRDF << END
 {{
-    "id": 2,
+    "id": 3,
     "title": "title1",
-    "ownerLogin": "admin",
-    "sharedWith": ["user"]
+    "ownerLogin": "admin"
 }}
+END
 
 PUT {root}/api/albumRDF << END
 {{
@@ -300,6 +284,14 @@ PUT {root}/api/albumRDF << END
     "title": "title1",
     "ownerLogin": "admin",
     "sharedWith": ["user"]
+}}
+
+PUT {root}/api/albumRDF << END
+{{
+    "id": 6,
+    "title": "title1",
+    "ownerLogin": "admin",
+    "sharedWith": ["user", "anotheruser"]
 }}
 
 # Error 404 as user 999999 not found in Database
@@ -324,7 +316,13 @@ GET {root}/api/albumRDF/2
 
 GET {root}/api/albumRDF/3
 
-GET {root}/api/albumRDF/3
+GET {root}/api/albumRDF/4
+
+GET {root}/api/albumRDF/5
+
+# Album 6 is shared  with but not owned by anotheruser.
+# When created, shared with "user" and "anotheruser"
+GET {root}/api/albumRDF/6
 
 # ERROR 404 not found
 GET {root}/api/albumRDF/999999
@@ -365,6 +363,8 @@ GET {root}/api/albumsSharedWithUserLogged
 # IF THE USER LOGGED IS ADMIN GET ALL ALBUMS SHARED WITH THE USER WITH LOGIN ADMIN
 GET {root}/api/albumsSharedWith/admin
 
+GET {root}/api/albumsSharedWith/anotheruser
+
 # ERROR 404
 GET {root}/api/albumsSharedWith/notexistuser
 
@@ -373,6 +373,9 @@ GET {root}/api/albumsOwnedByAndSharedWithUserLogged
 
 # IF THE USER LOGGED IS ADMIN GET ALL ALBUMS OWNED BY AND SHARED WITH THE USER WITH LOGIN ADMIN.
 GET {root}/api/albumsOwnedByAndSharedWith/admin
+
+# ERROR 404
+GET {root}/api/albumsOwnedByAndSharedWith/notexistuser
 
 
 # DELETE
@@ -413,8 +416,8 @@ END
 
 PUT {root}/api/photoRDF << END
 {{
-    "id": 1,
-    "albumId": 1,
+    "id": 2,
+    "albumId": 2,
     "depiction": [ {{"depiction": "DepictionAnimal", "literals": ["Medor"]}} ]
 }}
 END

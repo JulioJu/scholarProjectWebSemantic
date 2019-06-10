@@ -1870,12 +1870,64 @@ You should see https://jena.apache.org/documentation/query/app_api.html
 * http://rdf.myexperiment.org/howtosparql?page=LIMIT
 
 
-### SPARQL RDF collection and container
+### SPARQL RDF collection
 
 * General doc to retrieve, delete, insert members:
     http://www.snee.com/bobdc.blog/2014/04/rdf-lists-and-sparql.html
 
+> RDF lists are hard to deal with because they are not first class objects
+> in the RDF data model. Instead they are "encoded" in triples
+>  https://seaborne.blogspot.com/2011/03/updating-rdf-lists-with-sparql.html
+
+* BIG WARNING: SPARQL path needs SPARQL 1.1
+
+#### Delete an element in a list / collection
+
+* If we try to delete an URI like
+
+    ```
+<http://fr.uga.julioju.sempic/ResourcesCreated/album/2>
+    <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumSharedWith>
+        [ rdf:first  <http://fr.uga.julioju.sempic/ResourcesCreated/user/user> ; rdf:rest [ rdf:first <http://fr.uga.julioju.sempic/ResourcesCreated/user/admin> ; rdf:rest rdf:nil ] ]
+    ```
+
+    with the following request:
+    ```
+    DELETE WHERE { ?s rdf:first <http://fr.uga.julioju.sempic/ResourcesCreated/user/admin> }
+    ```
+    It breaks the rdf:list:
+    ```
+<http://fr.uga.julioju.sempic/ResourcesCreated/album/2>
+    <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumSharedWith>
+        [ rdf:rest [ rdf:first <http://fr.uga.julioju.sempic/ResourcesCreated/user/admin> ; rdf:rest rdf:nil ] ]
+    ```
+
+    * We want simply:
+    ```
+<http://fr.uga.julioju.sempic/ResourcesCreated/album/2>
+    <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumSharedWith>
+        [ rdf:first <http://fr.uga.julioju.sempic/ResourcesCreated/user/admin> ; rdf:rest rdf:nil ]
+    ```
+
+* In the resources above, they don't give trick to remove an element in a list
+
+* My solution is simply request all lists that contains `<http://fr.uga.julioju.sempic/ResourcesCreated/user/admin>`
+    and build a new list programmatically (in Java) without this resource, then
+    ```
+    DELETE WHERE {
+<http://fr.uga.julioju.sempic/ResourcesCreated/album/2>
+    <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumSharedWith>
+    ?p
+    }
+    ```
+    And append the list build programmatically.
+
+    (***TODO use syntax DELETE / INSERT / WHERE***)
+    See ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/jhipster/SempicRest/UserRDFResource.java
+    TODO, improve performence by make only one request for all deletions.
+
 #### SPARQL Query
+
 
 ##### With SELECT
 
@@ -1952,7 +2004,7 @@ WHERE
 * ARQ - Property Paths
     https://jena.apache.org/documentation/query/property_paths.html
 
-* Property functions
+##### Retrieve using Jena Property functions (no W3C compliant)
     https://jena.apache.org/documentation/query/extension.html#property-functions
 
     ```
@@ -1969,6 +2021,33 @@ WHERE
     <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumOwnerLogin> ?o1 .
   }
   ```
+
+##### Retrieve albums shared with an user, when this album is shared by several users.
+```
+CONSTRUCT
+  {
+    ?album <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumOwnerLogin> ?albumOwnerLogin .
+    ?album <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumSTitle> ?albumSTitle .
+    ?album <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumSharedWith> ?albumSharedWithList .
+    ?listRest <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> ?head .
+    ?listRest <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> ?tail .
+  }
+WHERE
+  { { ?album  <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumOwnerLogin>  ?albumOwnerLogin ;
+              <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumSTitle>  ?albumSTitle ;
+              <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumSharedWith>  ?albumSharedWithList ;
+              <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumSharedWith>  ?albumShareFilter
+      OPTIONAL
+        { ?albumSharedWithList (<http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>)* ?listRest .
+          ?listRest  <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>  ?head ;
+                    <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>  ?tail
+        }
+      OPTIONAL
+        { ?albumShareFilter (<http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>)*/<http://www.w3.org/1999/02/22-rdf-syntax-ns#first> ?listRestFilter }
+    }
+    FILTER ( ?listRestFilter IN (<http://fr.uga.julioju.sempic/ResourcesCreated/user/admin>) )
+  }
+```
 
 ### Use UNION instead of FILTER if possible
 
@@ -2065,7 +2144,7 @@ To understand how it works, don't forget that
 
 * To delete
     a Resource check
-    ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/sempic/RDFStore.java ,
+    ./scholarProjectWebSemantic/src/main/java/fr/uga/julioju/sempic/Delete.java ,
     the method `deleteResource (Resource r)`.
 
     As the method `readPhoto(long id)` presented above, there are the SPARQL
@@ -2074,18 +2153,11 @@ To understand how it works, don't forget that
     inspired by the method `deleteModel(Model m)` of the teacher.
 
 
-### Cascading delete
-
 * Maybe read https://stackoverflow.com/questions/1109228/removing-individuals-properties-from-rdf?rq=1
-
-* As we could see in ./rest_request_fuseki.roast I've a problem with
-    cascading DELETE
 
 * DOCUMENTATION:
     https://www.w3.org/TR/2013/REC-sparql11-update-20130321/#deleteWhere
 
-* My solution:
-    See the first request at ./rest_request_fuseki.roast (not implemented yet).
 
 ### Delete before update
 
@@ -2095,7 +2167,7 @@ To understand how it works, don't forget that
 * Therefore, Update can't be Atomic
     (see https://en.wikipedia.org/wiki/Atomicity_(database_systems) )
 
-* FIXME maybe there is a solution of that, but I don't know.
+* FIXME Maybe there is a solution of that, but I don't know.
     Probably the answer is at https://www.fun-mooc.fr/c4x/inria/41002S02/asset/C013FG-W3.pdf
     page 65 with the pattern
     ```
@@ -2109,6 +2181,32 @@ To understand how it works, don't forget that
 
     }
     ```
+### Delete RDF collections (list)
+
+* See section about collections
+
+### Cascading delete
+
+* With owl
+
+    ```
+DELETE WHERE
+{
+  <http://fr.uga.julioju.sempic/ResourcesCreated/album/1> ?p1 ?o1 .
+  ?s2 ?p3 ?o3 .
+  ?s2 ?p2 <http://fr.uga.julioju.sempic/ResourcesCreated/album/1> .
+}
+    ```
+    erase all the database.
+
+    In fact, when we trigger
+    ```
+CONSTRUCT { <http://fr.uga.julioju.sempic/ResourcesCreated/album/1> ?p ?o }
+WHERE { <http://fr.uga.julioju.sempic/ResourcesCreated/album/1> ?p ?o }
+```
+we see that `?anySubject owl:differentFrom <http://fr.uga.julioju.sempic/ResourcesCreated/album/1>`
+
+* Same example with photos
 
 ## Limitations of Fuseki
 
@@ -2990,10 +3088,12 @@ It should be have only one SPARQL request
     Contradiction with https://www.w3.org/2007/02/turtle/primer/#L2986
     TODO send an e-mail to ask to correct this mistake or create a PR
 
-6. Big ERROR cascading delete delete all.
-    For instance, delete an Album delete its user and users shared with.
-    Also, delete photos, and its album, and owner's album and users shared
-    with.
+* In the Atencias lesson, don't (see its PDF about RDF)
+    don't understand the sentance
+    > le comité dans l’ensemble a approuvé
+    > la résolu1on : le
+    > deuxième choix est meilleur
+    (page 63)
 
 
 # Credits
