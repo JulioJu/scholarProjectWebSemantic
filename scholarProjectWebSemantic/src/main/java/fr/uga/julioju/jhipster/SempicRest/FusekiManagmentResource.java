@@ -12,7 +12,7 @@ import fr.uga.julioju.sempic.FusekiServerConn;
  */
 @RestController
 @RequestMapping("/api")
-public class FusekiManagment  {
+public class FusekiManagmentResource  {
 
     /**
      * GET  /startFusekiProcess : start Fuseki Server

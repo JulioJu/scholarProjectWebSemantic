@@ -46,8 +46,11 @@ public class ReadPhoto  {
     /**
      * Query a Photo and retrieve all the direct properties
      * of the photo and if the property are depicts, albumId and
-     * albumOwnerId
-     * If the object has RDFS.label and RDF.type, retrieve the triple
+     * albumOwnerId .
+     * If the object has RDFS.label and RDF.type, retrieve the triple.
+     * <p>
+     * « Java API 1): Syntax use of the query » is not used to retrieve
+     * the Photo. JUST USED TO SHOW TO THE TEACHER THAT I'VE WORKED ON IT.
      *
      * @param id
      * @return
@@ -55,7 +58,7 @@ public class ReadPhoto  {
     public static Model read(long id, boolean shouldPrint) {
         String photoUri = Namespaces.getPhotoUri(id);
 
-        // // SPARQL syntax
+        // // SPARQL W3C syntax
         // // —————————————
         // String s = "CONSTRUCT {"
         //         + "<" + photoUri + "> ?p ?o . "
@@ -216,7 +219,7 @@ public class ReadPhoto  {
                         model.listObjectsOfProperty(r, RDFS.label).toList()
                         .parallelStream().map(RDFNode::toString)
                         .toArray(String[]::new);
-                    // TODO it seams that properties are order from general to
+                    // TODO it seems that properties are order from general to
                     // specific
                     // Not know if it's always that.
                     List<RDFNode> properties =

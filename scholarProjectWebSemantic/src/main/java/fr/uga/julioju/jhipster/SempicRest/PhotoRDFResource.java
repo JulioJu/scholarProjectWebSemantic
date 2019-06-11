@@ -7,8 +7,6 @@ import org.apache.jena.graph.Node_URI;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.vocabulary.RDF;
-import org.apache.jena.vocabulary.RDFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -20,16 +18,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import fr.uga.julioju.sempic.Ask;
 import fr.uga.julioju.sempic.CreateResource;
 import fr.uga.julioju.sempic.Delete;
 import fr.uga.julioju.sempic.Namespaces;
-import fr.uga.julioju.sempic.RDFConn;
 import fr.uga.julioju.sempic.ReadAlbum;
 import fr.uga.julioju.sempic.ReadPhoto;
 import fr.uga.julioju.sempic.entities.AlbumRDF;
 import fr.uga.julioju.sempic.entities.PhotoRDF;
-import fr.uga.miashs.sempic.model.rdf.SempicOnto;
 
 /**
  * REST controller for managing PhotoRDFResource.
@@ -62,7 +57,6 @@ public class PhotoRDFResource {
             @Valid @RequestBody PhotoRDF photoRDF) {
         log.debug("REST request to update PhotoRDF : {}", photoRDF);
 
-
         AlbumRDF albumRDF = ReadAlbum.readAlbum(photoRDF.getAlbumId());
         ReadAlbum.testUserLoggedPermissions(albumRDF, false);
 
@@ -73,60 +67,14 @@ public class PhotoRDFResource {
                 photoRDF
                 );
 
-        boolean isUpdate = false;
-        if (Ask.isUriIsSubject((Node_URI) photoResource.asNode())) {
-            isUpdate = true;
-        }
-
-        // TODO use bag
-        for (int depictionIndex = 0 ;
-                depictionIndex < photoRDF.getDepiction().length ;
-                depictionIndex++) {
-            String depictionURI = SempicOnto.NS
-                + photoRDF.getDepiction()[depictionIndex].getDepiction();
-            Resource sempicOntoResource = model.createResource(depictionURI);
-            Ask.testIfUriIsClass((Node_URI) sempicOntoResource.asNode());
-
-            Resource descriptionResource = model.createResource();
-
-            for (int literalsIndex = 0 ;
-                    literalsIndex <
-                        photoRDF.getDepiction()[depictionIndex]
-                            .getLiterals().length ;
-                    literalsIndex++
-            ) {
-                descriptionResource.addProperty(RDF.type, sempicOntoResource);
-                descriptionResource.addLiteral(RDFS.label,
-                        photoRDF.getDepiction()[depictionIndex]
-                        .getLiterals()[literalsIndex]);
-            }
-            model.add(photoResource, SempicOnto.photoDepicts, descriptionResource);
-        }
-        //
-        // log.debug("BELOW: MODEL BEFORE IT SAVED\n—————————————");
-        // model.write(System.out, "turtle");
-        // // print the graph on the standard output
-        // log.debug("BELOW: PRINT RESOURCE BEFORE IT SAVED"
-        //         + "\n—————————————");
-        // photoResource.getModel().write(System.out, "turtle");
-
-        // Delete photos before update, otherwise it appends
-        log.debug("Delete photos before update, otherwise it appends");
-
-        if (isUpdate) {
-            Delete.deleteSubjectUri((Node_URI) photoResource.asNode());
-        }
-
-        RDFConn.saveModel(model);
-        log.debug("BELOW: PRINT MODEL SAVED\n—————————————");
-        ReadPhoto.read(photoRDF.getId(), true)
-            .write(System.out, "turtle");
-
-        if (isUpdate) {
-            return ResponseEntity.ok().body(photoRDF);
-        } else {
-            return ResponseEntity.status(201).body(photoRDF);
-        }
+        return CreateResource.createOrUpdate(
+                photoResource,
+                photoRDF,
+                model
+                // (Void) -> {
+                //     return ReadPhoto.read(photoRDF.getId(), true);
+                // }
+        );
     }
 
     /**

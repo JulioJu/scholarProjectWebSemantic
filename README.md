@@ -3077,18 +3077,16 @@ simplify in twice place
 ```
 It should be have only one SPARQL request
 
-2. For PhotoRDF use rdf:bag to `depiction`
-
-3. Why when we open ./julioJuGeographicalZone.owl in Protégé
+2. Why when we open ./julioJuGeographicalZone.owl in Protégé
     Departments are Individuals and Classes.
     Don't understand. TODO ask to teacher.
 
-5. On the official doc https://jena.apache.org/tutorials/rdf_api.html#ch-Containers
+3. On the official doc https://jena.apache.org/tutorials/rdf_api.html#ch-Containers
     they speaks of « Collection »
     Contradiction with https://www.w3.org/2007/02/turtle/primer/#L2986
     TODO send an e-mail to ask to correct this mistake or create a PR
 
-* In the Atencias lesson, don't (see its PDF about RDF)
+4. In the Atencias lesson, don't (see its PDF about RDF)
     don't understand the sentance
     > le comité dans l’ensemble a approuvé
     > la résolu1on : le

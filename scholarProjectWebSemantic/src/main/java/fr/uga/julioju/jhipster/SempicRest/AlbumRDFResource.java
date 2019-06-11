@@ -21,7 +21,6 @@ import fr.uga.julioju.sempic.Ask;
 import fr.uga.julioju.sempic.CreateResource;
 import fr.uga.julioju.sempic.Delete;
 import fr.uga.julioju.sempic.Namespaces;
-import fr.uga.julioju.sempic.RDFConn;
 import fr.uga.julioju.sempic.ReadAlbum;
 import fr.uga.julioju.sempic.Exceptions.FusekiSubjectNotFoundException;
 import fr.uga.julioju.sempic.entities.AlbumRDF;
@@ -71,23 +70,11 @@ public class AlbumRDFResource  {
         ReadAlbum.testUserLoggedPermissions(albumRDF, false);
         Model model = ModelFactory.createDefaultModel();
         Resource resource = CreateResource.create(model, albumRDF);
-        boolean isUpdate = false;
-        if (Ask.isUriIsSubject((Node_URI) resource.asNode())) {
-            isUpdate = true;
-        }
-
-        log.debug("BELOW: PRINT MODEL THAT WILL BE SAVED\n—————————————");
-        model.write(System.out, "turtle");
-        if (isUpdate) {
-            Delete.deleteSubjectUri((Node_URI) NodeFactory.createURI(
-                        Namespaces.getAlbumUri(albumRDF.getId())));
-        }
-        RDFConn.saveModel(model);
-        if (isUpdate) {
-            return ResponseEntity.ok().body(albumRDF);
-        } else {
-            return ResponseEntity.status(201).body(albumRDF);
-        }
+        return CreateResource.createOrUpdate(
+                resource,
+                albumRDF,
+                model
+        );
     }
 
     /**
