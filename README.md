@@ -624,25 +624,225 @@ TODO add an issue on https://github.com/Galigator/openllet
 
 * Read it in Protégé
 
-## sempic.owl
+## sempiconto.owl
 
-### Datatypes created
+### DepictionBag
+```xml
+    <owl:Class rdf:about="http://www.co-ode.org/ontologies/ont.owl#DepictionBag">
+        <rdfs:subClassOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Depiction"/>
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag"/>
+    </owl:Class>
+```
 
-See in protege comments and seeAlso
+### « Who » question
+```xml
+    <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#DepictionWhoPerson">
+        <rdfs:subClassOf rdf:resource="http://www.co-ode.org/ontologies/ont.owl#DepictionBag"/>
+    </owl:Class>
+```
+
+### « What » question
+```xml
+    <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#DepictionWhat">
+        <rdfs:subClassOf rdf:resource="http://www.co-ode.org/ontologies/ont.owl#DepictionBag"/>
+    </owl:Class>
+```
+
+### « When » question
+
 
 #### Datatypes imported
-1. xsd:gYear
-2. xsd:gYearMonth
-3. time:dateTimeInterval
+1. date
 
-## ./julioJuGeographicalZone.owl
+```xml
+    <rdfs:Datatype rdf:about="http://www.w3.org/2001/XMLSchema#date">
+        <rdfs:comment xml:lang="en">Imported by me</rdfs:comment>
+        <rdfs:isDefinedBy xml:lang="en">https://www.w3.org/TR/xmlschema11-2/#date</rdfs:isDefinedBy>
+        <owl:versionInfo xml:lang="en">(…)
+
+The dateLexicalRep production is equivalent to this regular expression:
+    -?([1-9][0-9]{3,}|0[0-9]{3})-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00))?
+Note that neither the dateLexicalRep production nor this regular expression
+alone enforce the constraint on dateLexicalRep given above.
+
+(…)
+The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping· is
+·dateCanonicalMap·.
+(…)</owl:versionInfo>
+    </rdfs:Datatype>
+```
+1. xsd:gYear
+
+```xml
+    <rdfs:Datatype rdf:about="http://www.w3.org/2001/XMLSchema#gYear">
+        <rdfs:comment xml:lang="en">Imported by me xsd:date</rdfs:comment>
+        <rdfs:isDefinedBy xml:lang="en">https://www.w3.org/TR/xmlschema11-2/#gYear</rdfs:isDefinedBy>
+    </rdfs:Datatype>
+```
+2. xsd:gYearMonth
+```xml
+    <rdfs:Datatype rdf:about="http://www.w3.org/2001/XMLSchema#gYearMonth">
+        <rdfs:comment xml:lang="en">Imported by me xsd:date</rdfs:comment>
+        <rdfs:isDefinedBy xml:lang="en">https://www.w3.org/TR/xmlschema11-2/#gYearMonth</rdfs:isDefinedBy>
+    </rdfs:Datatype>
+```
+
+#### Winter, Spring, Summer, Autumn
+
+Two solutions to define year and month.
+The second, with Individuals is probably best solution
+
+##### Datatypes created
+
+* gYearSeason
+    ```xml
+
+    <rdfs:Datatype rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#gYearSeason">
+        <rdfs:comment xml:lang="en">Is equivalent to the regular expression
+
+-?([1-9][0-9]{3,}|0[0-9]{3})-(summer)|(autumn)|(winter)|(spring)</rdfs:comment>
+        <rdfs:seeAlso xml:lang="en">https://www.w3.org/TR/xmlschema11-2/#date</rdfs:seeAlso>
+    </rdfs:Datatype>
+    ```
+
+##### Solution studied (outdated): define thanks an interval of time
+
+> in the individuals tab for example, by clicking the plus sign besides the
+> "Types" field.  Then you put in the expression "hasCalories some
+> integer[>=200,<=250]".
+> https://mailman.stanford.edu/pipermail/protege-user/2014-August/001178.html
+I've tested te preceding solution without success, even if hasCalories is correct
+Tested also with `DateInterval some xsd:date[>=0000-09-21, <0000-12-22]`
+without more success. (existential restriction)
+
+> If you really need to assert that an intervals of integer as a property value
+> (e.g., specify a month as an interval of days in a year, I think you’d have to
+> define Interval as a class and specify max and min as data properties.
+> http://protege-project.136.n4.nabble.com/Data-property-assertions-for-individuals-in-Protege-5-0-beta-td4661131.html
+
+* Or use:
+    https://www.w3.org/TR/owl-time/#time:DateTimeInterval
+
+* ***To understand how define interval of time***
+    download https://www.w3.org/TR/owl-time/ and open it in Protege. Study
+    the tab « Individuals ».
+    * Second, minutes, hours are defined as an instance of « Temporal Unit »
+        and with « Data property assertion » of days, years, weeks, etc.
+    * Data properties « Days », « Years », etc has simply a domain
+        « Generalized duration description »
+
+##### Define simply as an Individual
+
+* Contrary as I have thought, winter, spring, summer, autumn can't be
+    defined tanks an interval of times in a year. In fact, in France, the
+    beginning date and the ending date of each change. They are not the same
+    all years.
+    See the following section of the Wikipedia article:
+     https://en.wikipedia.org/wiki/Season#Astronomical
+
+    Furthermore, there are two types of seasons. Astronomical seasons (used
+    in France) and Meteorological seasons (used in some countries).
+    See the following section of the Wikipedia article
+    https://en.wikipedia.org/wiki/Season#Four-season_calendar_reckoning
+
+##### Solution studied: use existing ontologies
+
+* RDF Calendar
+    https://www.w3.org/TR/rdfcal/
+    But too much to answer at question « When photo was taken », user
+    simply https://www.rubydoc.info/github/ruby-rdf/rdf/RDF/Literal/Date
+
+* There is also https://www.w3.org/TR/owl-time/
+    Very interesting and should be study to learn how they define time.
+    But not needed. Simply I my own properties.
+
+
+## « Where » question : ./julioJuGeographicalZone.owl
+
+To understand how it works, simply see in sempiconto.owl
+
+```xml
+    <owl:ObjectProperty rdf:about="http://www.co-ode.org/ontologies/ont.owl#photoTakenInFrancePlace">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:domain rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Photo"/>
+        <rdfs:range rdf:resource="http://julioJuGeographicalZone.owl/geographicalZoneFrance"/>
+        <rdfs:label xml:lang="en">photo taken in France Place</rdfs:label>
+    </owl:ObjectProperty>
+```
+
+* I don't import julioJuGeographicalZone.owl into sempiconto.owl because
+    julioJuGeographicalZone.owl is too big (near 36000 entities) and
+    too much individuals. Anyway, those ontologies work together in
+    Fuseki thanks declarations into `sempic.ttl` (see section above
+    « Generate ./julioJuGeographicalZone.owl »)
+
+    ```xml
+    <owl:Ontology rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl">
+        <owl:imports rdf:resource="……julioJuGeographicalZone.owl"/>
+    </owl:Ontology>
+    ```
+
+### Utilisation of rdfs:isDefinedBy is not good
+
+I used this to say
+```xml
+<owl:Class rdf:about="http://wikidataJulioJuEntity/entity/Q3083">
+    <rdfs:isDefinedBy rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">http://www.wikidata.org/entity/Q3083</rdfs:isDefinedBy>
+</owl:Class>
+```
+
+* Thanks content negotiation
+    `wget http://www.wikidata.org/entity/Q3083`
+    retrieve a json file.
+    In `firefox http://www.wikidata.org/entity/Q3083` display an HTML file.
+
+https://terms.tdwg.org/wiki/rdfs:isDefinedBy
+> isDefinedBy: is an instance of rdf:Property that is used to indicate a resource
+> defining the subject resource. This property may be used to indicate an RDF
+> vocabulary in which a resource is described.
+>
+> Notes: The definition of the subject resource. It points to the authoritative
+> information about the resource (which are not necessarily RDF, often html, and
+> in some cases PDF).
+
+==> at https://www.ics.forth.gr/isl/ontology/content-MTLO/html/owl_Thing.html
+we have
+`owl:thing rdfs:isDefinedBy http://www.w3.org/2002/07/owl#`
+
+==> Not know if my utilisation of `rdfs:isDefinedBy` is very canonical.
+    Probably, `rdfs:seeAlso` should be better. In fact, this page
+    is not a whole resource (HTML, PDF) with a definition of
+    http://wikidataJulioJuEntity/entity/Q3083 !!!
+
+https://www.w3.org/TR/rdf-schema/#ch_isdefinedby
+>      S rdfs:isDefinedBy O
+>
+> states that the resource O defines S. It may be possible to retrieve
+> representations of O from the Web, but this is not required. When such
+> representations may be retrieved, no constraints are placed on the format of
+> those representations. rdfs:isDefinedBy is a subproperty of rdfs:seeAlso.
+
+* In constrast, use `rdfs:isDefinedBy` for datatypes is a good option!
+
+
+### How to generate
 
 * See section above « Generate ./julioJuGeographicalZone.owl »
 
-### Datatypes created
+## The author of the picture
 
-gYearSeason
+* As often the owner of the album has taken the photo, I have
 
+    ```xml
+    <owl:DatatypeProperty rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoTakenByOwner">
+        <rdfs:subPropertyOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoTakenBy"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:domain rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#User"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+        <rdfs:comment xml:lang="en">WARNING: the java app should deduce that the photo is taken by the owner&apos;s album, not by somebody named &quot;true&quot; or &quot;false&quot; ;-)</rdfs:comment>
+        <rdfs:label xml:lang="en">photo taken by owner</rdfs:label>
+    </owl:DatatypeProperty>
+    ```
 
 # scholarProjectWebSemantic details
 This application was generated using JHipster 6.0.0-beta.0, you can find documentation and help at https://www.jhipster.tech/documentation-archive/v6.0.0-beta.0 .
@@ -725,7 +925,7 @@ Spring prod profil (keep dev profil)***
 
 * I continue to use JWT, even if when JHipster was deleted because
     as it's stateless, this solution is very cool. When I delete
-    the database for each modification of the file sempic.owl, I keep
+    the database for each modification of the file sempiconto.owl, I keep
     the credentials (as it's stateless). Very interesting to test API.
 
 * But a limitation of JWT is that it doesn't check than the user exists
@@ -829,7 +1029,7 @@ SLF4J: Actual binding is of type [ch.qos.logback.classic.util.ContextSelectorSta
         * http://soft.vub.ac.be/svn-pub/PlatformKit/platformkit-kb-owlapi3-doc/doc/owlapi3/javadoc/org/semanticweb/owlapi/reasoner/Node.html
         * https://stackoverflow.com/questions/21391135/what-is-the-owlnothing-class-designed-to-do/21391737
         * https://en.wikipedia.org/wiki/Semantic_Web
-    * The MOOC from INRIA (in french)
+    * The MOOC from INRIA (in french, but a little bit short)
         * About: https://www.fun-mooc.fr/courses/course-v1:inria+41002+self-paced/about
         1. Semaine 1 « Vers un web de données liées »
             https://www.fun-mooc.fr/c4x/inria/41002S02/asset/C013FG-W1.pdf
@@ -847,14 +1047,93 @@ SLF4J: Actual binding is of type [ch.qos.logback.classic.util.ContextSelectorSta
             https://www.fun-mooc.fr/c4x/inria/41002S02/asset/C013FG-W7.pdf
     * « Common Errors In OWL »
         https://protege.stanford.edu/conference/2004/slides/6.1_Horridge_CommonErrorsInOWL.pdf
+    * MOOC from OLEKSIY KHRIYENKO. ***VERY COOL AND VERY COMPLETE***
+        * Semantic Web and Linked Data
+            IHME course Spring 2015
+            http://users.jyu.fi/~olkhriye/IHME/IHME_Course-SemanticWeb_LinkedData.pdf
+        * TIES4520 Semantic Technologies for Developers
+            Autumn 2018
+            * Lecture 1: Semantic Web in a nutshel
+                http://users.jyu.fi/~olkhriye/ties4520/lectures/Lecture01.pdf
+            * Lecture 2: Storing and querying RDF data
+                http://users.jyu.fi/~olkhriye/ties4520/lectures/Lecture02.pdf
+            * Lecture 3: Ontologies
+                http://users.jyu.fi/~olkhriye/ties4520/lectures/Lecture03.pdf
+            * Lecture 4: Reasoning
+                http://users.jyu.fi/~olkhriye/ties4520/lectures/Lecture04.pdf
+            * Lecture 5: Programming with Semantic Web (RDF4J and Jena APIs)
+                http://users.jyu.fi/~olkhriye/ties4520/lectures/Lecture05.pdf
+                [note, some imprecisions, OntModel support only some part of OWL 1.1
+                RDF4J supports also reasoning https://github.com/eclipse/rdf4j-doc]
+            * Lecture 6: Data Exchange and Semantic Annotation
+                http://users.jyu.fi/~olkhriye/ties4520/lectures/Lecture06.pdf
+            * Lecture 7: Linked Data
+                http://users.jyu.fi/~olkhriye/ties4520/lectures/Lecture07.pdf
 
 * Why the original idea of Tim Beners-Lee is dead.
     * https://hackernoon.com/semantic-web-is-dead-long-live-the-ai-2a5ea0cf6423
     * https://twobithistory.org/2018/05/27/semantic-web.html
     * https://www.forbes.com/sites/cognitiveworld/2018/08/03/the-importance-of-schema-org/
 
+## Ontologies
 
-## Resources, classes, literals
+* See also
+    * https://en.wikipedia.org/wiki/Template:Semantic_Web
+    * https://www.w3.org/wiki/Good_Ontologies
+
+* Maybe a good model to make a new Ontology is
+    https://www.w3.org/Submission/vcard-rdf/
+    It's a [member submission](https://www.w3.org/wiki/Good_Ontologies),
+    therefore less than a draft!
+    But it's a very simple Ontology
+    See an example non official of an Ontology :
+    http://content.scottstreit.com/Semantic_Web/Assignments/Resources/Protégé/protegeLab/original_vCard/vCard.owl
+    (should be downloaded, or view-source in Firefox).
+
+> The Semantic Web provides a common framework that allows data to be shared and
+> reused across application, enterprise, and community boundaries
+> (W3C)
+
+* Ontology
+     > Ontologies are a formal way to describe taxonomies and classification
+     > networks, essentially defining the structure of knowledge for various
+     > domains: the nouns representing classes of objects and the verbs
+     > representing relations between the objects.
+     > https://en.wikipedia.org/wiki/Web_Ontology_Language
+     * See also https://en.wikipedia.org/wiki/Web_Ontology_Language#Ontologies
+        https://en.wikipedia.org/wiki/Ontology_(information_science)#Components
+    * RDF is an Ontology language
+        https://en.wikipedia.org/wiki/Web_Ontology_Language#Ontologies
+
+## RDFS/OWL/OWL DL 2 vs Object Oriented programming
+
+
+* More complete article from W3C
+    https://www.w3.org/2001/sw/BestPractices/SE/ODSD/
+    See especially the tab under « 3.3 A Comparison of OWL/RDF and
+    Object-Oriented Languages »
+    ***Very important to read***. Synthetic table!
+    https://www.w3.org/2001/sw/BestPractices/SE/ODSD/20060117/#comparison
+
+* https://www.w3.org/TR/rdf-primer/
+    * « 5.3 Interpreting RDF Schema Declarations »
+        ***Very interesting***, comparing with Java. Explain with text,
+        examples, etc.
+
+* https://www.researchgate.net/publication/228577024_OWL_vs_object_oriented_programming
+    (thesis)
+
+* Complement not developed on link above. ***As I say below*** in section
+    « Individual vs Class », contrary to Java, in OWL DL *version 2* (not 1)
+    an instance of a class (e.g. an Individual) could also at the same time a
+    `owl:class`.  I have an example in my ontology julioJuGeographicalZone.owl
+    with departments.  In Java, a class `owl:Class` « Ain » could not be an
+    instance of another Class!  ***I've blocked a lot on this problem***!!!
+
+
+## RDFS
+
+### Resources, classes, literals
 
 * Read https://www.w3.org/TR/rdf-schema to understand, especially
     1. https://www.w3.org/TR/rdf-schema/#ch_resource
@@ -869,7 +1148,7 @@ SLF4J: Actual binding is of type [ch.qos.logback.classic.util.ContextSelectorSta
 * Read also https://stackoverflow.com/questions/25737584/subclassof-and-instance-of-rdf-rdfsclass
     about rdfs:Resource and rdfs:Class
 
-## rdfs:subClassOf, rdf:type
+### rdfs:subClassOf, rdf:type
 
 * Even if this definition is outdated I like very much because I understand
     https://www.w3.org/TR/1998/WD-rdf-schema-19980409/
@@ -935,6 +1214,47 @@ SLF4J: Actual binding is of type [ch.qos.logback.classic.util.ContextSelectorSta
  > [BERNERS-LEE98].
  https://www.w3.org/2001/sw/RDFCore/Schema/20010913/#s2.1
 
+#### Range for datatype property
+
+* Defining DataRange Expression in Protege for a Data Type Property
+  See  https://stackoverflow.com/questions/24531940/defining-datarange-expression-in-protege-for-a-data-type-property]
+Use in range: `xsd:double[ >= 0, <= 0 ].`
+
+## OWL2
+
+### OWL2 essential resources
+
+***OWL2 Document Overview***. When we want understand organization of the doc,
+    use this one
+    https://www.w3.org/TR/owl2-overview/
+
+* To search something, use
+    https://www.w3.org/TR/2012/REC-owl2-quick-reference-20121211/
+
+* See also
+    https://www.w3.org/2007/OWL/wiki/OWL_Working_Group
+
+### OWL2 described as UML and as turtle
+
+* ***Very interesting to understand OWL2***.
+    https://www.ics.forth.gr/isl/ontology/content-MTLO/html/
+    * Contains also xsd datatypes described as owl ontology
+        See for instance `xsd:gYear`
+
+* ***We could also download the file and open it in Protege***
+    at https://www.w3.org/2002/07/owl#
+    Is it described at turtle !!
+
+For me, it's the reference to understand organization of OWL2.
+As W3C use a syntax that I don't understand well
+(See for instance https://www.w3.org/TR/owl2-new-features/)
+
+### Entities (Protégé, tab « Entities »)
+
+> Each entity in O MUST have an IRI satisfying the restrictions on the usage of
+> the reserved vocabulary from Sections 5.1–5.6.
+> https://www.w3.org/TR/2012/REC-owl2-syntax-20121211/#Ontologies
+
 ### Individual vs Class
 
 * https://stackoverflow.com/questions/37186507/ontology-design-class-or-individuals
@@ -946,17 +1266,27 @@ SLF4J: Actual binding is of type [ch.qos.logback.classic.util.ContextSelectorSta
         > individual with a class is rdf:type and the one between classes is
         > rdfs:subClassOf.
 
-
 * Very interesting paper https://pdfs.semanticscholar.org/97bf/4ccca4c44b71c7e9ccf40ce57dce45fb7000.pdf
     * Classes versus Individuals: Fundamental Design Issues for Ontologies on the Biomedical Semantic Web*
     > a molecular biologist might instantiate the class Protein with the individual
     > ‘Serotonin_Receptor’ , which is a clear enough description in many cases. In
-    > another context, a neur oscientist might instantiate the class Protein with the
+    > another context, a neuroscientist might instantiate the class Protein with the
     > individual ‘ Serotonin_Receptor_2A’ . Serotonin_Receptor_2A is in fact a
     > subclass of Serotonin_Receptor, but this information cannot be represented in
     > accordance to OWL DL semantics, since both have been defined as individuals.
     * The solution for this problem is https://www.w3.org/TR/owl2-new-features/#F12:_Punning
         When this paper was published maybe it was not published
+        > OWL 1 DL required a strict separation between the names of, e.g.,
+        > classes and individuals. OWL 2 DL relaxes this separation somewhat to
+        > allow different uses of the same term, e.g., Eagle, to be used for
+        > both a class, the class of all Eagles, and an individual, the
+        > individual representing the species Eagle belonging to the (meta)class
+        > of all plant and animal species. However, OWL 2 DL still imposes
+        > certain restrictions: it requires that a name cannot be used for both
+        > a class and a datatype and that a name can only be used for one kind
+        > of property. The OWL 2 Direct Semantics treats the different uses of
+        > the same name as completely separate, as is required in DL reasoners.
+        ***PRECEDING PARAGRAPH IS VERY VERY VERY VERY IMPORTANT***
 
 * Very cool explanation https://mailman.stanford.edu/pipermail/protege-owl/2007-February/001427.html
     Official Protégé Mailist
@@ -964,35 +1294,183 @@ SLF4J: Actual binding is of type [ch.qos.logback.classic.util.ContextSelectorSta
 * See an other explanation. Very cool explanations
     about concepts http://www.linkeddatatools.com/help/classes
 
-## Owl vs Object Oriented programming
+* Even if in OWL DL
+    * ***An IRI I can be used as an individual in O even if I is not declared as an individual in O***
+        > An IRI I can be used as an individual in O even if I is not declared as an individual in O
+        https://www.w3.org/TR/2012/REC-owl2-syntax-20121211/#Typing_Constraints_of_OWL_2_DL
 
-* https://www.w3.org/TR/rdf-primer/
-    Read: (comparing with Java)
-    5.3 Interpreting RDF Schema Declarations
+##### Class axioms vs Property Restriction vs Individual fact
 
-* More complete article from W3C
-    https://www.w3.org/2001/sw/BestPractices/SE/ODSD/
-    See especially the tab under « 3.3 A Comparison of OWL/RDF and
-    Object-Oriented Languages »
+* Axiom classes can't be applied to individuals (the tab « Individual »)
+    See also  Protégé seems to say the same thing.
 
-* https://www.researchgate.net/publication/228577024_OWL_vs_object_oriented_programming
-    (thesis)
+* Same note about « Property restrictions »
+    (existencial, universal, value, cardinality)
+    As Atencias says
+    > In OWL2 we can declare that the instances of a class C must satisfy certain
+    > conditions.
+    * ***Property restrictions should be inserted in Protégé in the tab
+        « Classes »***.
+
+* « Individual facts » (see lecture of Atencias) (property assertions in Protégé)
+    applied only to Individuals!
+
+* See also how to assert Property Restriction in Protégé
+    Use https://protegeproject.github.io/protege/class-expression-syntax/
+
+###### Question: Existential and universal restrictions in tab « Object Property »
+
+EXISTENTIAL RESTRICTION COULD WORK ONLY FOR OBJECT PROPERTY, NO DATATYPE PROPERTY
+An object property could have the same range of a datatype property
+(tested in Protégé)
+Under the tab « object property », click on « Ranges »
+
+* Ask to the teacher the mean of
+    ```
+
+    <owl:ObjectProperty rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoTakenDateObjecteProperty">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:domain rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Photo"/>
+        <rdfs:range>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoTakenDateObjecteProperty"/>
+                <owl:allValuesFrom rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Season"/>
+            </owl:Restriction>
+        </rdfs:range>
+        <rdfs:range>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoTakenYear"/>
+                <owl:allValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
+            </owl:Restriction>
+        </rdfs:range>
+        <rdfs:label xml:lang="en">photo taken at date</rdfs:label>
+    </owl:ObjectProperty>
+    ```
 
 
 
-## Linked Data
+#### owl:NamedIndividual and Protégé tab `Entities -> Individuals`
+
+* Definition
+    > The class owl:NamedIndividual is new to OWL 2. It is used for declaring
+    > named (in contrast to anonymous) individuals in OWL 2 DL. In OWL 2 Full,
+    > named individual axioms simply provide an alternative way to state that a
+    > given entity is an individual.
+    > (…)
+    > owl:NamedIndividual has the same class extension than owl:Thing, i.e. the
+    > set of all individuals.
+    > https://www.w3.org/2007/OWL/wiki/FullSemanticsNamedIndividuals
+    * not that ***`owl:Thing` is the set of all individuals*** !!!!
+
+* Example of a generated Named Individual thanks Protégé in
+    `Entities -> Individuals`
+    ```
+    <owl:NamedIndividual rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Autumn">
+        <rdf:type rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Season"/>
+        <rdfs:label xml:lang="en">Autumn</rdfs:label>
+    </owl:NamedIndividual>
+    ```
+
+ * Why when we open ./julioJuGeographicalZone.owl in Protégé
+     Departments are Individuals and Classes.
+     It's because we have
+
+     ```xml
+     <owl:Class rdf:about="http://wikidataJulioJuEntity/entity/Q3083">
+        <rdfs:label xml:lang="fr">"Ain"</rdfs:label>
+        <wikidataProperty:P2586>01</wikidataProperty:P2586>
+        <rdfs:isDefinedBy rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">http://www.wikidata.org/entity/Q3083</rdfs:isDefinedBy>
+        <rdfs:subClassOf rdf:resource="http://julioJuGeographicalZone.owl/geographicalZoneFrance" />
+     </owl:Class>
+
+     ```
+     The Declaration `<wikidataProperty:P2586>01</wikidataProperty:P2586>`
+     means for Protégé « Data property assertions ».
+     And assertions on data are only for Individuals, not class!
+
+* https://github.com/esnet/nml-mrml/issues/4
+    > In my limited work with OWL about 5 years ago I learned the distinction
+    > between class, declarations, and instance data.  OWL uses NamedIndividual as
+    > a class definition to identify an named instance of an object.  It allows
+    > the reasoning engine to determine the set of all instantiated objects, and
+    > from out perspective, allows us to query for all NamedIndividuals in an
+    > Ontology to get back all instance definitions within our model.  However, I
+    > never used this in any practical application.
+
+    > With all our objects defined as a specific class there was no need to use
+    > NamedIndividual to identify an instance data.  When we do add both the
+    > specific class and NamedIndividual to an instance we add some confusion to
+    > the representation of the instance data.  For example, the following two
+    > statements are equivalent:
+
+    ```
+    <owl:NamedIndividual rdf:about="urn:ogf:network:stp:uvalight.ets:ps-80">
+        <rdf:type rdf:resource="http://schemas.ogf.org/nml/2013/03/base#Port"/>
+    </owl:NamedIndividual>
+
+    <nml:Port rdf:about="urn:ogf:network:stp:uvalight.ets:ps-80">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#NamedIndividual" />
+    </nml:Port>
+    ```
+    > I also believe the following RDF statement is equivalent as well:
+    ```
+    <rdf:Description rdf:about="urn:ogf:network:stp:uvalight.ets:ps-80">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#NamedIndividual" />
+        <rdf:type rdf:resource="http://schemas.ogf.org/nml/2013/03/base#Port"/>
+    </rdf:Description>
+    ```
+    > Removing the use of NamedIndividual from the declaration means we only get
+    > the <nml:Port> version of the definition.  I think this might provide
+    > clarity.  Do you see anything we might break in OWL by removing it?
+
+* See also
+    https://stackoverflow.com/questions/37157883/member-of-an-owlclass-versus-owlnamedindividual
+
+## Protégé
+
+* Currently release version of Protégé is compatible with Java 8 and not Java 11
+    See https://github.com/protegeproject/protege/issues/822
+
+* `rdfs:comment` become JavaDoc into the generated file
+    ./scholarProjectWebSemantic/target/generated-sources/java/fr/uga/miashs/sempic/model/rdf/SempicOnto.java/
+
+* To have `rdfs:label` in lang `fr` and not only lang `en`
+    displayed in the pan `Entities`.
+    Under its pan `Entity`, the left-pan `Classes`
+    * `Menu View -> Custom Rendering` add « fr »
+
+* Files catalog-v001.xml are generated by Protégé.
+
+### Class expression syntax (Existential, Universal restrictions, etc.)
+
+https://protegeproject.github.io/protege/class-expression-syntax/
+
+## Linked Data (2006) / Linked Open Data (2010)
 
 * What is Linked Data
     https://en.wikipedia.org/wiki/Linked_data
     Datasets are: DBpedia, Wikidata, GeoNames, etc.
+    * But they no explain the system of five starts by Tim Berners Lee
+        done in 2010
+        The the course of Atencias or
+        * http://users.jyu.fi/~olkhriye/IHME/IHME_Course-SemanticWeb_LinkedData.pdf
+            > In 2006, Tim Berners-Lee set out four simple principles
+            > for publishing data on the web.  (http://linkeddata.org)
+            > (…)
+            > In 2010, Tim Berners-Lee suggested a 5 star deployment scheme for
+            > Open Data to encourage people (especially government data owners)
+            > to improve linked data.  Linked Open Data (LOD) is Linked Data
+            > which is released under an open license, which does not impede its
+            > reuse for free.
 
 * In Wikipedia (I was a Wikipedia Contributor),
     they use https://www.mediawiki.org/wiki/Extension:LinkedWiki
     to trigger SPARQL queries
+
 * Very cool Thesis in French about Linked Data
     https://tel.archives-ouvertes.fr/tel-02003672/document (1 feb 2019).
 
-## All sparql endpoints
+### All sparql endpoints
 
 * Check https://www.w3.org/wiki/SparqlEndpoints
 
@@ -1457,9 +1935,9 @@ SLF4J: Actual binding is of type [ch.qos.logback.classic.util.ContextSelectorSta
     ORDER BY ?communeLabel ?commune
 ```
 
-### Retrieve departments and communes
+#### Retrieve departments and communes
 
-#### Retrieve Department infos
+##### Retrieve Department infos
     * Warning it retrieve also https://www.wikidata.org/wiki/Q22247953
         that is probably not a Department.
         Error in Wikidata done by an English user on 27 march 2019
@@ -1491,7 +1969,7 @@ SLF4J: Actual binding is of type [ch.qos.logback.classic.util.ContextSelectorSta
     ```
 
 
-####  Retrieve communes and its Department URI
+#####  Retrieve communes and its Department URI
 
 * As:
     * « commune nouvelle » (Q2989454) is « subclass of » (P279) «commune of france » (wd:Q484170)
@@ -1595,7 +2073,7 @@ SELECT DISTINCT ?commune ?communeLabel ?departmentURI WHERE {
 ORDER BY ?communeLabel ?commune
 ```
 
-#### Create the rdf file
+##### Create the rdf file
 
 * Note: do not remove trailer tabs on the file. The best is to not edit it.
 
@@ -1638,41 +2116,6 @@ ORDER BY ?communeLabel ?commune
     * Or with the sed like explained above
 
 
-## Ontologies
-
-* See also
-    * https://en.wikipedia.org/wiki/Template:Semantic_Web
-    * https://www.w3.org/wiki/Good_Ontologies
-
-* Maybe a good model to make a new Ontology is
-    https://www.w3.org/Submission/vcard-rdf/
-    It's a [member submission](https://www.w3.org/wiki/Good_Ontologies),
-    therefore less than a draft!
-    But it's a very simple Ontology
-    See an example non official of an Ontology :
-    http://content.scottstreit.com/Semantic_Web/Assignments/Resources/Protégé/protegeLab/original_vCard/vCard.owl
-    (should be downloaded, or view-source in Firefox).
-
-> The Semantic Web provides a common framework that allows data to be shared and
-> reused across application, enterprise, and community boundaries
-> (W3C)
-
-* Ontology
-     > Ontologies are a formal way to describe taxonomies and classification
-     > networks, essentially defining the structure of knowledge for various
-     > domains: the nouns representing classes of objects and the verbs
-     > representing relations between the objects.
-     > https://en.wikipedia.org/wiki/Web_Ontology_Language
-     * See also https://en.wikipedia.org/wiki/Web_Ontology_Language#Ontologies
-        https://en.wikipedia.org/wiki/Ontology_(information_science)#Components
-    * RDF is an Ontology language
-        https://en.wikipedia.org/wiki/Web_Ontology_Language#Ontologies
-
-* RDF Calendar
-    https://www.w3.org/TR/rdfcal/
-    But too much to answer at question « When photo was taken », user
-    simply https://www.rubydoc.info/github/ruby-rdf/rdf/RDF/Literal/Date
-
 ## Jena Documentation
 
 * Note that Fuseki documentation has several break links. Use Google to
@@ -1683,57 +2126,34 @@ ORDER BY ?communeLabel ?commune
 
 * All JavaDoc for all projects are at https://jena.apache.org/documentation/javadoc/
 
-## Jena TDB2 vs Jena Fuseki2 vs OpenLink Virtuoso and Linked Data Platform
+### How to install Jena
 
-* Jena TDB2 and OpenLink Virtuoso are databases, more precisely a « LargeTripleStores »
-    * For comparaison see
-        https://www.w3.org/wiki/LargeTripleStores#OpenLink_Virtuoso_v7.2B_.2839.8B.2B_explicit.3B_uncounted_virtual.2Finferred.29
-    * See also https://www.w3.org/wiki/RdfStoreBenchmarking
-
-* Jena Fuseki is a REST Server, it could serve a Jena TDB2 database or
-    OpenLink Virtuoso database.
-    * See https://stackoverflow.com/questions/27958212/is-it-possible-to-add-virtuoso-as-a-storage-provider-in-jena-fuseki
-
-* Linked Data Platform specification (REST specification)
-    * Don't seem to be implemented by Fuseki (no found any reference about it)
-    * (originally by IBM)
-    * Virtuoso implements Linked Data Platform
-        http://vos.openlinksw.com/owiki/wiki/VOS/VirtLDP
-    * See also https://en.wikipedia.org/wiki/Linked_Data_Platform
-
-* Apache Marmotta is build on top of RDF4J (also called Sesame)
-    * RDF4J, contrary to TDB2 does not support OWL
-    * https://en.wikipedia.org/wiki/Apache_Jena
-
-* See also comparaison of triplesstores
-    https://en.wikipedia.org/wiki/Comparison_of_triplestores
-
-* The teacher cited OpenLink Virtuso
-    (a proprietary software with open sources parts) and says
-    that is more complicated to configure at startup.
-
-* Virtuoso use an SQL Database under the hood
-    https://stackoverflow.com/questions/17719341/difference-between-virtuoso-native-rdf-quad-store-and-virtuoso-sql-based-rdf-tri
-
-* Virtuoso could use Jena API
-    http://vos.openlinksw.com/owiki/wiki/VOS/VirtJenaProvider
-
-* In a future, we could use RDFConnection to a Virtuoso Database
-    https://github.com/openlink/virtuoso-opensource/issues/792
-
-### Why Fuseki is has HTTP POST is tricky
-
-* See my comments at ./rest_request_fuseki.roast
-    * Shortly:
-        POST request to update a resource seems contains non ASCII
-        characters that could not be retrieved by Wireshark
-        when we copy and past.
-        When we copy and past a request from Wireshark, if it's an UNICODE
-        char it is correctly copy and past even if it is symbolised
-        by « . » on Wireshark.
+See ./teacherExample/HowToConfigureJenaByJeromeDavid.pdf
 
 
-## Fuseki and TDB, sempic.ttl
+### Jena and OWL2 and OntModel
+
+> Jena does not provide OWL2 inference or OntModel support.
+> https://jena.apache.org/documentation/javadoc/jena/org/apache/jena/vocabulary/OWL2.html
+
+> Note: Although OWL version 1.1 is now a W3C recommendation, Jena's support for
+> OWL 1.1 features is limited. We will be addressing this in future versions
+> Jena.
+> https://jena.apache.org/documentation/ontology/
+
+* See also
+    https://mail-archives.apache.org/mod_mbox/jena-users/201612.mbox/<A286D8DA9B2E3B4581355AFD9B0B39F302D38023@SMUC0224.bauhaus-luftfahrt.corp>
+
+* During my search, I've explored how to build an `OntModel` and `OntResource`
+    To understand what it is, see official API Jena and
+    https://jena.apache.org/documentation/ontology/
+    There is a function `OntResource.remove()`, but as the resource isn't link
+    to a `RdfConnection`, if we use `OntResource.commit()` it can' work.
+
+* See also https://jena.apache.org/documentation/inference/index.html
+    Reasoners and rule engines: Jena inference support
+
+### Fuseki and TDB, sempic.ttl
 * To understand the file `sempic.ttl` give by the teacher, read
 
 1. official doc
@@ -1748,81 +2168,124 @@ https://jena.apache.org/documentation/tdb2/tdb2_fuseki.html
 > will be routed to the TDB2 database.
 https://github.com/apache/jena/blob/master/jena-db/use-fuseki-tdb2.md
 
-## Protégé
 
-* Currently release version of Protégé is compatible with Java 8 and not Java 11
-    See https://github.com/protegeproject/protege/issues/822
+## Jena TDB2 vs Jena Fuseki2 vs OpenLink Virtuoso and Linked Data Platform
 
-* `rdfs:comment` become JavaDoc into the generated file
-    ./scholarProjectWebSemantic/target/generated-sources/java/fr/uga/miashs/sempic/model/rdf/SempicOnto.java/
+* Jena TDB2 and OpenLink Virtuoso are databases, more precisely a « LargeTripleStores »
+    * For comparaison see
+        https://www.w3.org/wiki/LargeTripleStores#OpenLink_Virtuoso_v7.2B_.2839.8B.2B_explicit.3B_uncounted_virtual.2Finferred.29
+    * See also https://www.w3.org/wiki/RdfStoreBenchmarking
 
-* To have `rdfs:label` in lang `fr` and not only lang `en`
-    displayed in the pan `Entities`.
-    Under its pan `Entity`, the left-pan `Classes`
-    * `Menu View -> Custom Rendering` add « fr »
+* Linked Data Platform specification (REST specification)
+    * Don't seem to be implemented by Fuseki (no found any reference about it)
+    * (originally by IBM)
+    * Virtuoso implements Linked Data Platform
+        http://vos.openlinksw.com/owiki/wiki/VOS/VirtLDP
+    * See also https://en.wikipedia.org/wiki/Linked_Data_Platform
 
-* Files catalog-v001.xml are generated by Protégé.
+* Apache Marmotta is build on top of RDF4J (also called Sesame)
+    * https://en.wikipedia.org/wiki/Apache_Jena
 
-## Defining an interval of date
+* See also comparaison of triplesstores
+    https://en.wikipedia.org/wiki/Comparison_of_triplestores
 
+* The teacher cited OpenLink Virtuso
+    (a proprietary software with open sources parts) and says
+    that is more complicated to configure at startup.
 
+* Virtuoso use an SQL Database under the hood
+    https://stackoverflow.com/questions/17719341/difference-between-virtuoso-native-rdf-quad-store-and-virtuoso-sql-based-rdf-tri
 
-> in the individuals tab for example, by clicking the plus sign besides the
-> "Types" field.  Then you put in the expression "hasCalories some
-> integer[>=200,<=250]".
-> https://mailman.stanford.edu/pipermail/protege-user/2014-August/001178.html
-I've tested te preceding solution without success, even if hasCalories is correct
-Tested also with `DateInterval some xsd:date[>=0000-09-21, <0000-12-22]`
-without more success.
+***Comparaison about OWL API, Jena API, Protege API***
+https://stackoverflow.com/questions/17567771/owl-api-jena-api-protege-api-which-one-to-use
 
-> If you really need to assert that an intervals of integer as a property value
-> (e.g., specify a month as an interval of days in a year, I think you’d have to
-> define Interval as a class and specify max and min as data properties.
-> http://protege-project.136.n4.nabble.com/Data-property-assertions-for-individuals-in-Protege-5-0-beta-td4661131.html
+### RDF4J, GraphDB, OWLAPI
 
-* FOR ME THE SOLUTION IS TO ASIGN AN OBJECT PROPERTY TO
-    https://www.w3.org/TR/owl-time/#time:DateTimeInterval
+* RDF4J, contrary to TDB2 does not support OWL
+    But Jena support for owl is bad (see section about OntModel)
 
-## Range for datatype property
+* RDF4J supports also reasoning https://github.com/eclipse/rdf4j-doc]
 
-* Defining DataRange Expression in Protege for a Data Type Property
-  See  https://stackoverflow.com/questions/24531940/defining-datarange-expression-in-protege-for-a-data-type-property]
-Use in range: `xsd:double[ >= 0, <= 0 ].`
+> I prefer rdf4j as Rdf-Api for clients and GraphDB from Ontotext as RDF store.
+> I never liked programming with Jena.
+https://news.ycombinator.com/item?id=19419025
 
-## Existential and universal restrictions in tab « Object Property »
+GraphDB support some OWL inferences
+http://graphdb.ontotext.com/documentation/standard/owl-compliance.html
+See aslo http://graphdb.ontotext.com/documentation/enterprise/using-graphdb-with-the-rdf4j-api.html
 
-EXISTENTIAL RESTRICTION COULD WORK ONLY FOR OBJECT PROPERTY, NO DATATYPE PROPERTY
-An object property could have the same range of a datatype property
-(tested in Protégé)
-Under the tab « object property », click on « Ranges »
-
-* Ask to the teacher the mean of
-    ```
-
-    <owl:ObjectProperty rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoTakenDateObjecteProperty">
-        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
-        <rdfs:domain rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Photo"/>
-        <rdfs:range>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoTakenDateObjecteProperty"/>
-                <owl:allValuesFrom rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Season"/>
-            </owl:Restriction>
-        </rdfs:range>
-        <rdfs:range>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoTakenYear"/>
-                <owl:allValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
-            </owl:Restriction>
-        </rdfs:range>
-        <rdfs:label xml:lang="en">photo taken at date</rdfs:label>
-    </owl:ObjectProperty>
-    ```
+owlapi uses rdf4j as dependency
+    1. https://github.com/owlcs/owlapi/pull/551/commits/1dd4c38364483cf319e9d9f3784f432b22e459d4
+    2. https://github.com/owlcs/owlapi/issues/539
 
 
+But Neo4J(born in 2007 and open source AGPL with commercial support)
+    seems to be better than GraphDB (born in 2000 and commercial)
+    No SPARQL for Neo4j.
+    https://db-engines.com/en/system/GraphDB;Neo4j
+    https://en.wikipedia.org/wiki/Neo4j
 
-## How to install Jena
+Openllet is dependent of RDF4J, even if we use only Jena API
 
-See ./teacherExample/HowToConfigureJenaByJeromeDavid.pdf
+I've seen than API of rdf4j seems to be easier.
+See https://rdf4j.eclipse.org/documentation/programming/model/
+or https://rdf4j.eclipse.org/documentation/programming/repository/
+or https://rdf4j.eclipse.org/documentation/getting-started/
+
+I have no idea how owlapi works
+See https://github.com/phillord/owl-api/blob/master/contract/src/test/java/org/coode/owlapi/examples/Examples.java
+We see that it creates a temporary file. Not study.
+
+### Classement of databases
+https://db-engines.com/en/ranking
+https://en.wikipedia.org/wiki/DB-Engines_ranking
+Neo4J : rank 22
+Virtuoso : rank 82
+Apache Jena - TDB : rank 104
+GraphDB : rank 137
+RDF4J: rank 219
+
+
+### Use Jena with Virtuoso
+
+* Virtuoso could use Jena API
+    http://vos.openlinksw.com/owiki/wiki/VOS/VirtJenaProvider
+
+* See also
+    http://docs.openlinksw.com/virtuoso/rdfsparqlprotocolendpoint/
+
+* Jena Fuseki is a REST Server, it could serve a Jena TDB2 database or
+    OpenLink Virtuoso database.
+    * See https://stackoverflow.com/questions/27958212/is-it-possible-to-add-virtuoso-as-a-storage-provider-in-jena-fuseki
+
+* In a future, we could use RDFConnection to a Virtuoso Database
+    https://github.com/openlink/virtuoso-opensource/issues/792
+
+* Other resources to use virtuoso as storage provider
+    https://stackoverflow.com/questions/27958212/is-it-possible-to-add-virtuoso-as-a-storage-provider-in-jena-fuseki
+
+* See also this Medium article
+    https://medium.com/virtuoso-blog/maximizing-the-benefits-of-rdf-inference-between-client-side-frameworks-and-server-side-data-stores-46d0ce5e8fec
+
+### Quad store and graph database
+
+> Adding a name to the triple makes a "quad store" or named graph.
+> A graph database has a more generalized structure than a triplestore
+https://en.wikipedia.org/wiki/Triplestore
+
+Virtuoso or SQL Server are famous Graph Store but neither TDB nor RDF4J
+https://en.wikipedia.org/wiki/Graph_database
+
+### Why Fuseki is has HTTP POST is tricky
+
+* See my comments at ./rest_request_fuseki.roast
+    * Shortly:
+        POST request to update a resource seems contains non ASCII
+        characters that could not be retrieved by Wireshark
+        when we copy and past.
+        When we copy and past a request from Wireshark, if it's an UNICODE
+        char it is correctly copy and past even if it is symbolised
+        by « . » on Wireshark.
 
 
 ## Construct a Jena Query
@@ -1855,9 +2318,6 @@ See also https://en.wikipedia.org/wiki/SQL_injection
     retrieve the SPARQL syntax in the output of the console! Then
     if we want to use Virtuoso, simply see the output of the Console!
     Furthermore we could use Jena API into Virtuoso or opposite
-    http://docs.openlinksw.com/virtuoso/rdfsparqlprotocolendpoint/
-    https://stackoverflow.com/questions/27958212/is-it-possible-to-add-virtuoso-as-a-storage-provider-in-jena-fuseki
-    * Furthermore, probably we could connect Jena to Fuseki.
     * See also section above about « Virtuoso »
 
 * Read
@@ -2191,12 +2651,6 @@ To understand how it works, don't forget that
     (if exists, otherwise raise exception).
 7. `RDFNode` doesn't have `ModelCom`.
 8. See also https://www.w3.org/TR/rdf-schema/#ch_class
-
-* During my search, I've explored how to build an `OntModel` and `OntResource`
-    To understand what it is, see official API Jena and
-    https://jena.apache.org/documentation/ontology/
-    There is a function `OntResource.remove()`, but as the resource isn't link
-    to a `RdfConnection`, if we use `OntResource.commit()` it can' work.
 
 ### See also
 
@@ -2582,6 +3036,9 @@ by my app, in a independent Thread.
     https://github.com/Galigator/openllet
     open source (AGPL) or commercial license
     Historically developed and commercially supported by Complexible Inc; Maybe now https://www.stardog.com/
+
+* List of all Reasoners referenced by w3.org
+    https://www.w3.org/2001/sw/wiki/Category:OWL_Reasoner
 
 ## StackTrace « Iterator used inside a different transaction » and links
 
@@ -3160,31 +3617,6 @@ simplify in twice place
 ```
 It should be have only one SPARQL request
 
-2. Why when we open ./julioJuGeographicalZone.owl in Protégé
-    Departments are Individuals and Classes.
-    Don't understand. TODO ask to teacher.
-    Example of a generated Named Individual
-
-    ```
-    <owl:NamedIndividual rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Autumn">
-        <rdf:type rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Season"/>
-        <rdfs:label xml:lang="en">Autumn</rdfs:label>
-    </owl:NamedIndividual>
-    ```
-    > owl:NamedIndividual rdf:type rdfs:Class
-    > https://www.w3.org/2007/OWL/wiki/FullSemanticsNamedIndividuals
-
-3. Furthermore if I read well the preceding w3.org link,
-http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Autumn
-is not  a Class! Because
-`owl:NamedIndividual rdfs:subClassOf rdfs:Class`
-
-
-4. Furthermore Axiom classes can't be applied to individuals (the tab « Individual »)
-    in Protégé seems to say the same thing.
-    Don't forget that `onlyOf` link only abstract class, not individual
-    (if my interpretation is good)
-
 5. On the official doc https://jena.apache.org/tutorials/rdf_api.html#ch-Containers
     they speaks of « Collection »
     Contradiction with https://www.w3.org/2007/02/turtle/primer/#L2986
@@ -3217,3 +3649,13 @@ Copied from http://imss-www.upmf-grenoble.fr/~davidjer/javaee/CoursJena/SempicRD
 
 Note: the files under ./teacherExample was modified a little bit by me, but not
 a lot.
+
+* Some files are generated by JHipster Generator. See section
+    « Where is my code » above.
+
+
+> This work was conducted using the Protégé resource, which is supported by
+> grant GM10331601 from the National Institute of General Medical Sciences of
+> the United States National Institutes of Health.”
+> https://protege.stanford.edu/about.php#citing
+

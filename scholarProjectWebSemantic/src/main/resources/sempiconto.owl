@@ -1,6 +1,5 @@
 <?xml version="1.0"?>
-<rdf:RDF xmlns="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#"
-     xml:base="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl"
+<rdf:RDF xmlns="#"
      xmlns:owl="http://www.w3.org/2002/07/owl#"
      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      xmlns:xml="http://www.w3.org/XML/1998/namespace"
@@ -9,9 +8,7 @@
      xmlns:skos="http://www.w3.org/2004/02/skos/core#"
      xmlns:time="http://www.w3.org/2006/time#"
      xmlns:terms="http://purl.org/dc/terms/">
-    <owl:Ontology rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl">
-        <owl:imports rdf:resource="http://www.w3.org/2006/time#2016"/>
-    </owl:Ontology>
+    <owl:Ontology/>
 
 
 
@@ -138,7 +135,7 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
         <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
         <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
         <rdfs:domain rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Photo"/>
-        <rdfs:range rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#DepictionPlace"/>
+        <rdfs:range rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#DepictionWherePlace"/>
         <rdfs:label xml:lang="en">photo taken in</rdfs:label>
     </owl:ObjectProperty>
 
@@ -152,6 +149,18 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
         <rdfs:domain rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#UserId"/>
         <rdfs:range rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#User"/>
         <rdfs:label xml:lang="en">User id has login</rdfs:label>
+    </owl:ObjectProperty>
+
+
+
+    <!-- http://www.co-ode.org/ontologies/ont.owl#photoTakenInFrancePlace -->
+
+    <owl:ObjectProperty rdf:about="http://www.co-ode.org/ontologies/ont.owl#photoTakenInFrancePlace">
+        <rdfs:subPropertyOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoTakenIn"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:domain rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Photo"/>
+        <rdfs:range rdf:resource="http://julioJuGeographicalZone.owl/geographicalZoneFrance"/>
+        <rdfs:label xml:lang="en">photo taken in France Place</rdfs:label>
     </owl:ObjectProperty>
 
 
@@ -278,16 +287,6 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
 
 
 
-    <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#seasonDateIntervalDefinition -->
-
-    <owl:DatatypeProperty rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#seasonDateIntervalDefinition">
-        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
-        <rdfs:domain rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Season"/>
-        <rdfs:comment xml:lang="en">Use to define individuals Summer, Autumn, Winter, Spring (see tab « Individuals »)</rdfs:comment>
-    </owl:DatatypeProperty>
-
-
-
     <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#usersPassword -->
 
     <owl:DatatypeProperty rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#usersPassword">
@@ -308,6 +307,12 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
     ///////////////////////////////////////////////////////////////////////////////////////
      -->
 
+
+
+
+    <!-- http://julioJuGeographicalZone.owl/geographicalZoneFrance -->
+
+    <owl:Class rdf:about="http://julioJuGeographicalZone.owl/geographicalZoneFrance"/>
 
 
 
@@ -337,7 +342,6 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
     <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Depiction -->
 
     <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Depiction">
-        <rdfs:subClassOf rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag"/>
         <rdfs:label>Depiction</rdfs:label>
     </owl:Class>
 
@@ -352,18 +356,17 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
 
 
 
-    <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#DepictionPlace -->
+    <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#DepictionWhat -->
 
-    <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#DepictionPlace">
-        <rdfs:subClassOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#DepictionWhat"/>
-        <rdfs:label xml:lang="en">DepictionPlace</rdfs:label>
+    <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#DepictionWhat">
+        <rdfs:subClassOf rdf:resource="http://www.co-ode.org/ontologies/ont.owl#DepictionBag"/>
     </owl:Class>
 
 
 
-    <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#DepictionWhat -->
+    <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#DepictionWherePlace -->
 
-    <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#DepictionWhat">
+    <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#DepictionWherePlace">
         <rdfs:subClassOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Depiction"/>
     </owl:Class>
 
@@ -372,7 +375,7 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
     <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#DepictionWhoPerson -->
 
     <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#DepictionWhoPerson">
-        <rdfs:subClassOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Depiction"/>
+        <rdfs:subClassOf rdf:resource="http://www.co-ode.org/ontologies/ont.owl#DepictionBag"/>
     </owl:Class>
 
 
@@ -404,6 +407,7 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
     <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Season">
         <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
         <rdfs:label xml:lang="en">Season</rdfs:label>
+        <rdfs:seeAlso rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">https://en.wikipedia.org/wiki/Season#Four-season_calendar_reckoning</rdfs:seeAlso>
     </owl:Class>
 
 
@@ -450,9 +454,12 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
 
 
 
-    <!-- http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag -->
+    <!-- http://www.co-ode.org/ontologies/ont.owl#DepictionBag -->
 
-    <owl:Class rdf:about="http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag"/>
+    <owl:Class rdf:about="http://www.co-ode.org/ontologies/ont.owl#DepictionBag">
+        <rdfs:subClassOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Depiction"/>
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag"/>
+    </owl:Class>
 
 
 
@@ -471,8 +478,7 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
 
     <owl:NamedIndividual rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Autumn">
         <rdf:type rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Season"/>
-        <rdf:type rdf:resource="http://www.w3.org/2006/time#DateTimeInterval"/>
-        <rdfs:comment xml:lang="en">TODO: make object property assertion with time:DateTimeInterval</rdfs:comment>
+        <rdfs:isDefinedBy rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">https://en.wikipedia.org/wiki/Season#Four-season_calendar_reckoning</rdfs:isDefinedBy>
         <rdfs:label xml:lang="en">Autumn</rdfs:label>
     </owl:NamedIndividual>
 
@@ -482,9 +488,8 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
 
     <owl:NamedIndividual rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Spring">
         <rdf:type rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Season"/>
-        <rdf:type rdf:resource="http://www.w3.org/2006/time#DateTimeInterval"/>
+        <rdfs:isDefinedBy rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">https://en.wikipedia.org/wiki/Season#Four-season_calendar_reckoning</rdfs:isDefinedBy>
         <rdfs:label xml:lang="en">Spring</rdfs:label>
-        <rdfs:comment xml:lang="en">TODO: make object property assertion with time:DateTimeInterval</rdfs:comment>
     </owl:NamedIndividual>
 
 
@@ -493,9 +498,8 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
 
     <owl:NamedIndividual rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Summer">
         <rdf:type rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Season"/>
-        <rdf:type rdf:resource="http://www.w3.org/2006/time#DateTimeInterval"/>
+        <rdfs:isDefinedBy rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">https://en.wikipedia.org/wiki/Season#Four-season_calendar_reckoning</rdfs:isDefinedBy>
         <rdfs:label xml:lang="en">Summer</rdfs:label>
-        <rdfs:comment xml:lang="en">TODO: make object property assertion with time:DateTimeInterval</rdfs:comment>
     </owl:NamedIndividual>
 
 
@@ -504,9 +508,8 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
 
     <owl:NamedIndividual rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Winter">
         <rdf:type rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Season"/>
-        <rdf:type rdf:resource="http://www.w3.org/2006/time#DateTimeInterval"/>
+        <rdfs:isDefinedBy rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">https://en.wikipedia.org/wiki/Season#Four-season_calendar_reckoning</rdfs:isDefinedBy>
         <rdfs:label xml:lang="en">Winter</rdfs:label>
-        <rdfs:comment xml:lang="en">TODO: make object property assertion with time:DateTimeInterval</rdfs:comment>
     </owl:NamedIndividual>
 
 
