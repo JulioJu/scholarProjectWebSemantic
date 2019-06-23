@@ -22,7 +22,6 @@ import org.zalando.problem.spring.web.advice.security.SecurityProblemSupport;
 
 import fr.uga.julioju.jhipster.security.jwt.JWTConfigurer;
 import fr.uga.julioju.jhipster.security.jwt.TokenProvider;
-import fr.uga.julioju.sempic.entities.UserRDF;
 
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
@@ -101,6 +100,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter implemen
             .authorizeRequests()
             // .antMatchers("/api/register").permitAll()
             // .antMatchers("/api/register").hasAuthority(UserRDF.UserGroup.ADMIN_GROUP.toString())
+            // Added By JulioJu
+            // ————————————————
+            .antMatchers("/api/createInitialUser").permitAll()
+            // End added By JulioJu
+            // ————————————————
             .antMatchers("/api/activate").permitAll()
             .antMatchers("/api/authenticate").permitAll()
             .antMatchers("/api/account/reset-password/init").permitAll()

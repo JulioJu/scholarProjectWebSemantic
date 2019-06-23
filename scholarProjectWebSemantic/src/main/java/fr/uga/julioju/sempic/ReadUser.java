@@ -39,25 +39,30 @@ public class ReadUser extends ReadAbstract {
         Node_URI node_URILogin = (Node_URI) NodeFactory.createURI(uriLogin);
 
         // CONSTRUCT and WHERE clauses preparation
-        Triple tripleUser = Triple.create(
+        Triple tripleUserPassword = Triple.create(
+                node_URILogin,
+                SempicOnto.usersPassword.asNode(),
+                Var.alloc("password")
+                );
+        Triple tripleUserAdminGroup = Triple.create(
                 node_URILogin,
                 RDF.type.asNode(),
                 Var.alloc("adminGroup")
                 );
+        BasicPattern basicPattern = new BasicPattern();
+        basicPattern.add(tripleUserPassword);
+        basicPattern.add(tripleUserAdminGroup);
 
         // Prepare WHERE clause
         Triple tripleSubClassOf = Triple.create(
                 Var.alloc("adminGroup"),
                 RDFS.subClassOf.asNode(),
                 SempicOnto.User.asNode());
-        BasicPattern basicPatternWhere = new BasicPattern();
-        basicPatternWhere.add(tripleUser);
+        BasicPattern basicPatternWhere = new BasicPattern(basicPattern);
         basicPatternWhere.add(tripleSubClassOf);
         Op op = new OpBGP(basicPatternWhere);
 
-        // Prepare CONSTRUCT clause
-        BasicPattern basicPattern = new BasicPattern();
-        basicPattern.add(tripleUser);
+        // Read
         return ReadAbstract.read(node_URILogin, basicPattern, op);
     }
 
@@ -103,6 +108,8 @@ public class ReadUser extends ReadAbstract {
     public static UserRDF getUserByLogin(String login) {
         log.debug("Get userRDF : {}", login);
         Model model = ReadUser.read(login);
+        String password = model.listObjectsOfProperty(SempicOnto.usersPassword)
+            .toList().get(0).toString();
         UserGroup userGroup = UserGroup.NORMAL_USER_GROUP;
         if (
             model.listObjectsOfProperty(RDF.type)
@@ -110,8 +117,9 @@ public class ReadUser extends ReadAbstract {
         ) {
             userGroup = UserGroup.ADMIN_GROUP;
         }
-        UserRDF userRDF = new UserRDF(login, "NOT RETRIEVED (saved as a hash)",
-                userGroup);
+        // UserRDF userRDF = new UserRDF(login, "NOT RETRIEVED (saved as a hash)",
+        //         userGroup);
+        UserRDF userRDF = new UserRDF(login, password, userGroup);
         return userRDF;
     }
 

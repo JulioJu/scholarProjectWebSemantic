@@ -19,6 +19,14 @@ Accept-Encoding: identity
 content-type: application/json
 
 # ————————————————————————————————————————————
+# REQUEST TO CREATE ADMIN and USER  | {{{1
+# ————————————————————————————————————————————
+
+# Create a userRDF of the user currently logged
+# CAN'T UPDATE WITH the following.
+GET {root}/api/createInitialUser
+
+# ————————————————————————————————————————————
 # REQUEST TO RETRIEVE AUTHENTIFICATION TOKEN  | {{{1
 # ————————————————————————————————————————————
 
@@ -59,17 +67,19 @@ END
 # Authorisation with correct Spring Security role
 # ———————————————————————
 
+# Token validity until 2100
+
 # AUTHORIZATION FOR ADMIN
-Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJBRE1JTl9HUk9VUCIsImV4cCI6MTU2MTE5MTgzMn0.HjNKAieaTr5b9ELyzTfIYakfDhQdvRybs-KGH7jZMw1cnyk6z2pNIrEAW8teTvL_3DMEAIbFEC7_vbX5vBMyDg
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJBRE1JTl9HUk9VUCIsImV4cCI6NDcwNjI5MjE3M30.0_rPx99N_K8FP8kTCPN5oBB66OLhYouWmrr0fPWBjTs1K3PfLGorlGQlWvw08ZCiXwXRosMQtR65_45aWYiopA
 
 # AUTHORIZATION FOR USER
-# Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiYXV0aCI6Ik5PUk1BTF9VU0VSX0dST1VQIiwiZXhwIjoxNTYxNDAxMDQ1fQ.lt8_F-zdAPbDGH9poReXcL3r2QOMs0Hnu9tC7piJA247MOONGhWyd0c8FtFomxmcP5-d5YGfwFCHcCHOoO25tA
+# Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiYXV0aCI6Ik5PUk1BTF9VU0VSX0dST1VQIiwiZXhwIjo0NzA2MjkyMjQ0fQ.PkfUOBBDeGJtLGpSc-WMWR49thi_4OeUUEnYnl7Oy7A_1uAd2wNUYzh_9zwtgMueIjga6D3fo4_QXA_iLFtqCw
 
 # AUTHORIZATION FOR anOtherUser (NORMAL_USER_GROUP)
-# Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhbm90aGVydXNlciIsImF1dGgiOiJOT1JNQUxfVVNFUl9HUk9VUCIsImV4cCI6MTU2MTIyMjYzNX0.kdd4tTOpI-xrb5oEGnpXiD8Rc2rKtPKwFpfyy07dbJP3GV8BQfW6mEr1ouhJ_0-g8TAJ_MZbOI-v6VUXr-Aidw
+# Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhbm90aGVydXNlciIsImF1dGgiOiJOT1JNQUxfVVNFUl9HUk9VUCIsImV4cCI6NDcwNjI5MjM2NH0.ZEmfgZLOvgrx2lYq8XSMk6MkTlLQg7dvs20kYeRDf5fluo7A03ijnK9-GzcJr006h4V_VlIWyIkf7lvziFwn_g
 
-# AUTHORIZATION FOR anOtherUser (user1)
-# Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyMSIsImF1dGgiOiJOT1JNQUxfVVNFUl9HUk9VUCIsImV4cCI6MTU2MTQ1NTk4Nn0.5jbEdcQwwo_UB7UiBWbL-LDNn8yk89Zy5qEihXmCW2YlsgXCtAw9bQhWM7993C74bvELrCPpLOC9D8NDvCqSvA
+# AUTHORIZATION FOR user1
+# Authorization: Bearer $2a$10$L4I7CO/4P1FvqlJ3EJVwie6IP0e5CSafIzqbjKTQ.aZVVJ20Ebe1y
 
 # Authorisation with outdated Spring Security roles
 # ———————————————————————
@@ -149,9 +159,6 @@ GET {root}/api/rdfquery_listsubclassof/jioejiewijweiojfeji
 
 # CREATE / UPDATE
 # ———————————————
-# Create a userRDF of the user currently logged
-# CAN'T UPDATE WITH the following.
-GET {root}/api/createInitialUser
 
 # register
 # ——

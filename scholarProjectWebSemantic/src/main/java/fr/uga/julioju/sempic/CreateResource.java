@@ -177,7 +177,7 @@ public class CreateResource  {
                         photoRDF.getDepiction()[depictionIndex]
                         .getLiterals()[literalsIndex]);
             }
-            model.add(photoResource, SempicOnto.photoDepicts, descriptionResource);
+            model.add(photoResource, SempicOnto.photoDepictsDatatypeProperty, descriptionResource);
         }
 
         return photoResource;

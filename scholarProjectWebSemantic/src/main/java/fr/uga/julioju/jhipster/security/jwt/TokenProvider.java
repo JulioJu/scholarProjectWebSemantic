@@ -1,6 +1,8 @@
 package fr.uga.julioju.jhipster.security.jwt;
 
 import java.security.Key;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -28,7 +30,8 @@ public class TokenProvider implements InitializingBean {
     private Key key;
 
     private long tokenValidityInSeconds = 1800; // 0.5 hour
-    private long tokenValidityInSecondsForRememberMe = 2592000; // 30 hours;
+    private long tokenValidityInSecondsForRememberMe =
+        Long.parseLong("3145000000"); // 1 century;
 
     private long tokenValidityInMilliseconds;
 
@@ -56,10 +59,21 @@ public class TokenProvider implements InitializingBean {
         long now = (new Date()).getTime();
         Date validity;
         if (rememberMe) {
-            validity = new Date(now + this.tokenValidityInMillisecondsForRememberMe);
+            Date date = new Date(now + this.tokenValidityInMillisecondsForRememberMe);
+            validity = date;
         } else {
             validity = new Date(now + this.tokenValidityInMilliseconds);
         }
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
+        String validityISO_8601Format = df.format(validity);
+        log.info("JWT Token generated for the user with login '"
+                + authentication.getName()
+                + "' until "
+                + validityISO_8601Format
+                + " (Spring Security roles: "
+                + authentication.getAuthorities().stream().map(GrantedAuthority::toString).collect(Collectors.joining(", "))
+                + ")."
+                );
 
         return Jwts.builder()
             .setSubject(authentication.getName())
