@@ -2,7 +2,8 @@ Accept: application/rdf+thrift
 User-Agent: Apache-Jena-ARQ/3.11.0
 Connection: Keep-Alive
 Accept-Encoding: gzip,deflate
-Host: http://localhost:3030
+Host: localhost:3030
+use url_prefix http://localhost:3030
 
 # We could also use a POST request, but also with a string url encoded
 # (as tirrible as below)
@@ -91,6 +92,7 @@ Accept-Encoding: gzip,deflate
 # When we copy and past a request from Wireshark, if it's an UNICODE
 # char it is correctly copy and past even if it is symbolised
 # by « . » on Wireshark.
+# Maybe they symbolize a chunked transfer ?
 
 
 POST /sempic/?default << END

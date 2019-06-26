@@ -86,8 +86,11 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
     <owl:ObjectProperty rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumOwnerLogin">
         <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
         <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AsymmetricProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#IrreflexiveProperty"/>
         <rdfs:domain rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Album"/>
         <rdfs:range rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#User"/>
+        <owl:propertyDisjointWith rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumSharedWithOneUser"/>
         <rdfs:label xml:lang="en">album has owner</rdfs:label>
     </owl:ObjectProperty>
     
@@ -97,9 +100,36 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
 
     <owl:ObjectProperty rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumSharedWith">
         <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AsymmetricProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#IrreflexiveProperty"/>
         <rdfs:domain rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Album"/>
-        <rdfs:range rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#User"/>
+        <rdfs:range rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+        <rdfs:comment xml:lang="en">TODO use W3C’s new Shapes Constraint Language (SHACL) to define the shape of rdf:List. rdf:List should be a set of users.</rdfs:comment>
         <rdfs:label xml:lang="en">album shared with</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumSharedWithOneUser -->
+
+    <owl:ObjectProperty rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumSharedWithOneUser">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+        <rdfs:label xml:lang="en">album shared with one user</rdfs:label>
+        <owl:deprecated xml:lang="en">Used only to show to the teacher that I understand the concept of « owl:DisjointProperty ».</owl:deprecated>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#isSameUserAs -->
+
+    <owl:ObjectProperty rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#isSameUserAs">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#InverseFunctionalProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#SymmetricProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#TransitiveProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ReflexiveProperty"/>
+        <rdfs:label xml:lang="en">is same user as</rdfs:label>
+        <owl:deprecated xml:lang="en">Used only to show to the teacher that I understand the concept of « owl:TransitiveProperty », « owl:SymmetricProperty » (?s :isSameUserAs ?o  ==&gt; ?o :isSameUserAs ?s), « owl:ReflexiveProperty » (?s :isSameUserAs ?s).</owl:deprecated>
     </owl:ObjectProperty>
     
 
@@ -108,6 +138,8 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
 
     <owl:ObjectProperty rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoDepictsObjectProperty">
         <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AsymmetricProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#IrreflexiveProperty"/>
         <rdfs:domain rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Photo"/>
         <rdfs:range rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Depiction"/>
         <rdfs:comment xml:lang="en">uri end with &quot;ObjectProperty&quot; for OWL DL compatibility</rdfs:comment>
@@ -120,6 +152,8 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
 
     <owl:ObjectProperty rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoDepictsWhatAnimalObjectProperty">
         <rdfs:subPropertyOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoDepictsWhatObjectProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AsymmetricProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#IrreflexiveProperty"/>
         <rdfs:domain rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Photo"/>
         <rdfs:range rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#DepictionWhatAnimal"/>
         <rdfs:comment xml:lang="en">uri end with &quot;ObjectProperty&quot; for OWL DL compatibility</rdfs:comment>
@@ -132,6 +166,8 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
 
     <owl:ObjectProperty rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoDepictsWhatObjectProperty">
         <rdfs:subPropertyOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoDepictsObjectProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AsymmetricProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#IrreflexiveProperty"/>
         <rdfs:domain rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Photo"/>
         <rdfs:range rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#DepictionWhat"/>
         <rdfs:comment xml:lang="en">uri end with &quot;ObjectProperty&quot; for OWL DL compatibility</rdfs:comment>
@@ -144,6 +180,8 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
 
     <owl:ObjectProperty rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoDepictsWhoPersonObjectProperty">
         <rdfs:subPropertyOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoDepictsObjectProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AsymmetricProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#IrreflexiveProperty"/>
         <rdfs:domain rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Photo"/>
         <rdfs:range rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#DepictionWhoPerson"/>
         <rdfs:comment xml:lang="en">uri end with &quot;ObjectProperty&quot; for OWL DL compatibility</rdfs:comment>
@@ -157,6 +195,8 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
     <owl:ObjectProperty rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoInAlbum">
         <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
         <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AsymmetricProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#IrreflexiveProperty"/>
         <rdfs:domain rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Photo"/>
         <rdfs:range rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Album"/>
         <rdfs:label xml:lang="en">photo in album</rdfs:label>
@@ -169,6 +209,8 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
     <owl:ObjectProperty rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoTakenIn">
         <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
         <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AsymmetricProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#IrreflexiveProperty"/>
         <rdfs:domain rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Photo"/>
         <rdfs:label xml:lang="en">photo taken in</rdfs:label>
     </owl:ObjectProperty>
@@ -180,6 +222,8 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
     <owl:ObjectProperty rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoTakenInFrancePlace">
         <rdfs:subPropertyOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoTakenIn"/>
         <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AsymmetricProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#IrreflexiveProperty"/>
         <rdfs:domain rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Photo"/>
         <rdfs:range rdf:resource="http://julioJuGeographicalZone.owl/geographicalZoneFrance"/>
         <rdfs:label xml:lang="en">photo taken in France Place</rdfs:label>
@@ -190,11 +234,27 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
     <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#userIdHasLogin -->
 
     <owl:ObjectProperty rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#userIdHasLogin">
+        <rdfs:subPropertyOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#isSameUserAs"/>
+        <owl:inverseOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#userLoginHasId"/>
         <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
         <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#InverseFunctionalProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AsymmetricProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#IrreflexiveProperty"/>
         <rdfs:domain rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#UserId"/>
         <rdfs:range rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#User"/>
         <rdfs:label xml:lang="en">User id has login</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#userLoginHasId -->
+
+    <owl:ObjectProperty rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#userLoginHasId">
+        <rdfs:subPropertyOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#isSameUserAs"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AsymmetricProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#IrreflexiveProperty"/>
+        <rdfs:label xml:lang="en">User login has id</rdfs:label>
     </owl:ObjectProperty>
     
 
@@ -719,6 +779,15 @@ When we read the owl file, we see that it append tags `owl:equivalentClass` even
     <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#UserId">
         <rdfs:comment xml:lang="en">An User is defined by its URI id. During the life of an User, its login can change but not its ID. As ID, the login is unique (TODO implement it)</rdfs:comment>
         <rdfs:label xml:lang="en">User&apos;s Id</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/1999/02/22-rdf-syntax-ns#List -->
+
+    <owl:Class rdf:about="http://www.w3.org/1999/02/22-rdf-syntax-ns#List">
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+        <rdfs:comment xml:lang="en">rdf:list . Thanks « Open World Assumption », I define that « rdf:List » inherits of « owl:Thing ». As it, it is an « owl:Class » and could be used as a range of Object properties.</rdfs:comment>
     </owl:Class>
     
 

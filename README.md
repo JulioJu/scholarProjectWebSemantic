@@ -254,13 +254,7 @@ There are alternatives, non vimesque solutions.
     https://www.getpostman.com/
 
 * Note: To copy request in Wireshark to use it see notice below
-    * On Vim Roast, add `http://` in the `HOST` request header.
-        * Then to make a request simply use something like
-        `GET /path`.
-        * If the HOST is `http://google.fr`, when you will
-            press enter to `GET /PATH` it will trigger a
-            HTTP GET request to `http://google.fr/path`
-        * TODO see https://github.com/sharat87/roast.vim/issues/14
+        * see also https://github.com/sharat87/roast.vim/issues/14
 
 * I've posted lot of issues at
     https://github.com/sharat87/roast.vim/issues?utf8=✓&q=author:JulioJu+
@@ -269,7 +263,7 @@ There are alternatives, non vimesque solutions.
     1. Add type for rescue Wireshark headers in the documentation
     2. Add a template to retrieve authentification header (as it was
         shown at https://github.com/baverman/vial-http but this plugin was buggy
-        when it was presented)
+        when it was presented during a TupperVim conf)
     3. Automate tests
     5. Comparaison with vim-rest-console.
 
@@ -337,16 +331,17 @@ Note: verify the tcpdump is ordered by `N°`.
     2. A new window appears with two pans
     3. On the top pan, unfold « Hyptertext Transfer Protocol »
     4. Select the blue link « `[Full request URI:
-       http://localhost…]` »
-       (as it we are sure
-       that we are on the second tab named « Reassembled TCP »).
+    http://localhost…]` »
+    (as it we are sure
+    that we are on the second tab named « Reassembled TCP »).
     5. On its bottom pan righ click anywhere
     6. contextual menu appears
     7. copy
     8. as Printable text
- * When we copy and past a request from Wireshark, if it's an UNICODE
-     char it is correctly copy and past even if it is symbolised
-     by « . » on Wireshark. Tested with char « ¿ ».
+    * Note: on Wireshark, Unicode and not printable characters are represented by
+        the symbole ` . `.  It's not a problem, when you copy it in Vim the correct
+        corresponding symbols are represented.
+        https://github.com/sharat87/roast.vim/issues/22
 
 ### Teacher's instructions
 
@@ -1580,6 +1575,20 @@ In Protégé, Range restriction generate the following xml text
 
 * Check https://www.w3.org/wiki/SparqlEndpoints
 
+### data.gouv.fr sparql
+
+
+* How to use sparql on data.gouv.fr https://www.data.gouv.fr/fr/datasets/metadonnees-des-jeux-de-donnees-publies-sur-data-gouv-fr-rdf-web-semantique/
+    * This page seems very old as they advise OpenRefine and its RDF plugin
+        that is not maintened since lot of time.
+    * The online sparql engine does not respond today
+        http://www.data.maudry.com:3030/datagouvfr/sparql
+    * Source code of the project https://github.com/ColinMaudry/datagouvfr-rdf
+        * At this page (not updated since 3 day ago) he
+        advises the tool tarql to ocnvert csv to RDF
+        https://github.com/ColinMaudry/datagouvfr-rdf
+    * The author is https://colin.maudry.com/
+
 ### LinkedGeoData.org
 
 * For Geo there is LinkedGeoData.org, but the last update of the
@@ -2220,7 +2229,8 @@ ORDER BY ?communeLabel ?commune
         * Google Refine. In October 2012, it was renamed OpenRefine
             as it transitioned to a community-supported product.
     * Or with the sed like explained above
-
+    * Or with TARQL https://github.com/tarql/tarql
+        (not tested)
 
 ## Jena Documentation
 
