@@ -621,6 +621,71 @@ TODO add an issue on https://github.com/Galigator/openllet
 
 ## sempiconto.owl
 
+### Dublin Core
+
+I use Dublin Core in annotations of Ontology
+https://en.wikipedia.org/wiki/Dublin_Core
+
+> The Dublin Core Metadata Initiative supports innovation in metadata design and
+> best practices.
+> http://dublincore.org/
+
+### Simple Knowledge Organization System
+
+> The Simple Knowledge Organization System (SKOS) is a common data model for
+> sharing and linking knowledge organization systems via the Semantic Web
+> https://www.w3.org/2009/08/skos-reference/skos.html
+
+I use `http://www.w3.org/2004/02/skos/core#` especially
+`http://www.w3.org/2004/02/skos/core#definition`
+
+For instance
+
+```xml
+    <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#DepictionMammalExceptHuman">
+        <rdfs:subClassOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#DepictionWhatAnimal"/>
+        <rdfs:comment xml:lang="fr">Mammifère à l&apos;exception des humains</rdfs:comment>
+        <skos:definition xml:lang="fr">Mammifère à l&apos;exception des humains</skos:definition>
+    </owl:Class>
+```
+
+See also https://en.wikipedia.org/wiki/Simple_Knowledge_Organization_System
+
+### Shapes Constraint Language (SHACL)
+
+Used to know what is the shape of `http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumSharedWith`
+
+In Protégé, under the tab `Entities -> Indivudal` see
+http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#ShapeSharedWithUserCollection
+
+It is defined as:
+```xml
+        <rdfs:seeAlso>
+            <rdf:Description>
+                <rdfs:comment xml:lang="en">The example</rdfs:comment>
+                <rdfs:seeAlso rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#ShapeSharedWithUserCollection</rdfs:seeAlso>
+            </rdf:Description>
+        </rdfs:seeAlso>
+        <rdfs:seeAlso>
+            <rdf:Description>
+                <rdfs:comment xml:lang="en">On what the example is based</rdfs:comment>
+                <rdfs:seeAlso rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">https://www.topquadrant.com/2017/06/13/constraints-on-rdflists-using-shacl/</rdfs:seeAlso>
+            </rdf:Description>
+        </rdfs:seeAlso>
+        <rdfs:seeAlso>
+            <rdf:Description>
+                <rdfs:comment xml:lang="en">Official example to understand how SHACL works</rdfs:comment>
+                <rdfs:seeAlso rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">https://www.w3.org/TR/shacl/#shacl-example</rdfs:seeAlso>
+            </rdf:Description>
+        </rdfs:seeAlso>
+```
+
+It renders this thing as annotations. But I don't understand why.
+
+See also
+* the Official example to understand how SHACL works https://www.w3.org/TR/shacl/#shacl-example
+* On what the example is based https://www.topquadrant.com/2017/06/13/constraints-on-rdflists-using-shacl/
+
 ### « Who » question
 
 The property could be ObjectProperty or DatatypeProperty
@@ -667,6 +732,26 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
         <rdfs:isDefinedBy xml:lang="en">https://www.w3.org/TR/xmlschema11-2/#gYearMonth</rdfs:isDefinedBy>
     </rdfs:Datatype>
 ```
+##### OWL-Time
+
+This ontology is defined at https://www.w3.org/TR/owl-time/#time:DateTimeInterval
+
+The following DatatypeProperty of `http://www.w3.org/2006/time` can't be used
+because their domains are
+
+```xml
+    <owl:Class rdf:about="http://www.w3.org/2006/time#Instant">
+        <!-- […] -->
+        <rdfs:comment xml:lang="en">A temporal entity with zero extent or duration</rdfs:comment>
+        <rdfs:label xml:lang="en">Time instant</rdfs:label>
+        <skos:definition xml:lang="en">A temporal entity with zero extent or duration</skos:definition>
+    </owl:Class>
+```
+
+1. `http://www.w3.org/2006/time#inXSDDate`
+2. `http://www.w3.org/2006/time#inXSDgYear`
+3. `http://www.w3.org/2006/time#inXSDgYearMonth`
+
 
 #### Winter, Spring, Summer, Autumn
 
@@ -700,6 +785,8 @@ without more success. (existential restriction)
 > (e.g., specify a month as an interval of days in a year, I think you’d have to
 > define Interval as a class and specify max and min as data properties.
 > http://protege-project.136.n4.nabble.com/Data-property-assertions-for-individuals-in-Protege-5-0-beta-td4661131.html
+
+###### OWL-Time
 
 * Or use:
     https://www.w3.org/TR/owl-time/#time:DateTimeInterval
@@ -1205,9 +1292,13 @@ Use in range: `xsd:double[ >= 0, <= 0 ].`
 
 ### OWL2 essential resources
 
+
 ***OWL2 Document Overview***. When we want understand organization of the doc,
     use this one
     https://www.w3.org/TR/owl2-overview/
+
+***You must read the figure 2 at this link:***
+https://www.w3.org/TR/2012/REC-owl2-syntax-20121211/#Entities.2C_Literals.2C_and_Anonymous_Individuals
 
 * To search something, use
     https://www.w3.org/TR/2012/REC-owl2-quick-reference-20121211/
@@ -1379,6 +1470,46 @@ As W3C use a syntax that I don't understand well
 * See also
     https://stackoverflow.com/questions/37157883/member-of-an-owlclass-versus-owlnamedindividual
 
+### Class expression
+> In OWL 2, classes and property expressions are used to construct class
+> expressions, sometimes also called descriptions, and, in the description logic
+> literature, complex concepts. Class expressions represent sets of individuals by
+> formally specifying conditions on the individuals' properties; individuals
+> satisfying these conditions are said to be instances of the respective class
+> expressions. In the structural specification of OWL 2, class expressions are
+> represented by ClassExpression.
+>
+> A class expression can be used to represent the set of "people that have at
+> least one child". If an ontology additionally contains statements that "Peter is
+> a person" and that "Peter has child Chris", then Peter can be classified as an
+> instance of the mentioned class expression.
+>
+> OWL 2 provides a rich set of primitives that can be used to construct class
+> expressions. In particular, it provides the well known Boolean connectives and,
+> or, and not; a restricted form of universal and existential quantification;
+> number restrictions; enumeration of individuals; and a special self-restriction.
+>
+> As shown in Figure 2, classes are the simplest form of class expressions. The
+> other, complex, class expressions, are described in the following sections.
+> https://www.w3.org/TR/2012/REC-owl2-syntax-20121211/#Class_Expressions
+
+#### Max(min)cardinialyty and existential / universal restrictions
+
+> An existential class expression ObjectSomeValuesFrom( OPE CE ) consists of an
+> object property expression OPE and a class expression CE, and it contains all
+> those individuals that are connected by OPE to an individual that is an instance
+> of CE. Provided that OPE is simple according to the definition in Section 11,
+> such a class expression can be seen as a syntactic shortcut for the class
+> expression ObjectMinCardinality( 1 OPE CE ).
+https://www.w3.org/TR/2012/REC-owl2-syntax-20121211/#Existential_Quantification_2
+
+> A universal class expression ObjectAllValuesFrom( OPE CE ) consists of an object
+> property expression OPE and a class expression CE, and it contains all those
+> individuals that are connected by OPE only to individuals that are instances of
+> CE. Provided that OPE is simple according to the definition in Section 11, such
+> a class expression can be seen as a syntactic shortcut for the class expression
+
+https://www.w3.org/TR/2012/REC-owl2-syntax-20121211/#Maximum_Cardinality
 ## Protégé
 
 * Currently release version of Protégé is compatible with Java 8 and not Java 11
@@ -1442,7 +1573,25 @@ two and not more Classes or Individuals. Exemple for
     </owl:Class>
 ```
 
+### owl:propertyChainAxiom
+
+```xml
+    <owl:ObjectProperty rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoSharedWith">
+        <rdfs:label xml:lang="en">photo shared with</rdfs:label>
+        <owl:propertyChainAxiom rdf:parseType="Collection">
+            <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoInAlbum"/>
+            <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumSharedWith"/>
+        </owl:propertyChainAxiom>
+    </owl:ObjectProperty>
+```
+
+In Protégé gives
+in the pan `Entities -> Classes -> Description: TheClass`).
+under the button `SubProperty of (Chain)`:
+`'photo in album' o 'album shared with'`
+
 #### owl:unionOf
+***See*** https://www.w3.org/TR/2012/REC-owl2-primer-20121211/#Complex_Classes
 
 ```xml
     <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#TableAndChair">
@@ -1463,6 +1612,8 @@ The individual `CampingTableWithChair` is an instance of `Chair` and `Table`,
 therefore can't be a `owl:disjointUnionOf`.
 
 #### owl:intersectionOf
+
+***See*** https://www.w3.org/TR/2012/REC-owl2-primer-20121211/#Complex_Classes
 
 ***See:*** https://www.w3.org/TR/owl-xmlsyntax/apd-example.html#subapd-eg41
 
@@ -1500,6 +1651,10 @@ Under the tab « object property », click on « Ranges »
     ?domain :photoTakenDateObjectProperty ?individual .
     ?individual a :Season , xmln:date .
     ```
+
+    * We deduce than ?individual is an individual of a *Class expression*
+        who is the intersection of the Class `:Season` and `xlmn:date`
+        *See also the section above about « Class expression ».
 
     * or as generated by Protégé:
 
@@ -3757,6 +3912,184 @@ and the range :Professor
 
 7. See question under my section
     « Existential and universal restrictions in tab « Object Property » »
+
+9. The question
+
+diapositive number 72 of the course of Mister Atencias about RDF
+
+On the second paragraph
+<code>
+exvoc:resolution1 exvoc:approvedBy exvoc:rulesCommittee.
+exvoc:rulesCommittee a rdf:Bag;
+ rdf:_1 exvoc:Fred;
+ rdf:_2 exvoc:Wilma;
+ rdf:_3 exvoc:Dino.
+</code>
+
+The lecture says that « le comité dans l'ensemble a approuvé la résolution ».
+Mais pour exprimer des ensembles fermés, je croyais qu'il fallait utiliser des listes ?
+
+L'exemple 2 ne voudrait-il pas plutôt dire : « La résolution a été approuvé par le comité en tant qu'entité. Ce comité est composé entre autre (rdf:Bag) de Fred, Wilma et Dino (tous les membres du comité n'ont peut-être pas approuvé) » ?
+
+Et l'exemple 1
+<code>
+exvoc:resolution1 exvoc:approvedBy exvoc:Fred, exvoc:Wilma, exvoc:Dino.
+</code>
+signifirait simplement « la résolution 1 a été approuvé par Fred, Wilma et Dino » ?
+
+Conclusion de la diapositive 72: l'exemple 2 est meilleur que l'exemple 1.
+Mais si je comprends bien, l'exemple 1 et 2 ne signifient pas la même chose ?
+L'un ne peut donc pas être meilleur que l'autre, vu qu'ils n'ont pas la même
+signification ?
+
+### Protégé reasoners errors
+
+***Before all, run Protégé in Console to see all StackTrace***
+
+`http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#shouldBeInconsistent`
+should be inconsistant with all reasoners!
+I've read and test also:
+* https://pellet-users.mindswap.narkive.com/iFJdKDAo/consistency-checking-doesn-t-work
+* http://protege-project.136.n4.nabble.com/Protege-4-3-How-to-check-the-consistency-td4660711.html
+* http://protege-project.136.n4.nabble.com/Reasoner-caused-owl-nothing-td4667552.html
+
+==> Reasoners seems to bug in Protégé
+#### Ontop 1.18.0
+
+> Ontop is a platform to query relational databases as Virtual RDF Graphs using
+> SPARQL. It's fast and is packed with features.
+https://ontop.inf.unibz.it/
+
+On Protégé 5.5 we have a menu `Ontop -> Check for inconsistancies`.
+
+* OWL 2 Reasoners and custom datatypes not working
+    https://stackoverflow.com/questions/24540401/owl-2-reasoners-and-custom-datatypes-not-working
+    * But I have several custom datatypes!
+    Actually When I start Ontop I have the error
+    ```
+Axiom does not belong to OWL 2 QL:  Transitive: isSameUserAs
+Axiom does not belong to OWL 2 QL: <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Winter> isDefinedBy "https://en.wikipedia.org/wiki/Season#Four-season_calendar_reckoning"^^anyUR
+I (Unsupported data range: XSD_ANY_URI)
+Axiom does not belong to OWL 2 QL: photoTakenByOwner Range: boolean (unsupported datatype: XSD_BOOLEAN)
+Axiom does not belong to OWL 2 QL: _:genid2147483721 zeroOrMorePath <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> (Found anonymous individual, this feature is not supported:_:genid2147483
+721)
+Axiom does not belong to OWL 2 QL: AlbumOrPhoto DisjointUnionOf Album, Photo
+Axiom does not belong to OWL 2 QL: photoTakenTheMonth Range: gYearMonth[>= "1826-01"^^gYearMonth] (unsupported OWLDataRange construct: gYearMonth[>= "1826-01"^^gYearMonth])
+Axiom does not belong to OWL 2 QL: photoTakenAtExactDate Range: date[>= "1826-01-01"^^date] (unsupported OWLDataRange construct: date[>= "1826-01-01"^^date])
+Axiom does not belong to OWL 2 QL: Season EquivalentTo {Autumn , Spring , Summer , Winter} (unsupported construct {Autumn , Spring , Summer , Winter})
+Axiom does not belong to OWL 2 QL: FurnitureWithTableAndChair EquivalentTo Chair and Table (unsupported construct Chair
+ and Table)
+Axiom does not belong to OWL 2 QL: Photo SubClassOf photoInAlbum exactly 1 Album (unsupported operation in photoInAlbum exactly 1 Album)
+Axiom does not belong to OWL 2 QL: photoTakenYear Range: gYear[>= "1826"^^gYear] (unsupported OWLDataRange construct: gYear[>= "1826"^^gYear])
+Axiom does not belong to OWL 2 QL: <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Spring> isDefinedBy "https://en.wikipedia.org/wiki/Season#Four-season_calendar_reckoning"^^anyUR
+I (Unsupported data range: XSD_ANY_URI)
+Axiom does not belong to OWL 2 QL: _:genid2147483718 seeAlso "http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#ShapeSharedWithUserCollection"^^anyURI (Found anonymous individual, th
+is feature is not supported:_:genid2147483718)
+Axiom does not belong to OWL 2 QL: photoInAlbum o albumOwnerLogin SubPropertyOf: photoOwnedBy
+Axiom does not belong to OWL 2 QL: _:genid2147483724 path <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumSharedWith> (Found anonymous individual, this feature is not support
+ed:_:genid2147483724)
+Axiom does not belong to OWL 2 QL: TableAndChair EquivalentTo Chair or FurnitureWithTableAndChair or Table (unsupported construct Chair or FurnitureWithTableAndChair or Table)
+Axiom does not belong to OWL 2 QL: _:genid2147483724 path <http://datashapes.org/dash#ListShape> (Found anonymous individual, this feature is not supported:_:genid2147483724)
+Axiom does not belong to OWL 2 QL: UserGroupAdmin EquivalentTo {admin_created_in_protege1 , admin_created_in_protege2} (unsupported construct {admin_created_in_protege1 , admin_created_in_pro
+tege2})
+Axiom does not belong to OWL 2 QL: _:genid2147483719 seeAlso "https://www.topquadrant.com/2017/06/13/constraints-on-rdflists-using-shacl/"^^anyURI (Found anonymous individual, this feature is
+ not supported:_:genid2147483719)
+Axiom does not belong to OWL 2 QL: _:genid2147483722 class <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#User> (Found anonymous individual, this feature is not supported:_:genid
+2147483722)
+Axiom does not belong to OWL 2 QL: <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Season> seeAlso "https://en.wikipedia.org/wiki/Season#Four-season_calendar_reckoning"^^anyURI (U
+nsupported data range: XSD_ANY_URI)
+Axiom does not belong to OWL 2 QL: _:genid2147483720 comment "Official example to understand how SHACL works"@en (Found anonymous individual, this feature is not supported:_:genid2147483720)
+Axiom does not belong to OWL 2 QL: _:genid2147483722 path _:genid2147483723 (Found anonymous individual, this feature is not supported:_:genid2147483722)
+Axiom does not belong to OWL 2 QL: photoInAlbum o albumSharedWith SubPropertyOf: photoSharedWith
+Axiom does not belong to OWL 2 QL: _:genid2147483724 property _:genid2147483722 (Found anonymous individual, this feature is not supported:_:genid2147483724)
+Axiom does not belong to OWL 2 QL: _:genid2147483719 comment "On what the example is based"@en (Found anonymous individual, this feature is not supported:_:genid2147483719)
+Axiom does not belong to OWL 2 QL: <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Summer> isDefinedBy "https://en.wikipedia.org/wiki/Season#Four-season_calendar_reckoning"^^anyUR
+I (Unsupported data range: XSD_ANY_URI)
+Axiom does not belong to OWL 2 QL: <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#SeeAlsoUserListShape> seeAlso _:genid2147483720 (Found anonymous individual, this feature is not
+ supported:_:genid2147483720)
+Axiom does not belong to OWL 2 QL: Album SubClassOf albumOwnerLogin only UserLogin (unsupported operation in albumOwnerLogin only UserLogin)
+Axiom does not belong to OWL 2 QL: Album SubClassOf albumOwnerLogin exactly 1 UserLogin (unsupported operation in albumOwnerLogin exactly 1 UserLogin)
+Axiom does not belong to OWL 2 QL: _:genid2147483722 nodeKind <http://www.w3.org/ns/shacl#IRI> (Found anonymous individual, this feature is not supported:_:genid2147483722)
+Axiom does not belong to OWL 2 QL: _:genid2147483718 comment "The example"@en (Found anonymous individual, this feature is not supported:_:genid2147483718)
+Axiom does not belong to OWL 2 QL: AlbumOrPhoto SubClassOf sharedWithUserCollection only UserLogin (unsupported operation in sharedWithUserCollection only UserLogin)
+Axiom does not belong to OWL 2 QL: AlbumOrPhoto SubClassOf sharedWithUserCollection exactly 1 rdfListOfUsers (unsupported operation in sharedWithUserCollection exactly 1 rdfListOfUsers)
+Axiom does not belong to OWL 2 QL: DepictionMammal DisjointUnionOf DepictionMammalExceptHuman, DepictionWhoPerson
+Axiom does not belong to OWL 2 QL: UserLogin DisjointUnionOf UserGroupAdmin, UserGroupNormal
+Axiom does not belong to OWL 2 QL: <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Autumn> isDefinedBy "https://en.wikipedia.org/wiki/Season#Four-season_calendar_reckoning"^^anyUR
+I (Unsupported data range: XSD_ANY_URI)
+Axiom does not belong to OWL 2 QL: photoTakenYearSeason Range: gYearSeason[>= "1826-Spring"^^gYearSeason] (unsupported OWLDataRange construct: gYearSeason[>= "1826-Spring"^^gYearSeason])
+Axiom does not belong to OWL 2 QL: <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#SeeAlsoUserListShape> seeAlso _:genid2147483719 (Found anonymous individual, this feature is not
+ supported:_:genid2147483719)
+Axiom does not belong to OWL 2 QL: <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#SeeAlsoUserListShape> seeAlso _:genid2147483718 (Found anonymous individual, this feature is not
+ supported:_:genid2147483718)
+Axiom does not belong to OWL 2 QL: <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#ShapeSharedWithUserCollection> property _:genid2147483724 (Found anonymous individual, this feat
+ure is not supported:_:genid2147483724)
+Axiom does not belong to OWL 2 QL: Photo SubClassOf photoInAlbum only Album (unsupported operation in photoInAlbum only Album)
+Axiom does not belong to OWL 2 QL: Depiction DisjointUnionOf DepictionWhat, DepictionWhoPerson
+Axiom does not belong to OWL 2 QL: _:genid2147483720 seeAlso "https://www.w3.org/TR/shacl/#shacl-example"^^anyURI (Found anonymous individual, this feature is not supported:_:genid2147483720)
+
+Could not initialize the Quest query answering engine. Answering queries will not be available.
+no such vertex in graph
+java.lang.IllegalArgumentException: no such vertex in graph
+        at org.jgrapht.graph.AbstractGraph.assertVertexExist(AbstractGraph.java:158) ~[it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
+        at org.jgrapht.graph.AbstractBaseGraph.addEdge(AbstractBaseGraph.java:193) ~[it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
+        at it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl.getClassGraph(TBoxReasonerImpl.java:606) ~[it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
+        at it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl.create(TBoxReasonerImpl.java:83) ~[it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
+        at it.unibz.inf.ontop.owlrefplatform.core.Quest.setupRepository(Quest.java:436) ~[it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
+        at it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL.prepareQuestInstance(QuestOWL.java:271) [it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
+        at it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL.prepareReasoner(QuestOWL.java:452) [it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
+        at it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL.init(QuestOWL.java:148) [it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
+        at it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL.<init>(QuestOWL.java:174) [it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
+        at it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory.createReasoner(QuestOWLFactory.java:107) [it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
+        at it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory.createReasoner(QuestOWLFactory.java:92) [it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
+        at it.unibz.inf.ontop.protege.core.OntopOWLFactory.createReasoner(OntopOWLFactory.java:34) [it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
+        at it.unibz.inf.ontop.protege.core.OntopOWLFactory.createReasoner(OntopOWLFactory.java:21) [it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
+        at org.protege.editor.owl.model.inference.ReasonerUtilities.createReasoner(ReasonerUtilities.java:20) [protege-editor-owl.jar:na]
+        at org.protege.editor.owl.model.inference.OWLReasonerManagerImpl$ClassificationRunner.ensureRunningReasonerInitialized(OWLReasonerManagerImpl.java:428) [protege-editor-owl.jar:na]
+        at org.protege.editor.owl.model.inference.OWLReasonerManagerImpl$ClassificationRunner.run(OWLReasonerManagerImpl.java:386) [protege-editor-owl.jar:na]
+        at java.lang.Thread.run(Thread.java:748) [na:1.8.0_222]
+    ```
+
+* With the ontology give by the teacher ./teacherExample/src/main/resources/sempiconto.owl , when I try to start
+    the Ontop reasoner I have
+
+    ```
+it.unibz.inf.ontop.model.OBDAException: java.lang.Exception: No datasource has been defined. Virtual ABox mode requires exactly 1 data source in your OBDA model.
+        at it.unibz.inf.ontop.owlrefplatform.core.Quest.setupRepository(Quest.java:661) ~[it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
+        at it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL.prepareQuestInstance(QuestOWL.java:271) [it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
+        at it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL.prepareReasoner(QuestOWL.java:452) [it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
+        at it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL.init(QuestOWL.java:148) [it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
+        at it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL.<init>(QuestOWL.java:174) [it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
+        at it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory.createReasoner(QuestOWLFactory.java:107) [it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
+        at it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory.createReasoner(QuestOWLFactory.java:92) [it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
+        at it.unibz.inf.ontop.protege.core.OntopOWLFactory.createReasoner(OntopOWLFactory.java:34) [it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
+        at it.unibz.inf.ontop.protege.core.OntopOWLFactory.createReasoner(OntopOWLFactory.java:21) [it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
+        at org.protege.editor.owl.model.inference.ReasonerUtilities.createReasoner(ReasonerUtilities.java:20) [protege-editor-owl.jar:na]
+        at org.protege.editor.owl.model.inference.OWLReasonerManagerImpl$ClassificationRunner.ensureRunningReasonerInitialized(OWLReasonerManagerImpl.java:428) [protege-editor-owl.jar:na]
+        at org.protege.editor.owl.model.inference.OWLReasonerManagerImpl$ClassificationRunner.run(OWLReasonerManagerImpl.java:386) [protege-editor-owl.jar:na]
+        at java.lang.Thread.run(Thread.java:748) [na:1.8.0_222]
+Caused by: java.lang.Exception: No datasource has been defined. Virtual ABox mode requires exactly 1 data source in your OBDA model.
+        at it.unibz.inf.ontop.owlrefplatform.core.Quest.setupRepository(Quest.java:515) ~[it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
+        ... 12 common frames omitted
+    ```
+
+* Maybe try to configure with thanks the outdated help
+    https://github.com/ontop/ontop/wiki/Ontop-Preferences
+    (now there is a menu in `File -> Preferences -> Ontop Reasoner`)
+    * See also https://stackoverflow.com/questions/46297683/protege-ontop-reasoner-initialization-error
+        * Note, as we could see at
+            https://github.com/ontop/ontop/wiki/Ontop-Preferences/d619f9c34da99bef5fbaa6bb5bc8eb9f171a6187
+            I've corrected the Markdown syntax a title. Not done by nobody,
+            not edited since 2 years.
+
+    * To learn how to use Protégé we could see
+        https://github.com/ontop/ontop/wiki/Easy-Tutorial:-Using-Ontop-from-Protege
+    * Information about ontopOBDAModel
+        https://github.com/ontop/ontop/wiki/ontopOBDAModel
+    * TODO investigate issues
+
+
+
 
 # Credits
 

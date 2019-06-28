@@ -57,7 +57,7 @@ public class ReadUser extends ReadAbstract {
         Triple tripleSubClassOf = Triple.create(
                 Var.alloc("adminGroup"),
                 RDFS.subClassOf.asNode(),
-                SempicOnto.User.asNode());
+                SempicOnto.UserLogin.asNode());
         BasicPattern basicPatternWhere = new BasicPattern(basicPattern);
         basicPatternWhere.add(tripleSubClassOf);
         Op op = new OpBGP(basicPatternWhere);
