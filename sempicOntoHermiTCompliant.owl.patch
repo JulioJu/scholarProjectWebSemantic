@@ -1,0 +1,271 @@
+--- sempiconto.owl	2019-07-03 15:43:12.429381447 +0200
++++ sempicOntoHermiTCompliant.owl	2019-07-03 16:29:33.527856280 +0200
+@@ -134,53 +134,53 @@
+ 
+     <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#gYearSeason -->
+ 
+-    <rdfs:Datatype rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#gYearSeason">
+-        <rdfs:comment xml:lang="en">Is equivalent to the regular expression
+-
+--?([1-9][0-9]{3,}|0[0-9]{3})-(summer)|(autumn)|(winter)|(spring)</rdfs:comment>
+-        <rdfs:seeAlso xml:lang="en">https://www.w3.org/TR/xmlschema11-2/#date</rdfs:seeAlso>
+-        <skos:definition xml:lang="en">Is equivalent to the regular expression
+-
+--?([1-9][0-9]{3,}|0[0-9]{3})-(summer)|(autumn)|(winter)|(spring)</skos:definition>
+-    </rdfs:Datatype>
++<!--     <rdfs:Datatype rdf:about="http://miashs.univ&#45;grenoble&#45;alpes.fr/ontologies/sempic.owl#gYearSeason"> -->
++<!--         <rdfs:comment xml:lang="en">Is equivalent to the regular expression -->
++<!--  -->
++<!-- &#45;?([1&#45;9][0&#45;9]{3,}|0[0&#45;9]{3})&#45;(summer)|(autumn)|(winter)|(spring)</rdfs:comment> -->
++<!--         <rdfs:seeAlso xml:lang="en">https://www.w3.org/TR/xmlschema11&#45;2/#date</rdfs:seeAlso> -->
++<!--         <skos:definition xml:lang="en">Is equivalent to the regular expression -->
++<!--  -->
++<!-- &#45;?([1&#45;9][0&#45;9]{3,}|0[0&#45;9]{3})&#45;(summer)|(autumn)|(winter)|(spring)</skos:definition> -->
++<!--     </rdfs:Datatype> -->
+     
+ 
+ 
+     <!-- http://www.w3.org/2001/XMLSchema#date -->
+ 
+-    <rdfs:Datatype rdf:about="http://www.w3.org/2001/XMLSchema#date">
+-        <rdfs:comment xml:lang="en">(…)
+-
+-The dateLexicalRep production is equivalent to this regular expression:
+-    -?([1-9][0-9]{3,}|0[0-9]{3})-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00))?
+-Note that neither the dateLexicalRep production nor this regular expression
+-alone enforce the constraint on dateLexicalRep given above.
+-
+-(…)
+-The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping· is
+-·dateCanonicalMap·.
+-(…)</rdfs:comment>
+-        <rdfs:comment xml:lang="en">Imported by me</rdfs:comment>
+-        <rdfs:isDefinedBy xml:lang="en">https://www.w3.org/TR/xmlschema11-2/#date</rdfs:isDefinedBy>
+-    </rdfs:Datatype>
++<!--     <rdfs:Datatype rdf:about="http://www.w3.org/2001/XMLSchema#date"> -->
++<!--         <rdfs:comment xml:lang="en">(…) -->
++<!--  -->
++<!-- The dateLexicalRep production is equivalent to this regular expression: -->
++<!--     &#45;?([1&#45;9][0&#45;9]{3,}|0[0&#45;9]{3})&#45;(0[1&#45;9]|1[0&#45;2])&#45;(0[1&#45;9]|[12][0&#45;9]|3[01])(Z|(\+|&#45;)((0[0&#45;9]|1[0&#45;3]):[0&#45;5][0&#45;9]|14:00))? -->
++<!-- Note that neither the dateLexicalRep production nor this regular expression -->
++<!-- alone enforce the constraint on dateLexicalRep given above. -->
++<!--  -->
++<!-- (…) -->
++<!-- The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping· is -->
++<!-- ·dateCanonicalMap·. -->
++<!-- (…)</rdfs:comment> -->
++<!--         <rdfs:comment xml:lang="en">Imported by me</rdfs:comment> -->
++<!--         <rdfs:isDefinedBy xml:lang="en">https://www.w3.org/TR/xmlschema11&#45;2/#date</rdfs:isDefinedBy> -->
++<!--     </rdfs:Datatype> -->
+     
+ 
+ 
+     <!-- http://www.w3.org/2001/XMLSchema#gYear -->
+ 
+-    <rdfs:Datatype rdf:about="http://www.w3.org/2001/XMLSchema#gYear">
+-        <rdfs:comment xml:lang="en">Imported by me xsd:date</rdfs:comment>
+-        <rdfs:isDefinedBy xml:lang="en">https://www.w3.org/TR/xmlschema11-2/#gYear</rdfs:isDefinedBy>
+-    </rdfs:Datatype>
++    <!-- <rdfs:Datatype rdf:about="http://www.w3.org/2001/XMLSchema#gYear"> -->
++    <!--     <rdfs:comment xml:lang="en">Imported by me xsd:date</rdfs:comment> -->
++    <!--     <rdfs:isDefinedBy xml:lang="en">https://www.w3.org/TR/xmlschema11&#45;2/#gYear</rdfs:isDefinedBy> -->
++    <!-- </rdfs:Datatype> -->
+     
+ 
+ 
+     <!-- http://www.w3.org/2001/XMLSchema#gYearMonth -->
+ 
+-    <rdfs:Datatype rdf:about="http://www.w3.org/2001/XMLSchema#gYearMonth">
+-        <rdfs:comment xml:lang="en">Imported by me xsd:date</rdfs:comment>
+-        <rdfs:isDefinedBy xml:lang="en">https://www.w3.org/TR/xmlschema11-2/#gYearMonth</rdfs:isDefinedBy>
+-    </rdfs:Datatype>
++    <!-- <rdfs:Datatype rdf:about="http://www.w3.org/2001/XMLSchema#gYearMonth"> -->
++    <!--     <rdfs:comment xml:lang="en">Imported by me xsd:date</rdfs:comment> -->
++    <!--     <rdfs:isDefinedBy xml:lang="en">https://www.w3.org/TR/xmlschema11&#45;2/#gYearMonth</rdfs:isDefinedBy> -->
++    <!-- </rdfs:Datatype> -->
+     
+ 
+ 
+@@ -241,7 +241,7 @@
+         <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+         <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#InverseFunctionalProperty"/>
+         <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#SymmetricProperty"/>
+-        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#TransitiveProperty"/>
++        <!-- <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#TransitiveProperty"/> -->
+         <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ReflexiveProperty"/>
+         <rdfs:label xml:lang="en">is same user as</rdfs:label>
+         <owl:deprecated xml:lang="en">Used only to show to the teacher that I understand the concept of « owl:TransitiveProperty », « owl:SymmetricProperty » (?s :isSameUserAs ?o  ==&gt; ?o :isSameUserAs ?s), « owl:ReflexiveProperty » (?s :isSameUserAs ?s).</owl:deprecated>
+@@ -328,10 +328,10 @@
+         <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#IrreflexiveProperty"/>
+         <rdfs:domain rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Photo"/>
+         <rdfs:range rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#UserLogin"/>
+-        <owl:propertyChainAxiom rdf:parseType="Collection">
+-            <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoInAlbum"/>
+-            <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumOwnerLogin"/>
+-        </owl:propertyChainAxiom>
++        <!-- <owl:propertyChainAxiom rdf:parseType="Collection"> -->
++        <!--     <rdf:Description rdf:about="http://miashs.univ&#45;grenoble&#45;alpes.fr/ontologies/sempic.owl#photoInAlbum"/> -->
++        <!--     <rdf:Description rdf:about="http://miashs.univ&#45;grenoble&#45;alpes.fr/ontologies/sempic.owl#albumOwnerLogin"/> -->
++        <!-- </owl:propertyChainAxiom> -->
+         <rdfs:label xml:lang="en">photo owned by</rdfs:label>
+     </owl:ObjectProperty>
+     
+@@ -346,10 +346,10 @@
+         <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#IrreflexiveProperty"/>
+         <rdfs:domain rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Photo"/>
+         <rdfs:range rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#rdfListOfUsers"/>
+-        <owl:propertyChainAxiom rdf:parseType="Collection">
+-            <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoInAlbum"/>
+-            <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumSharedWith"/>
+-        </owl:propertyChainAxiom>
++        <!-- <owl:propertyChainAxiom rdf:parseType="Collection"> -->
++        <!--     <rdf:Description rdf:about="http://miashs.univ&#45;grenoble&#45;alpes.fr/ontologies/sempic.owl#photoInAlbum"/> -->
++        <!--     <rdf:Description rdf:about="http://miashs.univ&#45;grenoble&#45;alpes.fr/ontologies/sempic.owl#albumSharedWith"/> -->
++        <!-- </owl:propertyChainAxiom> -->
+         <rdfs:label xml:lang="en">photo shared with</rdfs:label>
+         <rdfs:seeAlso rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#SeeAlsoUserListShape"/>
+     </owl:ObjectProperty>
+@@ -501,16 +501,16 @@
+         <rdfs:subPropertyOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoTakenDateDatatypeProperty"/>
+         <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+         <rdfs:domain rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Photo"/>
+-        <rdfs:range>
+-            <rdfs:Datatype>
+-                <owl:onDatatype rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
+-                <owl:withRestrictions rdf:parseType="Collection">
+-                    <rdf:Description>
+-                        <xsd:minInclusive rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1826-01-01</xsd:minInclusive>
+-                    </rdf:Description>
+-                </owl:withRestrictions>
+-            </rdfs:Datatype>
+-        </rdfs:range>
++        <!-- <rdfs:range> -->
++        <!--     <rdfs:Datatype> -->
++        <!--         <owl:onDatatype rdf:resource="http://www.w3.org/2001/XMLSchema#date"/> -->
++        <!--         <owl:withRestrictions rdf:parseType="Collection"> -->
++        <!--             <rdf:Description> -->
++        <!--                 <xsd:minInclusive rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1826&#45;01&#45;01</xsd:minInclusive> -->
++        <!--             </rdf:Description> -->
++        <!--         </owl:withRestrictions> -->
++        <!--     </rdfs:Datatype> -->
++        <!-- </rdfs:range> -->
+         <owl:propertyDisjointWith rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoTakenTheMonth"/>
+         <owl:propertyDisjointWith rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoTakenYear"/>
+         <owl:propertyDisjointWith rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoTakenYearSeason"/>
+@@ -563,16 +563,16 @@
+         <rdfs:subPropertyOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoTakenDateDatatypeProperty"/>
+         <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+         <rdfs:domain rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Photo"/>
+-        <rdfs:range>
+-            <rdfs:Datatype>
+-                <owl:onDatatype rdf:resource="http://www.w3.org/2001/XMLSchema#gYearMonth"/>
+-                <owl:withRestrictions rdf:parseType="Collection">
+-                    <rdf:Description>
+-                        <xsd:minInclusive rdf:datatype="http://www.w3.org/2001/XMLSchema#gYearMonth">1826-01</xsd:minInclusive>
+-                    </rdf:Description>
+-                </owl:withRestrictions>
+-            </rdfs:Datatype>
+-        </rdfs:range>
++        <!-- <rdfs:range> -->
++        <!--     <rdfs:Datatype> -->
++        <!--         <owl:onDatatype rdf:resource="http://www.w3.org/2001/XMLSchema#gYearMonth"/> -->
++        <!--         <owl:withRestrictions rdf:parseType="Collection"> -->
++        <!--             <rdf:Description> -->
++        <!--                 <xsd:minInclusive rdf:datatype="http://www.w3.org/2001/XMLSchema#gYearMonth">1826&#45;01</xsd:minInclusive> -->
++        <!--             </rdf:Description> -->
++        <!--         </owl:withRestrictions> -->
++        <!--     </rdfs:Datatype> -->
++        <!-- </rdfs:range> -->
+         <owl:propertyDisjointWith rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoTakenYear"/>
+         <owl:propertyDisjointWith rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoTakenYearSeason"/>
+         <rdfs:label xml:lang="en">photo taken year-month</rdfs:label>
+@@ -586,16 +586,16 @@
+         <rdfs:subPropertyOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoTakenDateDatatypeProperty"/>
+         <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+         <rdfs:domain rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Photo"/>
+-        <rdfs:range>
+-            <rdfs:Datatype>
+-                <owl:onDatatype rdf:resource="http://www.w3.org/2001/XMLSchema#gYear"/>
+-                <owl:withRestrictions rdf:parseType="Collection">
+-                    <rdf:Description>
+-                        <xsd:minInclusive rdf:datatype="http://www.w3.org/2001/XMLSchema#gYear">1826</xsd:minInclusive>
+-                    </rdf:Description>
+-                </owl:withRestrictions>
+-            </rdfs:Datatype>
+-        </rdfs:range>
++        <!-- <rdfs:range> -->
++        <!--     <rdfs:Datatype> -->
++        <!--         <owl:onDatatype rdf:resource="http://www.w3.org/2001/XMLSchema#gYear"/> -->
++        <!--         <owl:withRestrictions rdf:parseType="Collection"> -->
++        <!--             <rdf:Description> -->
++        <!--                 <xsd:minInclusive rdf:datatype="http://www.w3.org/2001/XMLSchema#gYear">1826</xsd:minInclusive> -->
++        <!--             </rdf:Description> -->
++        <!--         </owl:withRestrictions> -->
++        <!--     </rdfs:Datatype> -->
++        <!-- </rdfs:range> -->
+         <owl:propertyDisjointWith rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoTakenYearSeason"/>
+         <rdfs:label xml:lang="en">Photo taken the year</rdfs:label>
+     </owl:DatatypeProperty>
+@@ -608,16 +608,16 @@
+         <rdfs:subPropertyOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoTakenDateDatatypeProperty"/>
+         <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+         <rdfs:domain rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Photo"/>
+-        <rdfs:range>
+-            <rdfs:Datatype>
+-                <owl:onDatatype rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#gYearSeason"/>
+-                <owl:withRestrictions rdf:parseType="Collection">
+-                    <rdf:Description>
+-                        <xsd:minInclusive rdf:datatype="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#gYearSeason">1826-Spring</xsd:minInclusive>
+-                    </rdf:Description>
+-                </owl:withRestrictions>
+-            </rdfs:Datatype>
+-        </rdfs:range>
++        <!-- <rdfs:range> -->
++        <!--     <rdfs:Datatype> -->
++        <!--         <owl:onDatatype rdf:resource="http://miashs.univ&#45;grenoble&#45;alpes.fr/ontologies/sempic.owl#gYearSeason"/> -->
++        <!--         <owl:withRestrictions rdf:parseType="Collection"> -->
++        <!--             <rdf:Description> -->
++        <!--                 <xsd:minInclusive rdf:datatype="http://miashs.univ&#45;grenoble&#45;alpes.fr/ontologies/sempic.owl#gYearSeason">1826&#45;Spring</xsd:minInclusive> -->
++        <!--             </rdf:Description> -->
++        <!--         </owl:withRestrictions> -->
++        <!--     </rdfs:Datatype> -->
++        <!-- </rdfs:range> -->
+     </owl:DatatypeProperty>
+     
+ 
+@@ -628,7 +628,7 @@
+         <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty"/>
+         <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+         <rdfs:domain rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#UserLogin"/>
+-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#token"/>
++        <!-- <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#token"/> -->
+         <rdfs:label xml:lang="en">user&apos;s password</rdfs:label>
+     </owl:DatatypeProperty>
+     
+@@ -1158,16 +1158,16 @@
+     
+ 
+ 
+-    <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#shouldBeInconsistent -->
+-
+-    <owl:NamedIndividual rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#shouldBeInconsistent">
+-        <rdf:type rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Album"/>
+-        <rdf:type rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Photo"/>
+-        <rdfs:comment xml:lang="en">Can&apos;t be from type Album and Photo</rdfs:comment>
+-    </owl:NamedIndividual>
+-    <rdf:Description>
+-        <sh:zeroOrMorePath rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#rest"/>
+-    </rdf:Description>
++    <!-- <!&#45;&#45; http://miashs.univ&#45;grenoble&#45;alpes.fr/ontologies/sempic.owl#shouldBeInconsistent &#45;&#45;> -->
++    <!--  -->
++    <!-- <owl:NamedIndividual rdf:about="http://miashs.univ&#45;grenoble&#45;alpes.fr/ontologies/sempic.owl#shouldBeInconsistent"> -->
++    <!--     <rdf:type rdf:resource="http://miashs.univ&#45;grenoble&#45;alpes.fr/ontologies/sempic.owl#Album"/> -->
++    <!--     <rdf:type rdf:resource="http://miashs.univ&#45;grenoble&#45;alpes.fr/ontologies/sempic.owl#Photo"/> -->
++    <!--     <rdfs:comment xml:lang="en">Can&#38;apos;t be from type Album and Photo</rdfs:comment> -->
++    <!-- </owl:NamedIndividual> -->
++    <!-- <rdf:Description> -->
++    <!--     <sh:zeroOrMorePath rdf:resource="http://www.w3.org/1999/02/22&#45;rdf&#45;syntax&#45;ns#rest"/> -->
++    <!-- </rdf:Description> -->
+     
+ 
+ 

@@ -349,6 +349,41 @@ See ./TeachersInstruction1.pdf
 
 See ./TeachersInstruction2.pdf
 
+### Install Protégé
+
+* See https://bugs.archlinux.org/task/63080
+    (issue posted by me)
+    for ArchLinux
+    Contrary to the build of ArchLinux, JRE is packaged with the app and
+    default third party plugins are installed with it.
+
+* See all versions of Protégé at
+    https://protegewiki.stanford.edu/wiki/Protege_Desktop_Old_Versions
+    * Or https://github.com/protegeproject/protege-distribution/releases/
+
+* Do not build with
+    https://github.com/protegeproject/protege/wiki/Building-from-Source
+    because of
+    https://github.com/protegeproject/protege/issues/903 (issue posted by me)
+    (Window "Inconsistent ontology explanation" not displayed )
+
+* As I say in « Protégé, generalities » section, Protégé 5.5 have some
+    problems with reasoners. Use Protégé 5.2 or 5.6.
+
+* Note, on the official doc « Building from source » of
+    https://github.com/protegeproject/protege/wiki/Building-from-Source
+    I have done the following change:
+    https://github.com/protegeproject/protege/wiki/Building-from-Source/_compare/708ed56e6932047f71dfac09c9e9a3c1caf71bbe...43706233fc63d3cf24013b4f1db1aeffcee54540
+
+#### Protégé 4.x
+
+Protégé seems to need Java 6. I've tested with Oracle-jre 7 and 8 without success
+As JRE 7 and 8 are not provided by Oracle without
+register, downladed thanks https://github.com/frekele/oracle-java/releases
+see also https://aur.archlinux.org/packages/jdk8/ )
+
+To test with Protégé 4.x, simply download Protégé with JRE embedded.
+
 # How to use fuseki and Openllet Reasoner
 
 ## Why simply add Openllet in classpath doesn't work:
@@ -620,6 +655,30 @@ TODO add an issue on https://github.com/Galigator/openllet
 * Read it in Protégé
 
 ## sempiconto.owl
+
+### Not compatible with Protégé reasoners
+
+This ontology is OWL full, not OWL DL
+
+### ./sempicOntoPelletCompliant.owl.patch
+
+```sh
+$ patch < sempicOntoPelletCompliant.owl.patch
+```
+./sempiconto.owl become compatible with Pellet
+(Pellet seems to be the best reasoner)
+
+***Do not forget to unapply any preceding patch before do this patch***
+
+### ./sempicOntoHermiTCompliant.owl.patch
+
+```sh
+$ patch < sempicOntoHermiTCompliant.owl.patch
+```
+
+./sempiconto.owl become compatible with HermiT
+
+***Do not forget to unapply any preceding patch before do this patch***
 
 ### Dublin Core
 
@@ -1510,10 +1569,15 @@ https://www.w3.org/TR/2012/REC-owl2-syntax-20121211/#Existential_Quantification_
 > a class expression can be seen as a syntactic shortcut for the class expression
 
 https://www.w3.org/TR/2012/REC-owl2-syntax-20121211/#Maximum_Cardinality
-## Protégé
+## Protégé OWL 2 syntax
 
 * Currently release version of Protégé is compatible with Java 8 and not Java 11
     See https://github.com/protegeproject/protege/issues/822
+    Under /usr/bin/protege
+    add:
+    ```sh
+    PATH="/usr/lib/jvm/java-8-openjdk/bin:$PATH"
+    ```
 
 * `rdfs:comment` become JavaDoc into the generated file
     ./scholarProjectWebSemantic/target/generated-sources/java/fr/uga/miashs/sempic/model/rdf/SempicOnto.java/
@@ -1700,6 +1764,298 @@ In Protégé, Range restriction generate the following xml text
         <!-- properties not copied here -->
     </owl:DatatypeProperty>
 ```
+
+## Protégé, generalities
+
+### Install Protégé
+
+See section with the same name above
+
+
+### Compatibility issue with Protégé 5.5
+
+« Inconsistent ontology makes the UI unresponsive »
+https://github.com/protegeproject/protege/issues/877
+Fixed in Protégé 5.6
+
+### Reset preferences UI issues
+
+« Reset preferences does not update the preferences window »
+https://github.com/protegeproject/protege/issues/168
+
+### Java Preferences API
+
+They use Java Preferences API
+See https://stackoverflow.com/questions/1320709/preference-api-storage/34019194#34019194
+
+Under Unix, it is saved in the global file (shared with all Java App)
+~/.java/.userPrefs/
+
+On Windows, saved in registry.
+
+### Others preferences
+
+Some preferences are also saved under
+~/.Protege/
+
+***This folder should be manually created otherwise an error
+is displayed when we start Protégé in Console, or in the log files***
+
+### Log file
+
+Saved in ~/.Protege folder. If this folder is not created, saved under
+~/.protege
+
+File very interesting.
+
+## OWL 2 reasoners
+
+### Generalities about reasoners and profiles
+
+See https://www.w3.org/TR/owl2-profiles
+
+From M. David:
+
+> OWL (et OWL 2) est un langage basé sur les logiques de description qui
+> sont elles même un ensemble de langages.
+> Tu peux écrire une ontologie valide mais qui n'est pas décidable (i.e.
+> en OWL Full).
+
+> la plus base expressivité est OWL EL puis OWL DL puis OWL Full (non
+> decidable, i.e. il n'existe pas de raisonneurs qui gèrent toute
+> l'expressivité de l'ontologie)
+
+> Plus un raisonneur gère des ontologies expressives, plus il va être
+> potentiellement lent.
+
+* See list of all reasoners at https://www.w3.org/2001/sw/wiki/OWL/Implementations
+
+* A list probably more updated of reasoners. Very well commented.
+    By owlapi doc.
+    https://github.com/owlcs/owlapi/wiki
+
+* To understand the interest of each reasoner see also what are OWL profiles
+    https://www.w3.org/TR/owl2-profiles
+    It seems that only OWL 2 DL are interesting.
+
+### Pellet (Openllet) and HermiT, the solutions
+
+* Could be used in command line.
+
+#### OWL 2 DL compatibility and errors with transitivity and property chain
+
+Pellet quand à lui se proclame clairement comme étant un « OWL 2 reasoner »
+https://github.com/stardog-union/pellet
+
+Si je lis bien
+https://stackoverflow.com/questions/38716646/pellet-transitivity-protege-5-classifiers
+ainsi que votre lien
+https://www.w3.org/TR/owl2-syntax/#Global_Restrictions_on_Axioms_in_OWL_2_DL
+ainsi que si je comprends bien la phrase « Note that reasoning with DL Safe
+rules is incomplete if the ontology contains property chains or transitivity
+axioms and complex properties are used in the rule bodies. » située sur la page
+de HermiT c'est mon ontologie qui a un problème.
+
+Les chaînes de propriétés et la transitivité ne peuvent être utilisées que dans
+certains cas que je ne remplis probablement pas dans l'ontologie que je vous ais
+envoyé [2019/07/02]?
+
+Therefore when we have the following error with Pellet,
+it's probably because we use declare a property as transitive in
+a wrong maneer
+```
+org.mindswap.pellet.exceptions.UnsupportedFeatureException: Axiom:  Transitive: isSameUserAs
+```
+Same thing for property chain.
+
+#### HermiT limitations
+
+##### Datatypes
+
+Contrary to Pellet, when we try to use datatypes not descripted in OWL 2
+specifications, we have the error:
+
+> org.semanticweb.HermiT.datatypes.UnsupportedDatatypeException: HermiT supports
+> all and only the datatypes of the OWL 2 datatype map, see
+> http://www.w3.org/TR/owl2-syntax/#Datatype_Maps.  The datatype
+> 'http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#gYearSeason' is not
+> part of the OWL 2 datatype map and no custom datatype definition is given;
+> therefore, HermiT cannot handle this datatype.
+
+See https://stackoverflow.com/questions/24540401/owl-2-reasoners-and-custom-datatypes-not-working
+
+##### Justifications
+
+Je crois que l'on peut en conclure qu'HermiiT met n'importe quoi quand il est
+confronté à des erreurs. Quand je vous avais envoyé mon ontologie, vous me
+disiez qu'il se plaignait des problèmes avec les propriétés déclarées comme
+asymnétriques, ou irréfléxive. Hors, c'est le fait d'enlever les chaînes de
+propriétés qui résoud le problème, non de supprimer les déclarations
+assymétriques et irréfléxives.
+
+Moi de mon côté j'avais vu l'erreur suivante « An error occurred during
+reasoning: Non-simple property ' inverse (isSameUserAs)' or its inverse appears
+in the cardinality restriction ' inverse (isSameUserAs) max 1 Thing'.. ». Or
+isSameUserAs n'a pas de propriété inverse, et il n'apparaît pas dans une «
+cardinality restriction ». De plus c'est le fait d'enlever le fait que
+`isSameUserAs` est transitif qui permet de se débarrasser de cette erreur. Donc
+le message d'erreur est erroné.
+
+Je note sommes tout que Pellet donne de meilleurs indications que HermiT sur
+l'origine des erreurs.
+
+Cela va dans le sens de ce qu'à écrit un professeur des université dans
+l'article
+https://pdfs.semanticscholar.org/9091/e269a2cf7a44b46681b3de3ca489a36ad243.pdf
+
+Dans cet article, à la case « Justiications  [feature of ontology reasoners
+provide explanations for inconsistency that exist in the ontologies ] », pour
+HermiT il mettent « no ». C'est compréhensible, si HermiT donne de mauvaises
+justifications, c'est la même chose que s'ils n'en donnait pas ! Pourtant ce
+papier date de 2012, et la version que nous utilisons d'HermiT date de 2013
+(voir http://www.hermit-reasoner.com/download/current/ )
+
+##### Scalability
+
+> The project I'm working on deals with loading OWL files from the Financial
+> Industry Business Ontology (FIBO) that contain numerous imports with many
+> individuals and classes -- what I noticed was that Pellet performs quite well at
+> doing an initial reasoning with generating the inferred hierarchy in contrast to
+> HermiT (which hangs/takes too long) and FaCT++ (won't work due to custom
+> datatypes in FIBO).
+> https://github.com/bdionne/pellet/issues/47
+
+##### Compatibility with Jena API
+
+* HermiT is no compatible with Jena API. Pellet (Openllet)
+    is the only one compatible with Jena API.
+    (see section « THE SOLUTION, use another reasoner » and « Question about
+    Owlapi and Jena API with Openllet »)
+
+### ELK
+
+* Elk ignores lot of Axioms. See the log file to see the warnings about
+axioms ignored.
+
+* It's an OWL EL reasoner.
+
+* What is OWL EL
+    > For example, OWL 2 EL provides class constructors that are sufficient to
+    > express the very large biomedical ontology SNOMED CT
+    > https://www.w3.org/TR/owl2-profiles/#OWL_2_EL
+
+* Note: ELK doesn't check consistence of individuals and infers no lot of things
+    Pellet and Hermit are better.
+
+### FaCT++
+
+Does not support custom datatypes
+
+See https://stackoverflow.com/questions/24540401/owl-2-reasoners-and-custom-datatypes-not-working
+
+J'ai essayé d'utiliser Fact++, mais il me force à supprimer les datatypes. De
+plus, même si je supprime les datatypes, la transitivité, les chaînes de
+propriété, quand je le lance il fait exploser Portégé sans messages d'erreurs
+(core dumped).
+
+De plus, Fact++ était hébergés sur le site Google Code, mais ce site a
+fermé  (Google a fermé le site web Google Code).
+
+Leur documentation est outdated. Elle renvoie à des spécifications de OWL 1
+http://owl.man.ac.uk/factplusplus/ , or si on en croit els références citées
+plus haut FaCT++ est owl 2 compatible.
+
+Probably not compatible with Protégé 5.2+
+
+### Ontop 1.18.0
+
+***Not very useful as it is only a EL profil***
+
+> Ontop is a platform to query relational databases as Virtual RDF Graphs using
+> SPARQL. It's fast and is packed with features.
+https://ontop.inf.unibz.it/
+
+On Protégé 5.5 we have a menu `Ontop -> Check for inconsistancies`.
+
+* OWL 2 Reasoners and custom datatypes not working
+    https://stackoverflow.com/questions/24540401/owl-2-reasoners-and-custom-datatypes-not-working
+    * But I have several custom datatypes!
+    Actually When I start Ontop I have the error
+
+* OWL 2 QL reasoner
+    Therefore probably not very interesting, like ELK (see above).
+
+* Maybe try to configure with thanks the outdated help
+    https://github.com/ontop/ontop/wiki/Ontop-Preferences
+    (now there is a menu in `File -> Preferences -> Ontop Reasoner`)
+    * See also https://stackoverflow.com/questions/46297683/protege-ontop-reasoner-initialization-error
+        * Note, as we could see at
+            https://github.com/ontop/ontop/wiki/Ontop-Preferences/d619f9c34da99bef5fbaa6bb5bc8eb9f171a6187
+            I've corrected the Markdown syntax a title. Not done by nobody,
+            not edited since 2 years.
+
+    * To learn how to use Protégé we could see
+        https://github.com/ontop/ontop/wiki/Easy-Tutorial:-Using-Ontop-from-Protege
+    * Information about ontopOBDAModel
+        https://github.com/ontop/ontop/wiki/ontopOBDAModel
+    * TODO investigate issues
+
+
+### Reasoners in Protégé
+
+***You must see Protégé logs at ~/.Protege/logs/protege.log !***
+***When you start Protégé in Command line you have also infos of Reasoners***
+
+*** Do not forget to check
+    all the menu `Reasoner -> Configure -> Displayed inference`***
+
+* Some Protégé reasoners could be downloaded at
+    https://protegewiki.stanford.edu/wiki/Protege_Plugin_Library
+* See also the article about reasoners in Protégé (a little bit old)
+    https://protegewiki.stanford.edu/wiki/Using_Reasoners
+* Not that HermiT is currently tagged to work with Protégé 4, but works with
+    Protégé 5.5.
+    Probably the case for others reasoners.
+
+* See somme interesting post on Forums
+    * http://protege-project.136.n4.nabble.com/Protege-4-3-How-to-check-the-consistency-td4660711.html
+    * http://protege-project.136.n4.nabble.com/Reasoner-caused-owl-nothing-td4667552.html
+
+
+## Owlapi and reasoners
+
+owlapi uses rdf4j as dependency
+    1. https://github.com/owlcs/owlapi/pull/551/commits/1dd4c38364483cf319e9d9f3784f432b22e459d4
+    2. https://github.com/owlcs/owlapi/issues/539
+
+Openllet is dependent of RDF4J, even if we use only Jena API
+
+Protégé uses owlapi 4.5 under the hood.
+See https://github.com/bdionne/pellet/issues/47 et https://github.com/protegeproject/protege/pull/633
+
+Reasoners uses owlapi (Pellet, Openllet, Hermit, ELK, etc.)
+See https://github.com/owlcs/owlapi/wiki
+
+Actually the last version of owlapi is 5.x, no compatible with 4.x.
+
+* No need to use directly owlapi:
+    * ***Comparaison about owlapi, Jena API, Protege API***
+https://stackoverflow.com/questions/17567771/owl-api-jena-api-protege-api-which-one-to-use
+    * But we could use owlapi without a reasoner
+        See https://github.com/phillord/owl-api/blob/master/contract/src/test/java/org/coode/owlapi/examples/Examples.java
+
+### Question about Owlapi and Jena API with Openllet
+
+Openllet is the only cool reasoner compatible with Jena API (see section
+« THE SOLUTION, use another reasoner »).
+
+I don't know if Jena API uses owlapi under the hoods. Feeling not.
+
+When we use Openllet with Jena API, I don't know if there are some limitations
+In fact, Jena API is compatible with a subset of OWL version 1
+
+See also the section « Jena and OWL2 and OntModel » and all the doc
+about Openllet in this current document.
 
 ## Linked Data (2006) / Linked Open Data (2010)
 
@@ -2345,6 +2701,8 @@ ORDER BY ?communeLabel ?commune
 
 ##### Create the rdf file
 
+* See in conclusion others solution to convert in RDV
+
 * Note: do not remove trailer tabs on the file. The best is to not edit it.
 
 1. In the Data retrieved, on the bottom pan go to `Download -> TSV file`
@@ -2370,7 +2728,7 @@ ORDER BY ?communeLabel ?commune
     * But not important
 
 
-### Conclusion
+### Conclusion about Linked Open Data
 
 * WikiData is the best
 
@@ -2386,6 +2744,33 @@ ORDER BY ?communeLabel ?commune
     * Or with the sed like explained above
     * Or with TARQL https://github.com/tarql/tarql
         (not tested)
+
+### Linked Open Vocabulary
+
+* *Linked Open Vocabularies, un écosystème encore fragile*
+    2012
+    (in French)
+    https://projet.liris.cnrs.fr/qetr2012/site/wp-content/uploads/2012/02/qetr2012_1.pdf
+
+* *Linked Open Vocabularies (LOV): a gateway to reusable semantic vocabularies on the Web*
+    2014
+    http://www.semantic-web-journal.net/system/files/swj1127.pdf (in English)
+
+* With the search « Linked open vocabulary » on Google
+    we have https://lov.linkeddata.es/dataset/lov/
+    But I don't know if it is interesting.
+    They say
+    > LOV started in 2011, in the framework of a French research
+    > projecthttp://datalift.org. Its main initial objective was to help
+    > publishers and users of linked data and vocabularies to assess what was
+    > available for their needs, to reuse it as far as possible, and to insert
+    > their own vocabulary production seamlessly in the ecosystem.
+    >
+    > TheOpen Knowledge Foundationhas kindly provided technical hosting from
+    > July 2012 until July 2018.
+    >
+    > Since July 2018, LOV is hosted by the Ontology Engineering Group at UPM
+    > https://lov.linkeddata.es/dataset/lov/about
 
 ## Jena Documentation
 
@@ -2467,13 +2852,12 @@ https://github.com/apache/jena/blob/master/jena-db/use-fuseki-tdb2.md
 * Virtuoso use an SQL Database under the hood
     https://stackoverflow.com/questions/17719341/difference-between-virtuoso-native-rdf-quad-store-and-virtuoso-sql-based-rdf-tri
 
-***Comparaison about OWL API, Jena API, Protege API***
-https://stackoverflow.com/questions/17567771/owl-api-jena-api-protege-api-which-one-to-use
-
-### RDF4J, GraphDB, OWLAPI
+### RDF4J, GraphDB, Neo4J
 
 * RDF4J, contrary to TDB2 does not support OWL
-    But Jena support for owl is bad (see section about OntModel)
+    But Jena support for owl is bad
+    (see section about « Question about Owlapi and Jena API with Openllet »
+    and info about OntModel in this doc).
 
 * RDF4J supports also reasoning https://github.com/eclipse/rdf4j-doc]
 
@@ -2485,10 +2869,6 @@ GraphDB support some OWL inferences
 http://graphdb.ontotext.com/documentation/standard/owl-compliance.html
 See aslo http://graphdb.ontotext.com/documentation/enterprise/using-graphdb-with-the-rdf4j-api.html
 
-owlapi uses rdf4j as dependency
-    1. https://github.com/owlcs/owlapi/pull/551/commits/1dd4c38364483cf319e9d9f3784f432b22e459d4
-    2. https://github.com/owlcs/owlapi/issues/539
-
 
 But Neo4J(born in 2007 and open source AGPL with commercial support)
     seems to be better than GraphDB (born in 2000 and commercial)
@@ -2496,16 +2876,10 @@ But Neo4J(born in 2007 and open source AGPL with commercial support)
     https://db-engines.com/en/system/GraphDB;Neo4j
     https://en.wikipedia.org/wiki/Neo4j
 
-Openllet is dependent of RDF4J, even if we use only Jena API
-
-I've seen than API of rdf4j seems to be easier.
+I've seen than API of rdf4j seems to be easier than Jena
 See https://rdf4j.eclipse.org/documentation/programming/model/
 or https://rdf4j.eclipse.org/documentation/programming/repository/
 or https://rdf4j.eclipse.org/documentation/getting-started/
-
-I have no idea how owlapi works
-See https://github.com/phillord/owl-api/blob/master/contract/src/test/java/org/coode/owlapi/examples/Examples.java
-We see that it creates a temporary file. Not study.
 
 ### Classement of databases
 https://db-engines.com/en/ranking
@@ -3009,9 +3383,9 @@ DELETE WHERE
 
     In fact, when we trigger
     ```
-CONSTRUCT { <http://fr.uga.julioju.sempic/ResourcesCreated/album/1> ?p ?o }
-WHERE { <http://fr.uga.julioju.sempic/ResourcesCreated/album/1> ?p ?o }
-```
+    CONSTRUCT { <http://fr.uga.julioju.sempic/ResourcesCreated/album/1> ?p ?o }
+    WHERE { <http://fr.uga.julioju.sempic/ResourcesCreated/album/1> ?p ?o }
+    ```
 we see that `?anySubject owl:differentFrom <http://fr.uga.julioju.sempic/ResourcesCreated/album/1>`
 
 * Same example with photos
@@ -3906,7 +4280,7 @@ It should be have only one SPARQL request
                  rdfs:subClassOf [ rdf:type owl:Restriction ;
                                    owl:onProperty :isTaughtBy ;
                                    owl:allValuesFrom :Professor . ] .
-                                   ```
+```
 is the same as say that the domain of :isTaughtBy is :FirstYearCourse
 and the range :Professor
 
@@ -3918,13 +4292,13 @@ and the range :Professor
 diapositive number 72 of the course of Mister Atencias about RDF
 
 On the second paragraph
-<code>
+```
 exvoc:resolution1 exvoc:approvedBy exvoc:rulesCommittee.
 exvoc:rulesCommittee a rdf:Bag;
  rdf:_1 exvoc:Fred;
  rdf:_2 exvoc:Wilma;
  rdf:_3 exvoc:Dino.
-</code>
+```
 
 The lecture says that « le comité dans l'ensemble a approuvé la résolution ».
 Mais pour exprimer des ensembles fermés, je croyais qu'il fallait utiliser des listes ?
@@ -3932,9 +4306,9 @@ Mais pour exprimer des ensembles fermés, je croyais qu'il fallait utiliser des 
 L'exemple 2 ne voudrait-il pas plutôt dire : « La résolution a été approuvé par le comité en tant qu'entité. Ce comité est composé entre autre (rdf:Bag) de Fred, Wilma et Dino (tous les membres du comité n'ont peut-être pas approuvé) » ?
 
 Et l'exemple 1
-<code>
+```
 exvoc:resolution1 exvoc:approvedBy exvoc:Fred, exvoc:Wilma, exvoc:Dino.
-</code>
+```
 signifirait simplement « la résolution 1 a été approuvé par Fred, Wilma et Dino » ?
 
 Conclusion de la diapositive 72: l'exemple 2 est meilleur que l'exemple 1.
@@ -3942,154 +4316,10 @@ Mais si je comprends bien, l'exemple 1 et 2 ne signifient pas la même chose ?
 L'un ne peut donc pas être meilleur que l'autre, vu qu'ils n'ont pas la même
 signification ?
 
-### Protégé reasoners errors
+10. See my question in the section
+    « Question about Owlapi and Jena API with Openllet »
 
-***Before all, run Protégé in Console to see all StackTrace***
-
-`http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#shouldBeInconsistent`
-should be inconsistant with all reasoners!
-I've read and test also:
-* https://pellet-users.mindswap.narkive.com/iFJdKDAo/consistency-checking-doesn-t-work
-* http://protege-project.136.n4.nabble.com/Protege-4-3-How-to-check-the-consistency-td4660711.html
-* http://protege-project.136.n4.nabble.com/Reasoner-caused-owl-nothing-td4667552.html
-
-==> Reasoners seems to bug in Protégé
-#### Ontop 1.18.0
-
-> Ontop is a platform to query relational databases as Virtual RDF Graphs using
-> SPARQL. It's fast and is packed with features.
-https://ontop.inf.unibz.it/
-
-On Protégé 5.5 we have a menu `Ontop -> Check for inconsistancies`.
-
-* OWL 2 Reasoners and custom datatypes not working
-    https://stackoverflow.com/questions/24540401/owl-2-reasoners-and-custom-datatypes-not-working
-    * But I have several custom datatypes!
-    Actually When I start Ontop I have the error
-    ```
-Axiom does not belong to OWL 2 QL:  Transitive: isSameUserAs
-Axiom does not belong to OWL 2 QL: <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Winter> isDefinedBy "https://en.wikipedia.org/wiki/Season#Four-season_calendar_reckoning"^^anyUR
-I (Unsupported data range: XSD_ANY_URI)
-Axiom does not belong to OWL 2 QL: photoTakenByOwner Range: boolean (unsupported datatype: XSD_BOOLEAN)
-Axiom does not belong to OWL 2 QL: _:genid2147483721 zeroOrMorePath <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> (Found anonymous individual, this feature is not supported:_:genid2147483
-721)
-Axiom does not belong to OWL 2 QL: AlbumOrPhoto DisjointUnionOf Album, Photo
-Axiom does not belong to OWL 2 QL: photoTakenTheMonth Range: gYearMonth[>= "1826-01"^^gYearMonth] (unsupported OWLDataRange construct: gYearMonth[>= "1826-01"^^gYearMonth])
-Axiom does not belong to OWL 2 QL: photoTakenAtExactDate Range: date[>= "1826-01-01"^^date] (unsupported OWLDataRange construct: date[>= "1826-01-01"^^date])
-Axiom does not belong to OWL 2 QL: Season EquivalentTo {Autumn , Spring , Summer , Winter} (unsupported construct {Autumn , Spring , Summer , Winter})
-Axiom does not belong to OWL 2 QL: FurnitureWithTableAndChair EquivalentTo Chair and Table (unsupported construct Chair
- and Table)
-Axiom does not belong to OWL 2 QL: Photo SubClassOf photoInAlbum exactly 1 Album (unsupported operation in photoInAlbum exactly 1 Album)
-Axiom does not belong to OWL 2 QL: photoTakenYear Range: gYear[>= "1826"^^gYear] (unsupported OWLDataRange construct: gYear[>= "1826"^^gYear])
-Axiom does not belong to OWL 2 QL: <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Spring> isDefinedBy "https://en.wikipedia.org/wiki/Season#Four-season_calendar_reckoning"^^anyUR
-I (Unsupported data range: XSD_ANY_URI)
-Axiom does not belong to OWL 2 QL: _:genid2147483718 seeAlso "http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#ShapeSharedWithUserCollection"^^anyURI (Found anonymous individual, th
-is feature is not supported:_:genid2147483718)
-Axiom does not belong to OWL 2 QL: photoInAlbum o albumOwnerLogin SubPropertyOf: photoOwnedBy
-Axiom does not belong to OWL 2 QL: _:genid2147483724 path <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumSharedWith> (Found anonymous individual, this feature is not support
-ed:_:genid2147483724)
-Axiom does not belong to OWL 2 QL: TableAndChair EquivalentTo Chair or FurnitureWithTableAndChair or Table (unsupported construct Chair or FurnitureWithTableAndChair or Table)
-Axiom does not belong to OWL 2 QL: _:genid2147483724 path <http://datashapes.org/dash#ListShape> (Found anonymous individual, this feature is not supported:_:genid2147483724)
-Axiom does not belong to OWL 2 QL: UserGroupAdmin EquivalentTo {admin_created_in_protege1 , admin_created_in_protege2} (unsupported construct {admin_created_in_protege1 , admin_created_in_pro
-tege2})
-Axiom does not belong to OWL 2 QL: _:genid2147483719 seeAlso "https://www.topquadrant.com/2017/06/13/constraints-on-rdflists-using-shacl/"^^anyURI (Found anonymous individual, this feature is
- not supported:_:genid2147483719)
-Axiom does not belong to OWL 2 QL: _:genid2147483722 class <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#User> (Found anonymous individual, this feature is not supported:_:genid
-2147483722)
-Axiom does not belong to OWL 2 QL: <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Season> seeAlso "https://en.wikipedia.org/wiki/Season#Four-season_calendar_reckoning"^^anyURI (U
-nsupported data range: XSD_ANY_URI)
-Axiom does not belong to OWL 2 QL: _:genid2147483720 comment "Official example to understand how SHACL works"@en (Found anonymous individual, this feature is not supported:_:genid2147483720)
-Axiom does not belong to OWL 2 QL: _:genid2147483722 path _:genid2147483723 (Found anonymous individual, this feature is not supported:_:genid2147483722)
-Axiom does not belong to OWL 2 QL: photoInAlbum o albumSharedWith SubPropertyOf: photoSharedWith
-Axiom does not belong to OWL 2 QL: _:genid2147483724 property _:genid2147483722 (Found anonymous individual, this feature is not supported:_:genid2147483724)
-Axiom does not belong to OWL 2 QL: _:genid2147483719 comment "On what the example is based"@en (Found anonymous individual, this feature is not supported:_:genid2147483719)
-Axiom does not belong to OWL 2 QL: <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Summer> isDefinedBy "https://en.wikipedia.org/wiki/Season#Four-season_calendar_reckoning"^^anyUR
-I (Unsupported data range: XSD_ANY_URI)
-Axiom does not belong to OWL 2 QL: <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#SeeAlsoUserListShape> seeAlso _:genid2147483720 (Found anonymous individual, this feature is not
- supported:_:genid2147483720)
-Axiom does not belong to OWL 2 QL: Album SubClassOf albumOwnerLogin only UserLogin (unsupported operation in albumOwnerLogin only UserLogin)
-Axiom does not belong to OWL 2 QL: Album SubClassOf albumOwnerLogin exactly 1 UserLogin (unsupported operation in albumOwnerLogin exactly 1 UserLogin)
-Axiom does not belong to OWL 2 QL: _:genid2147483722 nodeKind <http://www.w3.org/ns/shacl#IRI> (Found anonymous individual, this feature is not supported:_:genid2147483722)
-Axiom does not belong to OWL 2 QL: _:genid2147483718 comment "The example"@en (Found anonymous individual, this feature is not supported:_:genid2147483718)
-Axiom does not belong to OWL 2 QL: AlbumOrPhoto SubClassOf sharedWithUserCollection only UserLogin (unsupported operation in sharedWithUserCollection only UserLogin)
-Axiom does not belong to OWL 2 QL: AlbumOrPhoto SubClassOf sharedWithUserCollection exactly 1 rdfListOfUsers (unsupported operation in sharedWithUserCollection exactly 1 rdfListOfUsers)
-Axiom does not belong to OWL 2 QL: DepictionMammal DisjointUnionOf DepictionMammalExceptHuman, DepictionWhoPerson
-Axiom does not belong to OWL 2 QL: UserLogin DisjointUnionOf UserGroupAdmin, UserGroupNormal
-Axiom does not belong to OWL 2 QL: <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Autumn> isDefinedBy "https://en.wikipedia.org/wiki/Season#Four-season_calendar_reckoning"^^anyUR
-I (Unsupported data range: XSD_ANY_URI)
-Axiom does not belong to OWL 2 QL: photoTakenYearSeason Range: gYearSeason[>= "1826-Spring"^^gYearSeason] (unsupported OWLDataRange construct: gYearSeason[>= "1826-Spring"^^gYearSeason])
-Axiom does not belong to OWL 2 QL: <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#SeeAlsoUserListShape> seeAlso _:genid2147483719 (Found anonymous individual, this feature is not
- supported:_:genid2147483719)
-Axiom does not belong to OWL 2 QL: <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#SeeAlsoUserListShape> seeAlso _:genid2147483718 (Found anonymous individual, this feature is not
- supported:_:genid2147483718)
-Axiom does not belong to OWL 2 QL: <http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#ShapeSharedWithUserCollection> property _:genid2147483724 (Found anonymous individual, this feat
-ure is not supported:_:genid2147483724)
-Axiom does not belong to OWL 2 QL: Photo SubClassOf photoInAlbum only Album (unsupported operation in photoInAlbum only Album)
-Axiom does not belong to OWL 2 QL: Depiction DisjointUnionOf DepictionWhat, DepictionWhoPerson
-Axiom does not belong to OWL 2 QL: _:genid2147483720 seeAlso "https://www.w3.org/TR/shacl/#shacl-example"^^anyURI (Found anonymous individual, this feature is not supported:_:genid2147483720)
-
-Could not initialize the Quest query answering engine. Answering queries will not be available.
-no such vertex in graph
-java.lang.IllegalArgumentException: no such vertex in graph
-        at org.jgrapht.graph.AbstractGraph.assertVertexExist(AbstractGraph.java:158) ~[it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
-        at org.jgrapht.graph.AbstractBaseGraph.addEdge(AbstractBaseGraph.java:193) ~[it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
-        at it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl.getClassGraph(TBoxReasonerImpl.java:606) ~[it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
-        at it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl.create(TBoxReasonerImpl.java:83) ~[it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
-        at it.unibz.inf.ontop.owlrefplatform.core.Quest.setupRepository(Quest.java:436) ~[it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
-        at it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL.prepareQuestInstance(QuestOWL.java:271) [it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
-        at it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL.prepareReasoner(QuestOWL.java:452) [it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
-        at it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL.init(QuestOWL.java:148) [it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
-        at it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL.<init>(QuestOWL.java:174) [it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
-        at it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory.createReasoner(QuestOWLFactory.java:107) [it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
-        at it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory.createReasoner(QuestOWLFactory.java:92) [it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
-        at it.unibz.inf.ontop.protege.core.OntopOWLFactory.createReasoner(OntopOWLFactory.java:34) [it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
-        at it.unibz.inf.ontop.protege.core.OntopOWLFactory.createReasoner(OntopOWLFactory.java:21) [it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
-        at org.protege.editor.owl.model.inference.ReasonerUtilities.createReasoner(ReasonerUtilities.java:20) [protege-editor-owl.jar:na]
-        at org.protege.editor.owl.model.inference.OWLReasonerManagerImpl$ClassificationRunner.ensureRunningReasonerInitialized(OWLReasonerManagerImpl.java:428) [protege-editor-owl.jar:na]
-        at org.protege.editor.owl.model.inference.OWLReasonerManagerImpl$ClassificationRunner.run(OWLReasonerManagerImpl.java:386) [protege-editor-owl.jar:na]
-        at java.lang.Thread.run(Thread.java:748) [na:1.8.0_222]
-    ```
-
-* With the ontology give by the teacher ./teacherExample/src/main/resources/sempiconto.owl , when I try to start
-    the Ontop reasoner I have
-
-    ```
-it.unibz.inf.ontop.model.OBDAException: java.lang.Exception: No datasource has been defined. Virtual ABox mode requires exactly 1 data source in your OBDA model.
-        at it.unibz.inf.ontop.owlrefplatform.core.Quest.setupRepository(Quest.java:661) ~[it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
-        at it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL.prepareQuestInstance(QuestOWL.java:271) [it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
-        at it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL.prepareReasoner(QuestOWL.java:452) [it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
-        at it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL.init(QuestOWL.java:148) [it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
-        at it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL.<init>(QuestOWL.java:174) [it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
-        at it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory.createReasoner(QuestOWLFactory.java:107) [it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
-        at it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory.createReasoner(QuestOWLFactory.java:92) [it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
-        at it.unibz.inf.ontop.protege.core.OntopOWLFactory.createReasoner(OntopOWLFactory.java:34) [it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
-        at it.unibz.inf.ontop.protege.core.OntopOWLFactory.createReasoner(OntopOWLFactory.java:21) [it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
-        at org.protege.editor.owl.model.inference.ReasonerUtilities.createReasoner(ReasonerUtilities.java:20) [protege-editor-owl.jar:na]
-        at org.protege.editor.owl.model.inference.OWLReasonerManagerImpl$ClassificationRunner.ensureRunningReasonerInitialized(OWLReasonerManagerImpl.java:428) [protege-editor-owl.jar:na]
-        at org.protege.editor.owl.model.inference.OWLReasonerManagerImpl$ClassificationRunner.run(OWLReasonerManagerImpl.java:386) [protege-editor-owl.jar:na]
-        at java.lang.Thread.run(Thread.java:748) [na:1.8.0_222]
-Caused by: java.lang.Exception: No datasource has been defined. Virtual ABox mode requires exactly 1 data source in your OBDA model.
-        at it.unibz.inf.ontop.owlrefplatform.core.Quest.setupRepository(Quest.java:515) ~[it.unibz.inf.ontop.protege-1.18.0.jar:1.18.0]
-        ... 12 common frames omitted
-    ```
-
-* Maybe try to configure with thanks the outdated help
-    https://github.com/ontop/ontop/wiki/Ontop-Preferences
-    (now there is a menu in `File -> Preferences -> Ontop Reasoner`)
-    * See also https://stackoverflow.com/questions/46297683/protege-ontop-reasoner-initialization-error
-        * Note, as we could see at
-            https://github.com/ontop/ontop/wiki/Ontop-Preferences/d619f9c34da99bef5fbaa6bb5bc8eb9f171a6187
-            I've corrected the Markdown syntax a title. Not done by nobody,
-            not edited since 2 years.
-
-    * To learn how to use Protégé we could see
-        https://github.com/ontop/ontop/wiki/Easy-Tutorial:-Using-Ontop-from-Protege
-    * Information about ontopOBDAModel
-        https://github.com/ontop/ontop/wiki/ontopOBDAModel
-    * TODO investigate issues
-
-
-
+11. Ask to the teacher if I can publish its explanations.
 
 # Credits
 
