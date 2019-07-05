@@ -656,30 +656,6 @@ TODO add an issue on https://github.com/Galigator/openllet
 
 ## sempiconto.owl
 
-### Not compatible with Protégé reasoners
-
-This ontology is OWL full, not OWL DL
-
-### ./sempicOntoPelletCompliant.owl.patch
-
-```sh
-$ patch < sempicOntoPelletCompliant.owl.patch
-```
-./sempiconto.owl become compatible with Pellet
-(Pellet seems to be the best reasoner)
-
-***Do not forget to unapply any preceding patch before do this patch***
-
-### ./sempicOntoHermiTCompliant.owl.patch
-
-```sh
-$ patch < sempicOntoHermiTCompliant.owl.patch
-```
-
-./sempiconto.owl become compatible with HermiT
-
-***Do not forget to unapply any preceding patch before do this patch***
-
 ### Dublin Core
 
 I use Dublin Core in annotations of Ontology
