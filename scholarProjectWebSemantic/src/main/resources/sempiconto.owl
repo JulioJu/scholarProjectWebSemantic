@@ -73,6 +73,12 @@
     
 
 
+    <!-- http://www.w3.org/2002/07/owl#seeAlso -->
+
+    <owl:AnnotationProperty rdf:about="http://www.w3.org/2002/07/owl#seeAlso"/>
+    
+
+
     <!-- http://www.w3.org/2004/02/skos/core#changeNote -->
 
     <owl:AnnotationProperty rdf:about="http://www.w3.org/2004/02/skos/core#changeNote"/>
@@ -214,9 +220,6 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
 
     <owl:ObjectProperty rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumSharedWith">
         <rdfs:subPropertyOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#sharedWithUserCollection"/>
-        <!-- <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/> -->
-        <!-- <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AsymmetricProperty"/> -->
-        <!-- <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#IrreflexiveProperty"/> -->
         <rdfs:domain rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Album"/>
         <rdfs:range rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#rdfListOfUsers"/>
         <rdfs:label xml:lang="en">album shared with</rdfs:label>
@@ -235,11 +238,15 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
     
 
 
+    <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#isAPhoto -->
+
+    <owl:ObjectProperty rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#isAPhoto"/>
+    
+
+
     <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#isSameUserAs -->
 
     <owl:ObjectProperty rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#isSameUserAs">
-        <!-- <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/> -->
-        <!-- <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#InverseFunctionalProperty"/> -->
         <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#SymmetricProperty"/>
         <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#TransitiveProperty"/>
         <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ReflexiveProperty"/>
@@ -326,18 +333,16 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
 
     <owl:ObjectProperty rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoOwnedBy">
         <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
-        <!-- <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/> -->
-        <!-- <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#IrreflexiveProperty"/> -->
         <rdfs:domain rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Photo"/>
         <rdfs:range rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#UserLogin"/>
         <owl:propertyChainAxiom rdf:parseType="Collection">
             <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoInAlbum"/>
             <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#albumOwnerLogin"/>
         </owl:propertyChainAxiom>
+        <rdfs:label xml:lang="en">photo owned by</rdfs:label>
         <owl:seeAlso xml:lang="en">
            As this property is defined by a propertyChain, see README.md, section « OWL DL and composites property »
         </owl:seeAlso>
-        <rdfs:label xml:lang="en">photo owned by</rdfs:label>
     </owl:ObjectProperty>
     
 
@@ -346,9 +351,6 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
 
     <owl:ObjectProperty rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoSharedWith">
         <rdfs:subPropertyOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#sharedWithUserCollection"/>
-        <!-- <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/> -->
-        <!-- <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AsymmetricProperty"/> -->
-        <!-- <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#IrreflexiveProperty"/> -->
         <rdfs:domain rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Photo"/>
         <rdfs:range rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#rdfListOfUsers"/>
         <owl:propertyChainAxiom rdf:parseType="Collection">
@@ -394,9 +396,6 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
     <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#sharedWithUserCollection -->
 
     <owl:ObjectProperty rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#sharedWithUserCollection">
-        <!-- <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/> -->
-        <!-- <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AsymmetricProperty"/> -->
-        <!-- <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#IrreflexiveProperty"/> -->
         <rdfs:domain rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#AlbumOrPhoto"/>
         <rdfs:range rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#rdfListOfUsers"/>
         <rdfs:label xml:lang="en">Shared with user collection</rdfs:label>
@@ -459,8 +458,14 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
     <owl:DatatypeProperty rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoDepictsDatatypeProperty">
         <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty"/>
         <rdfs:domain rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Photo"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#anyURI"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:range>
+            <rdfs:Datatype>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://www.w3.org/2001/XMLSchema#anyURI"/>
+                    <rdf:Description rdf:about="http://www.w3.org/2001/XMLSchema#string"/>
+                </owl:unionOf>
+            </rdfs:Datatype>
+        </rdfs:range>
         <rdfs:comment xml:lang="en">uri end with &quot;DatatypeProperty&quot; for OWL DL compatibility</rdfs:comment>
         <rdfs:label xml:lang="en">photo depicts datatype property</rdfs:label>
     </owl:DatatypeProperty>
@@ -669,6 +674,7 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
             </owl:Class>
         </rdfs:subClassOf>
         <owl:disjointWith rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#AdministratorsCreatedInProtege"/>
+        <rdfs:label xml:lang="en">Administrator User Group</rdfs:label>
     </owl:Class>
     
 
@@ -676,12 +682,27 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
     <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#AdministratorsCreatedInProtege -->
 
     <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#AdministratorsCreatedInProtege">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:oneOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#admin_created_in_protege1"/>
+                    <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#admin_created_in_protege2"/>
+                </owl:oneOf>
+            </owl:Class>
+        </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#UserGroupAdmin"/>
         <rdfs:subClassOf>
             <owl:Class>
                 <owl:complementOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#AdministratorsCreatedByTheApp"/>
             </owl:Class>
         </rdfs:subClassOf>
+        <rdfs:comment xml:lang="en">In Protégé, under pan « Description: Administrator UserGroup », we have
+`{admin_created_in_protege1, admin_created_in_protege2}.`
+
+It means
+`:AdministratorsCreatedInProtege owl:oneOf (:admin_created_in_protege1 :admin_created_in_protege2)`
+
+When we read the owl file, we see that it append tags `owl:equivalentClass` even if we write manually this axiom in the file without.</rdfs:comment>
     </owl:Class>
     
 
@@ -719,13 +740,6 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
                 <owl:allValuesFrom rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#rdfListOfUsers"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <!-- <rdfs:subClassOf> -->
-        <!--     <owl:Restriction> -->
-        <!--         <owl:onProperty rdf:resource="http://miashs.univ&#45;grenoble&#45;alpes.fr/ontologies/sempic.owl#sharedWithUserCollection"/> -->
-        <!--         <owl:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:qualifiedCardinality> -->
-        <!--         <owl:onClass rdf:resource="http://miashs.univ&#45;grenoble&#45;alpes.fr/ontologies/sempic.owl#rdfListOfUsers"/> -->
-        <!--     </owl:Restriction> -->
-        <!-- </rdfs:subClassOf> -->
         <owl:disjointUnionOf rdf:parseType="Collection">
             <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Album"/>
             <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Photo"/>
@@ -842,6 +856,12 @@ The ·lexical mapping· for date is ·dateLexicalMap·. The ·canonical mapping�
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
+                <owl:onProperty rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#isAPhoto"/>
+                <owl:hasValue rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#true"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
                 <owl:onProperty rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoInAlbum"/>
                 <owl:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:qualifiedCardinality>
                 <owl:onClass rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Album"/>
@@ -920,14 +940,6 @@ When we read the owl file, we see that it append tags `owl:equivalentClass` even
     <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#UserGroupAdmin -->
 
     <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#UserGroupAdmin">
-        <owl:equivalentClass>
-            <owl:Class>
-                <owl:oneOf rdf:parseType="Collection">
-                    <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#admin_created_in_protege1"/>
-                    <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#admin_created_in_protege2"/>
-                </owl:oneOf>
-            </owl:Class>
-        </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#UserLogin"/>
         <rdfs:subClassOf>
             <owl:Class>
@@ -935,14 +947,6 @@ When we read the owl file, we see that it append tags `owl:equivalentClass` even
             </owl:Class>
         </rdfs:subClassOf>
         <rdfs:comment xml:lang="en">Could manage all albums</rdfs:comment>
-        <rdfs:comment xml:lang="en">In Protégé, under pan « Description: Administrator UserGroup », we have
-`{admin_created_in_protege1, admin_created_in_protege2}.`
-
-It means
-`:UserGroupAdmin owl:oneOf (:admin_created_in_protege1 :admin_created_in_protege2)`
-
-When we read the owl file, we see that it append tags `owl:equivalentClass` even if we write manually this axiom in the file without.</rdfs:comment>
-        <rdfs:label xml:lang="en">Administrator User Group</rdfs:label>
     </owl:Class>
     
 
@@ -987,6 +991,27 @@ When we read the owl file, we see that it append tags `owl:equivalentClass` even
     
 
 
+    <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#boolean -->
+
+    <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#boolean">
+        <owl:disjointUnionOf rdf:parseType="Collection">
+            <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#false"/>
+            <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#true"/>
+        </owl:disjointUnionOf>
+        <rdf:comment xml:lang="en">http://www.w3.org/2001/XMLSchema#boolean is a Datatypes. Current boolean is a Class</rdf:comment>
+        <owl:seeAlso rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">http://www.w3.org/2001/XMLSchema#boolean</owl:seeAlso>
+    </owl:Class>
+    
+
+
+    <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#false -->
+
+    <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#false">
+        <rdfs:subClassOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#boolean"/>
+    </owl:Class>
+    
+
+
     <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#rdfListOfUsers -->
 
     <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#rdfListOfUsers">
@@ -1006,6 +1031,14 @@ When we read the owl file, we see that it append tags `owl:equivalentClass` even
         <rdfs:label xml:lang="en">The user of the login</rdfs:label>
         <owl:deprecated xml:lang="en">Just to show to the theacher that I know the meaning of « owl:equivalentTo ».
 Not used in the app.</owl:deprecated>
+    </owl:Class>
+    
+
+
+    <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#true -->
+
+    <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#true">
+        <rdfs:subClassOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#boolean"/>
     </owl:Class>
     
 
@@ -1076,6 +1109,12 @@ Not used in the app.</owl:deprecated>
         <rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#seeAlso"/>
         <rdfs:seeAlso>
             <rdf:Description>
+                <rdfs:comment xml:lang="en">The example</rdfs:comment>
+                <rdfs:seeAlso rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#ShapeSharedWithUserCollection</rdfs:seeAlso>
+            </rdf:Description>
+        </rdfs:seeAlso>
+        <rdfs:seeAlso>
+            <rdf:Description>
                 <rdfs:comment xml:lang="en">Official example to understand how SHACL works</rdfs:comment>
                 <rdfs:seeAlso rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">https://www.w3.org/TR/shacl/#shacl-example</rdfs:seeAlso>
             </rdf:Description>
@@ -1084,12 +1123,6 @@ Not used in the app.</owl:deprecated>
             <rdf:Description>
                 <rdfs:comment xml:lang="en">On what the example is based</rdfs:comment>
                 <rdfs:seeAlso rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">https://www.topquadrant.com/2017/06/13/constraints-on-rdflists-using-shacl/</rdfs:seeAlso>
-            </rdf:Description>
-        </rdfs:seeAlso>
-        <rdfs:seeAlso>
-            <rdf:Description>
-                <rdfs:comment xml:lang="en">The example</rdfs:comment>
-                <rdfs:seeAlso rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#ShapeSharedWithUserCollection</rdfs:seeAlso>
             </rdf:Description>
         </rdfs:seeAlso>
     </owl:NamedIndividual>
@@ -1153,7 +1186,7 @@ Not used in the app.</owl:deprecated>
     <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#admin_created_in_protege1 -->
 
     <owl:NamedIndividual rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#admin_created_in_protege1">
-        <rdf:type rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#AdministratorsCreatedByTheApp"/>
+        <rdf:type rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#AdministratorsCreatedInProtege"/>
     </owl:NamedIndividual>
     
 
@@ -1161,8 +1194,14 @@ Not used in the app.</owl:deprecated>
     <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#admin_created_in_protege2 -->
 
     <owl:NamedIndividual rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#admin_created_in_protege2">
-        <rdf:type rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#AdministratorsCreatedByTheApp"/>
+        <rdf:type rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#AdministratorsCreatedInProtege"/>
     </owl:NamedIndividual>
+    
+
+
+    <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#true -->
+
+    <owl:NamedIndividual rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#true"/>
     
 
 
@@ -1180,6 +1219,7 @@ Not used in the app.</owl:deprecated>
             <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#AlbumOrPhoto"/>
             <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Depiction"/>
             <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#UserLogin"/>
+            <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#boolean"/>
         </owl:members>
     </rdf:Description>
     <rdf:Description>
