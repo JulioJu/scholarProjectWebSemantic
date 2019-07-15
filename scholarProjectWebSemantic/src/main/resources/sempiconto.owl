@@ -856,12 +856,6 @@ When we read the owl file, we see that it append tags `owl:equivalentClass` even
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#isAPhoto"/>
-                <owl:hasValue rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#true"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
                 <owl:onProperty rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoInAlbum"/>
                 <owl:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:qualifiedCardinality>
                 <owl:onClass rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Album"/>
@@ -995,19 +989,29 @@ When we read the owl file, we see that it append tags `owl:equivalentClass` even
 
     <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#boolean">
         <owl:disjointUnionOf rdf:parseType="Collection">
-            <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#false"/>
-            <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#true"/>
+            <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#booleanFalse"/>
+            <rdf:Description rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#booleanTrue"/>
         </owl:disjointUnionOf>
-        <rdf:comment xml:lang="en">http://www.w3.org/2001/XMLSchema#boolean is a Datatypes. Current boolean is a Class</rdf:comment>
+        <rdfs:comment xml:lang="en">http://www.w3.org/2001/XMLSchema#boolean is a Datatypes. Current boolean is a Class</rdfs:comment>
         <owl:seeAlso rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">http://www.w3.org/2001/XMLSchema#boolean</owl:seeAlso>
     </owl:Class>
     
 
 
-    <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#false -->
+    <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#booleanFalse -->
 
-    <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#false">
+    <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#booleanFalse">
         <rdfs:subClassOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#boolean"/>
+        <rdfs:comment xml:lang="en">Do not use « false » as it is a reserved word</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#booleanTrue -->
+
+    <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#booleanTrue">
+        <rdfs:subClassOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#boolean"/>
+        <rdfs:comment xml:lang="en">Do not use « true » as it is a reserved word</rdfs:comment>
     </owl:Class>
     
 
@@ -1016,7 +1020,7 @@ When we read the owl file, we see that it append tags `owl:equivalentClass` even
 
     <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#rdfListOfUsers">
         <rdfs:subClassOf rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
-        <rdf:comment xml:lang="en">A list (rdf:Collection) of Users</rdf:comment>
+        <rdfs:comment xml:lang="en">A list (rdf:Collection) of Users</rdfs:comment>
         <rdfs:label xml:lang="en">Collection of Users</rdfs:label>
         <rdfs:seeAlso rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#SeeAlsoUserListShape"/>
         <skos:definition xml:lang="en">A list (rdf:Collection) of Users</skos:definition>
@@ -1031,14 +1035,6 @@ When we read the owl file, we see that it append tags `owl:equivalentClass` even
         <rdfs:label xml:lang="en">The user of the login</rdfs:label>
         <owl:deprecated xml:lang="en">Just to show to the theacher that I know the meaning of « owl:equivalentTo ».
 Not used in the app.</owl:deprecated>
-    </owl:Class>
-    
-
-
-    <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#true -->
-
-    <owl:Class rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#true">
-        <rdfs:subClassOf rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#boolean"/>
     </owl:Class>
     
 
@@ -1103,20 +1099,28 @@ Not used in the app.</owl:deprecated>
     
 
 
+    <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Hiver -->
+
+    <owl:NamedIndividual rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Hiver">
+        <owl:sameAs rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Winter"/>
+    </owl:NamedIndividual>
+    
+
+
     <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#SeeAlsoUserListShape -->
 
     <owl:NamedIndividual rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#SeeAlsoUserListShape">
         <rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#seeAlso"/>
         <rdfs:seeAlso>
             <rdf:Description>
-                <rdfs:comment xml:lang="en">The example</rdfs:comment>
-                <rdfs:seeAlso rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#ShapeSharedWithUserCollection</rdfs:seeAlso>
+                <rdfs:comment xml:lang="en">Official example to understand how SHACL works</rdfs:comment>
+                <rdfs:seeAlso rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">https://www.w3.org/TR/shacl/#shacl-example</rdfs:seeAlso>
             </rdf:Description>
         </rdfs:seeAlso>
         <rdfs:seeAlso>
             <rdf:Description>
-                <rdfs:comment xml:lang="en">Official example to understand how SHACL works</rdfs:comment>
-                <rdfs:seeAlso rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">https://www.w3.org/TR/shacl/#shacl-example</rdfs:seeAlso>
+                <rdfs:comment xml:lang="en">The example</rdfs:comment>
+                <rdfs:seeAlso rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#ShapeSharedWithUserCollection</rdfs:seeAlso>
             </rdf:Description>
         </rdfs:seeAlso>
         <rdfs:seeAlso>
@@ -1199,9 +1203,17 @@ Not used in the app.</owl:deprecated>
     
 
 
-    <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#true -->
+    <!-- http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoCreatedInProtege -->
 
-    <owl:NamedIndividual rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#true"/>
+    <owl:NamedIndividual rdf:about="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoCreatedInProtege">
+        <rdf:type rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#Photo"/>
+    </owl:NamedIndividual>
+    <rdf:Description>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#NegativePropertyAssertion"/>
+        <owl:sourceIndividual rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoCreatedInProtege"/>
+        <owl:assertionProperty rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#photoTakenByOwner"/>
+        <owl:targetValue rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">false</owl:targetValue>
+    </rdf:Description>
     
 
 

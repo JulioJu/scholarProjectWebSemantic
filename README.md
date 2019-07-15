@@ -367,8 +367,10 @@ See ./TeachersInstruction2.pdf
     https://github.com/protegeproject/protege/issues/903 (issue posted by me)
     (Window "Inconsistent ontology explanation" not displayed )
 
-* As I say in « Protégé, generalities » section, Protégé 5.5 have some
-    problems with reasoners. Use Protégé 5.2 or 5.6.
+* As I say in « Protégé, generalities » section, « Regressions on Protégé 5.5 »
+    , ***use Protégé 5.2 or 5.6, not Protégé 5.5***.
+    Note that Protégé 5.5 add some useful functionalities, like a button
+    to copy and past URI of an entity
 
 * Note, on the official doc « Building from source » of
     https://github.com/protegeproject/protege/wiki/Building-from-Source
@@ -383,6 +385,50 @@ register, downladed thanks https://github.com/frekele/oracle-java/releases
 see also https://aur.archlinux.org/packages/jdk8/ )
 
 To test with Protégé 4.x, simply download Protégé with JRE embedded.
+See https://protege.stanford.edu/download/protege/4.3/installanywhere/Web_Installers/
+
+##### JDK6 and mvn
+
+To build jdk6, use https://aur.archlinux.org/packages/jdk6/
+Change the PKGBUILD with the source
+http://www.atteya.net/site/en/downloads/java-jdk?download=48:java-jdk-6u45-linux-x64
+
+> According to the Maven release history page, the last Maven version that works with JDK1.6 is 3.2.5.
+> https://stackoverflow.com/questions/36141186/what-version-of-maven-is-compatible-with-java-6
+
+Download it at https://www-us.apache.org/dist/maven/maven-3/3.2.5/binaries/apache-maven-3.2.5-bin.tar.gz
+
+#### Pellet Protégé Plugin
+
+As I show in the following doc, Pellet reasoner seems to be the best.
+
+To download it, use the official git repo https://github.com/stardog-union/pellet
+Should be compiled with oracle-jdk8 or openjdk8
+(jdk12 or openjdk12)
+> Removal of javac Support for 6/1.6 source, target, and release Values
+>
+> Consistent with the policy outlined in JEP 182: Policy for Retiring javac -source and -target Options, support for the 6/1.6 argument value for javac's -source, -target, and --release flags has been removed.
+> https://www.oracle.com/technetwork/java/javase/12-relnote-issues-5211422.html
+
+then put the pellet Jar into the plugins folder of Protege
+
+```
+$ sudo cp protege/plugin/com.clarkparsia.protege.plugin.pellet.jar /usr/share/java/protege/plugins
+```
+
+Difference with the last released version of Pellet 2.3 seems to be minor
+(according to the commit history).
+
+Do not forget to not use Protege build with
+    https://github.com/protegeproject/protege/wiki/Building-from-Source
+    because  it lack some Plugins dependencies.
+
+See also https://github.com/protegeproject/protege-distribution/issues/21
+
+##### oracle-jdk8
+
+https://aur.archlinux.org/packages/jdk8/#comment-691071
+
 
 # How to use fuseki and Openllet Reasoner
 
@@ -1845,7 +1891,7 @@ and https://www.w3.org/TR/2012/REC-owl2-quick-reference-20121211/#Class_Expressi
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#isAPhoto"/>
-                <owl:hasValue rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#true" />
+                <owl:hasValue rdf:resource="http://miashs.univ-grenoble-alpes.fr/ontologies/sempic.owl#booleanTrue" />
             </owl:Restriction>
         </rdfs:subClassOf>
 ```
@@ -1853,7 +1899,7 @@ Give in Protégé
 in the pan `Entities -> Classes -> Descrpition: Photo`,
 under the button `Subclass of`:
 
-`'is a photo' value true`
+`'is a photo' value booleanTrue`
 
 #### owl:equivalentClass for Datatype (Datatype definitions)
 
@@ -1887,6 +1933,18 @@ But following could work:
 
 It's logical, because a datatype allow simply a range of string !
 Not several class!
+
+### owl:sameAs (for individuals)
+
+> Export inferred axioms cannot handle same individuals axioms
+> https://github.com/protegeproject/protege/issues/3
+
+That's why when we open Protégé, under the tab `Individuals by class`
+in the pan `Instances:`, the entity `:Hiver` is reported as `For: Nothing selected`.
+That's why also in the pan `Class hierarchy`, when we select `owl: Thing`, under
+the tab `Instances` we show also the entity `:Hiver`.
+
+When we start `Pellet`, we see that hiver has inferred type `Hiver`.
 
 ### Property Range Restriction
 
@@ -1960,11 +2018,15 @@ In Protégé, Range restriction generate the following xml text
 See section with the same name above
 
 
-### Compatibility issue with Protégé 5.5
+### Regressions on Protégé 5.5
 
 « Inconsistent ontology makes the UI unresponsive »
 https://github.com/protegeproject/protege/issues/877
 Fixed in Protégé 5.6
+
+See my issue
+> Equivalent sign between classes and object properties not displayed in Protege 5.5 (regression)
+> https://github.com/protegeproject/protege/issues/910
 
 ### Reset preferences UI issues
 
@@ -1995,6 +2057,14 @@ Saved in ~/.Protege folder. If this folder is not created, saved under
 ~/.protege
 
 File very interesting.
+
+Log could be should under the menu `Window -> Show log`.
+
+### Query
+
+We could do some query directly in Protégé
+
+Check the menu `Window -> tabs`.
 
 ## OWL 2 reasoners
 
@@ -4510,6 +4580,22 @@ signification ?
     « Question about Owlapi and Jena API with Openllet »
 
 11. Ask to the teacher if I can publish its explanations.
+
+# Issues posted by me for this project
+
+(Issues posted about roast.vim are not reported here)
+
+1. Missing dependencies in org.sonatype
+    https://github.com/bdionne/pellet/issues/48
+
+2. Equivalent sign between classes and object properties not displayed in Protege 5.5 (regression)
+    https://github.com/protegeproject/protege/issues/910
+
+3. Add Pellet 2.4
+    https://github.com/protegeproject/protege-distribution/issues/21
+
+4. Progege build on ArchLinux
+    https://bugs.archlinux.org/task/63080
 
 # Credits
 
