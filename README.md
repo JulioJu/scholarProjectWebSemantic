@@ -1630,6 +1630,14 @@ with the following declarations:
     </owl:Class>
 ```
 
+It's normal, because the following means range are anyURI AND string.
+
+Maybe could work if `xsd:string` has a hierarchical relation with `xsd:anyURI`.
+
+```xml
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#anyURI"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+```
 ##### Two (not cool) solutions
 
 1. But if in the range of `:photoDepictsDatatypeProperty`
@@ -3649,6 +3657,24 @@ DELETE WHERE
 we see that `?anySubject owl:differentFrom <http://fr.uga.julioju.sempic/ResourcesCreated/album/1>`
 
 * Same example with photos
+
+#### Other solution from teacher
+
+Simply delete all anonymous resources that are not object of a triple.
+
+But probably don't work
+
+(`_:myList1` `_:myList2` are anonymous)
+```
+:subj1 :propert1 _:myList1
+
+_:myList1 rdf:first :toto
+_:myList1 rdf:rest _:myList2
+
+_:myList2 rdf:first :titi
+_:myList2 rdf:rest rdf:nil
+
+```
 
 ## Limitations of Fuseki
 
